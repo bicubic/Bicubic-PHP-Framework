@@ -1,0 +1,5 @@
+{
+    "answer":"{ANSWER-STATUS}",
+    "error":"{ERROR-MESSAGE}",
+    "Content":"{CONTENT-FILE}"
+}
