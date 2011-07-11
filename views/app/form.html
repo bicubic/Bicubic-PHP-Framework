@@ -1,0 +1,41 @@
+<form name="{APPFORM-ID}" method="post" action="{APPFORM-ACTION}">
+    <fieldset>
+        <legend>{LANG-ADDAPPLICATION}</legend>
+        <div>
+            <label>{LANG-NAME}:
+            <input type="text" name="{APPFORM-PARAM-APP-NAME}" value="{APPFORM-DATA-APP-NAME}" maxlength="64" />
+            </label>
+            <label>{LANG-COMPANY}:
+            <input type="text" name="{APPFORM-PARAM-APP-COMPANY}" value="{FORM-DATA-APP-COMPANY}" maxlength="64" />
+            </label>
+            <label>{LANG-PROTOCOL}:
+            <input type="text" name="{APPFORM-PARAM-APP-PROTOCOL}" value="{FORM-DATA-APP-PROTOCOL}" maxlength="64" />
+            </label>
+            <button type="button" id="formsubmit">{LANG-INSERT}</button>
+        </div>
+    </fieldset>
+<!--</form>
+<form name="{APPFORM2-ID}" method="post" action="{APPFORM2-ACTION}">--> 
+   <table width="600" border="0">
+        <thead>
+            <tr>
+                <th width="15%">Id</th>
+                <th width="35%">Name</th>
+                <th width="30">Protocol</th>
+                <th width="20%">Actions</th>
+            </tr>
+        </thead>
+        <!-- BEGIN APPS -->
+        <tr> 
+            <td align="center">{APP-ID}</td>
+            <td align="center">{APP-NAME}</td>
+            <td align="center">{APP-PROTOCOL}</td>
+            <td align="center">
+                <a href="{LINK-EDIT}" title="Editar">Edit</a>
+                <a href="{LINK-DELETE}" title="Eliminar">Delete</a>
+            </td>
+        </tr>
+        <!-- END APPS -->
+   </table>
+        
+</form>
