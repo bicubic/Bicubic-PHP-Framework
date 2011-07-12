@@ -8,6 +8,8 @@
  * @license    MIT
  * @framework  2.2
  */
+
+
 class Application {
 
     public $user;
@@ -131,6 +133,7 @@ class Application {
         }
         return null;
     }
+    
 
     public function getJsonParam($force = false) {
         $value = file_get_contents("php://input");
