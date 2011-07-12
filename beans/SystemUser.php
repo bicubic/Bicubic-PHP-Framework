@@ -11,6 +11,7 @@
 class SystemUser implements DataObject {
 
     private $id;
+    private $name;
     private $username;
     private $password;
     private $email;
@@ -27,6 +28,7 @@ class SystemUser implements DataObject {
     public function __getProperties() {
         return array(
             "id",
+            "name",
             "username",
             "password",
             "email",
@@ -48,6 +50,22 @@ class SystemUser implements DataObject {
      */
     function getId() {
         return $this->id;
+    }
+    
+    /**
+     * Setea el valor de una propiedad
+     * @param long $value <p>EL valor de la propiedad</p>
+     */
+    function setName($value) {
+        $this->name = $value;
+    }
+
+    /**
+     * Obtiene el valor de una propiedad
+     * @return el valor de la propiedad o null si la propiedad no existe
+     */
+    function getName() {
+        return $this->name;
     }
 
     /**
