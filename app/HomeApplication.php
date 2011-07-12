@@ -50,6 +50,7 @@ class HomeApplication extends Application {
         parent::setMainTemplate($navigationFolder, $navigationFile, $title);
 
         $this->setHTMLVariableTemplate('HELLO-TEMPLATE', $this->lang['text_helloworld']);
+        $this->setHTMLVariableTemplate('LINK-LOGIN', $this->getSecureAppUrl("login", "login"));
     }
 
 }

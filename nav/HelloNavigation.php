@@ -13,15 +13,24 @@ class HelloNavigation extends Navigation{
         parent::__construct($application);
     }
     
+    
+  
+    public function hello(){
+        $this->application->setMainTemplate("hello", "hello", $this->application->lang['text_helloworld']);
+        $this->application->setHtmlVariableTemplate("HELLO", $this->application->lang['text_helloworld']);
+        $this->application->render();
+    }
+    
     public function helloJson(){
         $this->application->setMainTemplate("hello", "hello", "", "json");
         $this->application->setJsonVariableTemplate("HELLO", $this->application->lang['text_helloworld']);
         $this->application->render();
     }
-  
-    public function hello(){
-        $this->application->setMainTemplate("hello", "hello", $this->application->lang['text_helloworld']);
-        $this->application->setHtmlVariableTemplate("HELLO", $this->application->lang['text_helloworld']);
+    
+    public function helloPrivate(){
+        $this->application->setMainTemplate("hello", "helloprivate", "", "json");
+        $this->application->setJsonVariableTemplate("USER", $this->application->user->getName());
+        $this->application->setJsonVariableTemplate("HELLO", $this->application->lang['text_helloworld']);
         $this->application->render();
     }
     
