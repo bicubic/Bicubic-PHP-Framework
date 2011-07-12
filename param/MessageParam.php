@@ -1,13 +1,12 @@
 <?php
 
 /**
- * Parámetro de mensages
+ * Bicubic PHP Framework
  *
- * @author     Juan Francisco Rodríguez <jrodriguez@bicubic.cl>
+ * @author     Juan Rodríguez-Covili <juan@bicubic.cl>
  * @copyright  2011 Bicubic Technology - http://www.bicubic.cl
- * @license    Bicubic Comercial Licence
- * @license
- * @framework  2.1
+ * @license    MIT
+ * @framework  2.2
  */
 class MessageParam {
 

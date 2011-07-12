@@ -2,13 +2,11 @@
 
 /**
  * Bicubic PHP Framework
- * Languaje File
  *
- * @author     Juan Rodríguez-Covili <jrodriguez@bicubic.cl>
- * @copyright  2010 Bicubic Technology - http://www.bicubic.cl
- * @license    Bicubic Comercial Licence
- * @license    Licenced for ONEMI, Chile
- * @framework  2.1
+ * @author     Juan Rodríguez-Covili <juan@bicubic.cl>
+ * @copyright  2011 Bicubic Technology - http://www.bicubic.cl
+ * @license    MIT
+ * @framework  2.2
  */
 $lang = array();
 //Error messages
@@ -27,7 +25,7 @@ $lang['error_invalidid'] = "invalid id";
 $lang['error_invalidcontent'] = "invalid content";
 $lang['error_jsonnotvalid'] = "invalid json";
 $lang['error_login'] = "nombre de usuario o contraseña incorrecto";
-$lang['error_navnotfound'] = "navegación no encontrada";
+$lang['error_navnotfound'] = "navegacion no encontrada";
 $lang['error_notvalid'] = "valor del campo no válido";
 $lang['error_notfound'] = "no encontrado";
 $lang['error_pagnotfound'] = "página no encontrada";
@@ -50,6 +48,7 @@ $lang['text_panel'] = "Panel";
 $lang['text_preferences'] = 'preferences';
 $lang['text_yes'] = 'yes';
 $lang['text_statusok'] = "Ok";
+$lang['text_helloworld'] = "Hello World!";
 ////Titles
 
 $lang['title_error'] = "Error";
