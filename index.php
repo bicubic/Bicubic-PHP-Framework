@@ -9,7 +9,7 @@
  * @framework  2.2
  */
 //base
-require_once("config_example.php");
+require_once("config.php");
 require_once("lang.php");
 require_once("error.php");
 //lib
