@@ -2,13 +2,11 @@
 
 /**
  * Bicubic PHP Framework
- * Application Class
  *
- * @author     Juan Rodríguez-Covili <jrodriguez@bicubic.cl>
- * @copyright  2010 Bicubic Technology - http://www.bicubic.cl
- * @license    Bicubic Comercial Licence
- * @license
- * @framework  2.1
+ * @author     Juan Rodríguez-Covili <juan@bicubic.cl>
+ * @copyright  2011 Bicubic Technology - http://www.bicubic.cl
+ * @license    MIT
+ * @framework  2.2
  */
 class Application {
 
@@ -25,7 +23,6 @@ class Application {
     protected $tpl;
     //navigation
     public $navigation;
-    public $daemonOutput;
 
     /**
      * Construye una nueva aplicacion
@@ -41,7 +38,6 @@ class Application {
         $this->name = $name;
         $this->data = $data;
         $this->tpl = new HTML_Template_Sigma();
-        $this->daemonOutput = $data;
     }
 
     /**
@@ -49,7 +45,7 @@ class Application {
      * @return Nada
      */
     public function execute() {
-        
+        session_start();
     }
 
     /**
@@ -660,8 +656,13 @@ class Application {
      * @param string $navigationFile <p>El nombre del archivo de vista (sin la extension)</p>
      * @return Nada
      */
-    public function setMainTemplate($navigationFolder, $navigationFile, $title) {
-        if ($this->tpl->loadTemplateFile($this->config['folder_template'] . "$this->name/template.html") === SIGMA_OK) {
+    public function setMainTemplate($navigationFolder, $navigationFile, $title="", $priority="html") {
+        if ($priority != "html") {
+            if ($this->tpl->loadTemplateFile($this->config['folder_template'] . "$this->name/template." . $priority) === SIGMA_OK) {
+                $this->tpl->addBlockfile("TEMPLATE-CONTENT", $this->name, $this->config['folder_navigation'] . "$navigationFolder/$navigationFile." . $priority);
+            }
+        }
+        else if ($this->tpl->loadTemplateFile($this->config['folder_template'] . "$this->name/template.html") === SIGMA_OK) {
             $this->tpl->addBlockfile("TEMPLATE-CONTENT", $this->name, $this->config['folder_navigation'] . "$navigationFolder/$navigationFile.html");
             $this->setLangItems($this->name);
             $this->tpl->addBlockfile("TEMPLATE-JAVASCRIPT", $this->name . "_javascript", $this->config['folder_navigation'] . "$navigationFolder/$navigationFile.js");
@@ -672,7 +673,7 @@ class Application {
         } else if ($this->tpl->loadTemplateFile($this->config['folder_template'] . "$this->name/template.json") === SIGMA_OK) {
             $this->tpl->addBlockfile("TEMPLATE-CONTENT", $this->name, $this->config['folder_navigation'] . "$navigationFolder/$navigationFile.json");
         }
-        
+
         $this->setHTMLVariableTemplate("TEMPLATE-TITLE", $title);
     }
 
@@ -1075,7 +1076,7 @@ class Application {
             $this->error($this->lang['error_filenotfound']);
         }
         $fsize = filesize($filepath);
-        if ($this->config['daemon_system'] == "windows") {
+        if ($this->config['system'] == "windows") {
             header("Content-Type: application/octet-stream");
             header("Content-Disposition: attachment; filename=$fileName");
             header("Content-Type: application/force-download");
@@ -1084,7 +1085,7 @@ class Application {
             ob_clean();
             flush();
             readfile($filepath);
-        } elseif ($this->config['daemon_system'] == "linux") {
+        } elseif ($this->config['system'] == "linux") {
 //            header("Content-Disposition: attachment; filename=$fileName");
 //            header("Content-Location: $filepath");
 //            header("Content-Type: application/force-download");
@@ -1223,7 +1224,7 @@ class Application {
             $this->setHTMLVariableTemplate("PAGE-TEXT-NEXT", $this->lang['word_next']);
         }
     }
-    
+
     /**
      * formatea un booleano a texto
      * @param boolean $boolean
