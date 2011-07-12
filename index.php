@@ -9,7 +9,7 @@
  * @framework  2.2
  */
 //base
-require_once("config.php");
+require_once("config_example.php");
 require_once("lang.php");
 require_once("error.php");
 //lib
@@ -44,32 +44,35 @@ if (isset($argv)) {
         $_GET[$request[0]] = $request[1];
     }
 }
+
 //Determines the $application to run
 $application = new Application($config, $lang, null, null);
 $app = $application->getUrlParam($config['param_app'], "letters");
-if (isset($app)) {
-    switch ($app) {
-        case "home": {
-                require_once("app/HomeApplication.php");
-                $application = new HomeApplication($config, $lang);
-                break;
-            }
-        case "json": {
-                require_once("app/JsonApplication.php");
-                $application = new JsonApplication($config, $lang);
-                break;
-            }
-        case "login": {
-                require_once("app/LoginApplication.php");
-                $application = new LoginApplication($config, $lang);
-                break;
-            }
-        default: {
-                require_once("app/HomeApplication.php");
-                $application = new HomeApplication($config, $lang);
-                break;
-            }
-    }
+switch ($app) {
+    case "home": {
+            require_once("app/HomeApplication.php");
+            $application = new HomeApplication($config, $lang);
+            break;
+        }
+    case "json": {
+            require_once("app/JsonApplication.php");
+            $application = new JsonApplication($config, $lang);
+            break;
+        }
+    case "login": {
+            require_once("app/LoginApplication.php");
+            $application = new LoginApplication($config, $lang);
+            break;
+        }
+    case "private": {
+            require_once("app/PrivateApplication.php");
+            $application = new PrivateApplication($config, $lang);
+            break;
+        }
+    default: {
+            $application->redirect("home", "hello");
+            break;
+        }
 }
 //Runs the $application navigation
 $application->execute();

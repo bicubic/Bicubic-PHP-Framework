@@ -8,7 +8,10 @@
  * @license    MIT
  * @framework  2.2
  */
-class LoginApplication extends Application {
+
+require_once("data/SystemUserData.php");
+
+class PrivateApplication extends Application {
 
     /**
      * Constructor
@@ -17,7 +20,7 @@ class LoginApplication extends Application {
      */
     function __construct($config, $lang) {
         $data = new PostgreSQLData($config['database_host'], $config['database_user'], $config['database_password'], $config['database_database'], $lang);
-        parent::__construct($config, $lang, $data, "login");
+        parent::__construct($config, $lang, $data, "private");
     }
 
     /**
@@ -26,35 +29,21 @@ class LoginApplication extends Application {
     public function execute() {
         //Session
         session_start();
+        $this->user = $this->loginCheck();
+        if($this->user === false) {
+            $this->secureRedirect("login", "login");
+        }
         //Navigation
         $this->navigation = $this->getUrlParam($this->config['param_navigation'], "letters");
         switch ($this->navigation) {
-            case "login" : {
-                    require_once("nav/LoginNavigation.php");
-                    $navigation = new LoginNavigation($this);
-                    $navigation->login();
-                    break;
-                }
-            case "loginSubmit" : {
-                    require_once('nav/LoginNavigation.php');
-                    $navigation = new LoginNavigation($this);
-                    $navigation->loginSubmit();
-                    break;
-                }
-            case "logout" : {
-                    require_once("nav/LoginNavigation.php");
-                    $navigation = new LoginNavigation($this);
-                    $navigation->logout();
-                    break;
-                }
-            case "message" : {
-                    require_once("nav/MessageNavigation.php");
-                    $messageNavigation = new MessageNavigation($this);
-                    $messageNavigation->message();
+            case "hello" : {
+                    require_once("nav/HelloNavigation.php");
+                    $messageNavigation = new HelloNavigation($this);
+                    $messageNavigation->helloPrivate();
                     break;
                 }
             default : {
-                    $this->secureRedirect("login", "login");
+                    $this->error($this->lang['error_navnotfound']);
                     break;
                 }
         }
@@ -68,6 +57,8 @@ class LoginApplication extends Application {
      */
     public function setMainTemplate($navigationFolder, $navigationFile, $title="") {
         parent::setMainTemplate($navigationFolder, $navigationFile, $title);
+        
+        $this->setHTMLVariableTemplate('LINK-LOGOUT', $this->getSecureAppUrl("login", "logout"));
     }
 
 }

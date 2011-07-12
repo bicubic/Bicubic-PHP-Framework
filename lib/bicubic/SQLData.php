@@ -11,11 +11,11 @@
 abstract class SQLData extends Data {
 
     public $totalRows;
-    
+
     //Perform a data insert process
     //@param $object the object data to insert
     //@returns the id inserted if the operation was succesfully, false if not
-    public function insert(DataObject $object, $idname = "id"){
+    public function insert(DataObject $object, $idname = "id") {
         $class = get_class($object);
         $table = ($class);
         $params = array();
@@ -30,44 +30,43 @@ abstract class SQLData extends Data {
             $key = $property;
             $obj = strpos($key, "_object");
             $arr = strpos($key, "_array");
-            if(!$arr){
+            if (!$arr) {
                 if ($obj > 0) {
                     $cammel = substr(strtoupper(substr($property, 0, 1)) . substr($property, 1), 0, $obj);
                     $getter = "get$cammel";
                     $setter = "set$cammel";
                     $value = $object->$getter();
-                    
+
                     if ($value->getId() != null) {
                         if ($i == 0) {
-                            $query .= "\"" .substr($key, 0, $obj) . "\" ";
+                            $query .= "\"" . substr($key, 0, $obj) . "\" ";
                             $i++;
                         } else {
                             $query .= ", \"" . substr($key, 0, $obj) . "\" ";
                         }
-                        
+
                         $params[substr($key, 0, $obj)] = $value->getId();
-                        
                     } else {
                         $l = 0;
                         $properties1 = $value->__getProperties();
-                        foreach ($properties1 as $property1){
+                        foreach ($properties1 as $property1) {
                             $key1 = $property1;
                             $obj1 = strpos($key1, "_object");
                             $arr1 = strpos($key1, "_array");
-                            if ($obj1 == 0 && $arr1 == 0){
+                            if ($obj1 == 0 && $arr1 == 0) {
                                 $cammel = strtoupper(substr($property1, 0, 1)) . substr($property1, 1);
                                 $getter = "get$cammel";
                                 $setter = "set$cammel";
-                                if ($value->$getter() != null){
+                                if ($value->$getter() != null) {
                                     $l++;
                                 }
                             }
                         }
-                        if($l != 0){
+                        if ($l != 0) {
                             $value->setId($this->insert($value));
-                            if($value->getId() != -1){
+                            if ($value->getId() != -1) {
                                 if ($i == 0) {
-                                    $query .= "\"" .substr($key, 0, $obj) . "\" ";
+                                    $query .= "\"" . substr($key, 0, $obj) . "\" ";
                                     $i++;
                                 } else {
                                     $query .= ", \"" . substr($key, 0, $obj) . "\" ";
@@ -75,14 +74,14 @@ abstract class SQLData extends Data {
                                 $params[substr($key, 0, $obj)] = $value->getId();
                             }
                         }
-                    } 
+                    }
                 } else {
                     $cammel = strtoupper(substr($property, 0, 1)) . substr($property, 1);
                     $getter = "get$cammel";
                     $setter = "set$cammel";
                     $value = $object->$getter();
-                    if($object->getId() == null){
-                        if ($value != null && $key != $idname ) {
+                    if ($object->getId() == null) {
+                        if ($value != null && $key != $idname) {
                             if ($i == 0) {
                                 $query .= "\"$key\"";
                                 $i++;
@@ -97,7 +96,7 @@ abstract class SQLData extends Data {
                     }
                 }
             } else {
-                $cammel = substr(strtoupper(substr($property, 0, 1)) . substr($property, 1), 0, $arr)  ;
+                $cammel = substr(strtoupper(substr($property, 0, 1)) . substr($property, 1), 0, $arr);
                 $getters[$a] = $cammel;
                 $a++;
             }
@@ -120,13 +119,13 @@ abstract class SQLData extends Data {
             return false;
         }
         $id = $this->lastInsertId($table);
-        
-        if(count($getters) > 0){
-            foreach ($getters as $arrayName){
+
+        if (count($getters) > 0) {
+            foreach ($getters as $arrayName) {
                 $getter = "get$arrayName";
                 $objects = $object->$getter();
-                if(count($objects) > 0){
-                    foreach ($objects as $subObject){
+                if (count($objects) > 0) {
+                    foreach ($objects as $subObject) {
                         $setter = "set$arrayName" . $class;
                         $subObject->$setter($id);
                         $this->insert($subObject);
@@ -134,10 +133,10 @@ abstract class SQLData extends Data {
                 }
             }
         }
-        
+
         return $id;
     }
-    
+
     //Performs a data selection process
     //@param $object the target object that filters the data
     //@returns an array containing objects of the type of $object
@@ -153,7 +152,7 @@ abstract class SQLData extends Data {
             $key = $property;
             $obj = strpos($key, "_object");
             $arr = strpos($key, "_array");
-            if (!$arr){
+            if (!$arr) {
                 if ($obj > 0) {
                     $cammel = substr(strtoupper(substr($property, 0, 1)) . substr($property, 1), 0, $obj);
                     $getter = "get$cammel";
@@ -195,7 +194,7 @@ abstract class SQLData extends Data {
             $query .= "ORDER BY \"id\" ASC ";
         }
         if (isset($limit) && isset($indexStart)) {
-            
+
             if ($limit < 0) {
                 $limit = 0;
             }
@@ -210,7 +209,7 @@ abstract class SQLData extends Data {
         $countrow = $this->readNext($countresult);
         $this->totalRows = $countrow['total'];
         $result = $this->performRead($query);
-        
+
         while ($row = $this->readNext($result)) {
             $object = new $class();
             $properties = $object->__getProperties();
@@ -218,7 +217,7 @@ abstract class SQLData extends Data {
                 $key = $property;
                 $obj = strpos($key, "_object");
                 $arr = strpos($key, "_array");
-                if(!$arr){
+                if (!$arr) {
                     if ($obj > 0) {
                         $cammel = substr(strtoupper(substr($property, 0, 1)) . substr($property, 1), 0, $obj);
                         $getter = "get$cammel";
@@ -235,37 +234,37 @@ abstract class SQLData extends Data {
                             $object->$setter($row[$key]);
                         }
                     }
-                } 
+                }
             }
             $data[$object->getId()] = $object;
         }
-        
-        if($arrays != false){
-        foreach ($data as $arrobject){
-            $arrproperties = $arrobject->__getProperties();
-            foreach($arrproperties as $arrproperty){
-                $key = $arrproperty;
-                $arr = strpos($key, "_array");
-                if($arr > 0){
-                    $cammel = substr(strtoupper(substr($property, 0, 1)) . substr($property, 1), 0, $arr)  ;
-                    $arr += 7;
-                    $class = substr(substr($property, 0, 1) . substr($property, 1), $arr, ($arr . 10));
-                    $getter = "get$cammel";
-                    $setter = "set$cammel";
-                    $subgetter = "get$cammel" . get_class($arrobject);
-                    $subsetter = "set$cammel" . get_class($arrobject);
-                    $subObject = new $class();
-                    $subObject->$subsetter($arrobject->getId());
-                    $subdata1 = $this->select($subObject, "id", "ASC");
-                    $arrobject->$setter($subdata1);
+
+        if ($arrays != false) {
+            foreach ($data as $arrobject) {
+                $arrproperties = $arrobject->__getProperties();
+                foreach ($arrproperties as $arrproperty) {
+                    $key = $arrproperty;
+                    $arr = strpos($key, "_array");
+                    if ($arr > 0) {
+                        $cammel = substr(strtoupper(substr($property, 0, 1)) . substr($property, 1), 0, $arr);
+                        $arr += 7;
+                        $class = substr(substr($property, 0, 1) . substr($property, 1), $arr, ($arr . 10));
+                        $getter = "get$cammel";
+                        $setter = "set$cammel";
+                        $subgetter = "get$cammel" . get_class($arrobject);
+                        $subsetter = "set$cammel" . get_class($arrobject);
+                        $subObject = new $class();
+                        $subObject->$subsetter($arrobject->getId());
+                        $subdata1 = $this->select($subObject, "id", "ASC");
+                        $arrobject->$setter($subdata1);
+                    }
                 }
             }
-        }
         }
         $this->freeMemory($result);
         return $data;
     }
-    
+
     //Performs a data unique selection process
     //@param $object the target object to copy the data
     //@returns a new object of the type of $object
@@ -280,7 +279,7 @@ abstract class SQLData extends Data {
         } else {
             $query .= "ORDER BY A.\"id\" DESC ";
         }
-        
+
         //query execution
         //echo "$query<br />";
         $result = $this->performRead($query);
@@ -289,9 +288,8 @@ abstract class SQLData extends Data {
         $this->freeMemory($result);
         return $object2[0];
     }
-    
-   
-    private function getQuery(DataObject $object, $j = 0, $l = "A", $a = 0){
+
+    private function getQuery(DataObject $object, $j = 0, $l = "A", $a = 0, $j2 = 0) {
         $properties = $object->__getProperties();
         $query = array();
         $query[0] = "";
@@ -302,51 +300,61 @@ abstract class SQLData extends Data {
             $key = $property;
             $obj = strpos($key, "_object");
             $arr = strpos($key, "_array");
-            if($arr == 0){
-                if($obj > 0) {
-                   $cammel = substr(strtoupper(substr($property, 0, 1)) . substr($property, 1), 0, $obj);
-                   $getter = "get$cammel";
-                   $setter = "set$cammel";
-                   $value = $object->$getter();
-                   $key = substr(substr($property, 0, 1) . substr($property, 1), 0, $obj);
-                   if ($j == 0) {
+            if ($arr == 0) {
+                if ($obj > 0) {
+                    $cammel = substr(strtoupper(substr($property, 0, 1)) . substr($property, 1), 0, $obj);
+                    $getter = "get$cammel";
+                    $setter = "set$cammel";
+                    $value = $object->$getter();
+                    $key = substr(substr($property, 0, 1) . substr($property, 1), 0, $obj);
+                    if ($j == 0) {
                         $query[0] .= "$l.\"$key\" as \"" . "$l.$key\"";
-                        if ($value->getId() != null) {
-                            $value->setId($this->escapeChars($value->getId()));
-                            $query[4] .= "AND $l.\"$key\" = '" . $value->getId() . "' ";
-                        }
+                        
                     } else {
                         $query[0] .= ", $l.\"$key\" as \"" . "$l.$key\"";
+                    }
+                    $j++;
+                    if ($j2 == 0) {
+                        if ($value->getId() != null) {
+                            $value->setId($this->escapeChars($value->getId()));
+                            $query[4] .= " $l.\"$key\" = '" . $value->getId() . "' ";
+                            $j2++;
+                        }
+                    } else {
                         if ($value->getId() != null) {
                             $value->setId($this->escapeChars($value->getId()));
                             $query[4] .= "AND $l.\"$key\" = '" . $value->getId() . "' ";
                         }
                     }
+                } else {
+                    $cammel = strtoupper(substr($property, 0, 1)) . substr($property, 1);
+                    $getter = "get$cammel";
+                    $setter = "set$cammel";
+                    $value = $object->$getter();
+                    if ($j == 0) {
+                        $query[0] .= "$l.\"$key\" as \"" . "$l.$key\" ";
+                        
+                    } else {
+                        $query[0] .= ", $l.\"$key\" as \"" . "$l.$key\" ";
+                    }
                     $j++;
-               } else {
-                   $cammel = strtoupper(substr($property, 0, 1)) . substr($property, 1);
-                   $getter = "get$cammel";
-                   $setter = "set$cammel";
-                   $value = $object->$getter();
-                   if($j == 0) {
-                      $query[0] .= "$l.\"$key\" as \"". "$l.$key\" ";
-                      if($value != null){
-                         $value = $this->escapeChars($value);
-                         $query[4] .= " $l.\"$key\" = '$value' ";
-                      }
-                   }else{
-                       $query[0] .= ", $l.\"$key\" as \"". "$l.$key\" ";
-                       if($value != null){
-                          $value = $this->escapeChars($value);
-                          $query[4] .= "AND $l.\"$key\" = '$value' ";
-                       }
-                   }
-                   $j++;
+                    if ($j2 == 0) {
+                        if ($value != null) {
+                            $value = $this->escapeChars($value);
+                            $query[4] .= " $l.\"$key\" = '$value' ";
+                            $j2++;
+                        }
+                    } else {
+                        if ($value != null) {
+                            $value = $this->escapeChars($value);
+                            $query[4] .= "AND $l.\"$key\" = '$value' ";
+                        }
+                    }
                 }
             }
         }
-        if($l == "A") {
-            $class = get_class($object);    
+        if ($l == "A") {
+            $class = get_class($object);
             $query[1] .= " \"$class\" $l";
             $i = $l;
             $l++;
@@ -360,30 +368,29 @@ abstract class SQLData extends Data {
                     $setter = "set$cammel";
                     $value = $object->$getter();
                     $class = substr(strtolower(substr($property, 0, 1)) . substr($property, 1), 0, $obj);
-                    if($a == 0){
+                    if ($a == 0) {
                         $query[2] .= " $i.\"$class\" = $e.id ";
-                        $aux = $this->getQuery($value, $j, $e, $a);
+                        $aux = $this->getQuery($value, $j, $e, $a, $j2);
                         $query[0] .= $aux[0];
                         $query[1] .= $aux[1];
                         $query[2] .= $aux[2];
                         $query[4] .= $aux[4];
                         $e = $aux[3];
                         $a++;
-
-                    }else{
+                    } else {
                         $query[2] .= "AND $i.\"$class\" = $e.id ";
-                        $aux = $this->getQuery($value, $j, $e, $a);
+                        $aux = $this->getQuery($value, $j, $e, $a, $j2);
                         $query[0] .= $aux[0];
                         $query[1] .= $aux[1];
                         $query[2] .= $aux[2];
                         $query[4] .= $aux[4];
                         $e = $aux[3];
                         $a++;
-                    } 
+                    }
                 }
             }
-        }else{
-            $class = get_class($object);    
+        } else {
+            $class = get_class($object);
             $query[1] .= ", \"$class\" $l";
             $i = $l;
             $l++;
@@ -397,7 +404,7 @@ abstract class SQLData extends Data {
                     $value = $object->$getter();
                     $class = substr(strtolower(substr($property, 0, 1)) . substr($property, 1), 0, $obj);
                     $query[2] .= "AND $i.\"$class\" = $e.id ";
-                    $aux = $this->getQuery($value, $j, $e, $a);
+                    $aux = $this->getQuery($value, $j, $e, $a, $j2);
                     $query[0] .= $aux[0];
                     $query[1] .= $aux[1];
                     $query[2] .= $aux[2];
@@ -409,8 +416,8 @@ abstract class SQLData extends Data {
         $query[3] = $e;
         return $query;
     }
-    
-    private function fillObject(DataObject $object, $row, $i = "A"){
+
+    private function fillObject(DataObject $object, $row, $i = "A") {
         $fill = array();
         $class = get_class($object);
         $object = new $class();
@@ -423,7 +430,7 @@ abstract class SQLData extends Data {
                 $obj = strpos($key, "_object");
                 $arr = strpos($key, "_array");
                 if ($arr > 0) {
-                   $cammel = substr(strtoupper(substr($property, 0, 1)) . substr($property, 1), 0, $arr)  ;
+                    $cammel = substr(strtoupper(substr($property, 0, 1)) . substr($property, 1), 0, $arr);
                     $arr += 7;
                     $class = substr(substr($property, 0, 1) . substr($property, 1), $arr, ($arr . 10));
                     $getter = "get$cammel";
@@ -434,7 +441,6 @@ abstract class SQLData extends Data {
                     $subObject1->$subsetter($object->getId());
                     $subdata1 = $this->select($subObject1, "id", "ASC");
                     $object->$setter1($subdata1);
-                    
                 } else if ($obj > 0) {
                     $cammel = substr(strtoupper(substr($property, 0, 1)) . substr($property, 1), 0, $obj);
                     $key = $i . "." . substr(strtolower(substr($property, 0, 1)) . substr($property, 1), 0, $obj);
@@ -456,15 +462,12 @@ abstract class SQLData extends Data {
                         $object->$setter($row[$key]);
                     }
                 }
-                
-                
             }
-           
         }
         $fill[1] = $e;
         return $fill;
     }
-    
+
     public function update(DataObject $object, $idname = "id") {
         $class = get_class($object);
         $table = ($class);
@@ -486,54 +489,52 @@ abstract class SQLData extends Data {
                 $object2 = new $class();
                 $subSetter = $setter . $table;
                 $object2->$subSetter($object->getId());
-                if(count($objects)>0){
-                    if($this->borrar($object2))
-                    foreach ($objects as $subObject){
-                        $subObject->$subSetter($object->getId());
-                        $this->insert($subObject);
-                    }
+                if (count($objects) > 0) {
+                    if ($this->borrar($object2))
+                        foreach ($objects as $subObject) {
+                            $subObject->$subSetter($object->getId());
+                            $this->insert($subObject);
+                        }
                 }
-     
             } else if ($obj > 0) {
-                
-                  $cammel = substr(strtoupper(substr($property, 0, 1)) . substr($property, 1), 0, $obj);
-                  $getter = "get$cammel";
-                  $setter = "set$cammel";
-                  $value = $object->$getter();
-                  
-                  if ($value->getId() != null) {
-                      if ($i == 0) {
-                          $query .= "SET " . substr($key, 0, $obj) .  " ='" . $value->getId() . "' ";
-                          $this->actualizar($value);
-                          $i++;
-                      } else {
-                          $query .= ", " . substr($key, 0, $obj) .  " ='" . $value->getId(). "' ";
-                          $this->actualizar($value);
-                      }
-                  } else {
-                      $properties1 = $value->__getProperties();
-                      $j = 0;
-                      foreach ($properties1 as $property1){
-                          $key1 = $property1;
-                          $obj1 = strpos($key1, "_object");
-                          $arr = strpos($key1, "_array");
-                          if ($key1 != null && $obj1 == 0 && $arr == 0){
-                              $cammel = strtoupper(substr($property1, 0, 1)) . substr($property1, 1);
-                              $getter = "get$cammel";
-                              $setter = "set$cammel";
-                              if ($value->$getter() != null){
-                                  $j++;
-                              }
-                          }
+
+                $cammel = substr(strtoupper(substr($property, 0, 1)) . substr($property, 1), 0, $obj);
+                $getter = "get$cammel";
+                $setter = "set$cammel";
+                $value = $object->$getter();
+
+                if ($value->getId() != null) {
+                    if ($i == 0) {
+                        $query .= "SET " . substr($key, 0, $obj) . " ='" . $value->getId() . "' ";
+                        $this->actualizar($value);
+                        $i++;
+                    } else {
+                        $query .= ", " . substr($key, 0, $obj) . " ='" . $value->getId() . "' ";
+                        $this->actualizar($value);
                     }
-                    if($j != 0){
+                } else {
+                    $properties1 = $value->__getProperties();
+                    $j = 0;
+                    foreach ($properties1 as $property1) {
+                        $key1 = $property1;
+                        $obj1 = strpos($key1, "_object");
+                        $arr = strpos($key1, "_array");
+                        if ($key1 != null && $obj1 == 0 && $arr == 0) {
+                            $cammel = strtoupper(substr($property1, 0, 1)) . substr($property1, 1);
+                            $getter = "get$cammel";
+                            $setter = "set$cammel";
+                            if ($value->$getter() != null) {
+                                $j++;
+                            }
+                        }
+                    }
+                    if ($j != 0) {
                         $value->setId($this->insert($value));
                         if ($i == 0) {
-                            $query .= "SET " . strtolower(substr(get_class($value), 0 , $obj)) .  " ='" . $value->getId() . "' ";
+                            $query .= "SET " . strtolower(substr(get_class($value), 0, $obj)) . " ='" . $value->getId() . "' ";
                             $i++;
                         } else {
-                            $query .= ", " . strtolower(substr(get_class($value), 0 ,$obj))  .  " ='" . $value->getId(). "' ";
-                            
+                            $query .= ", " . strtolower(substr(get_class($value), 0, $obj)) . " ='" . $value->getId() . "' ";
                         }
                     }
                 }
@@ -562,13 +563,13 @@ abstract class SQLData extends Data {
                 }
             }
         }
-        if ($object->getId() != null){
+        if ($object->getId() != null) {
             $query .= "WHERE $idname = " . $object->getId();
         } else {
             return false;
         }
-        
-        echo "$query<br />";
+
+        //echo "$query<br />";
 //        exit();
         //query execution
         if (!$this->performWrite($query)) {
@@ -577,6 +578,7 @@ abstract class SQLData extends Data {
         //ending
         return true;
     }
+
     //Perform a data delete process
     //@param $object the object data to delete
     //@returns true if the operation was succesfully, false if not
@@ -590,7 +592,7 @@ abstract class SQLData extends Data {
             $key = $property;
             $obj = strpos($key, "_object");
             $arr = strpos($key, "_array");
-            if(!$arr){
+            if (!$arr) {
                 if ($obj > 0) {
                     $cammel = substr(strtoupper(substr($property, 0, 1)) . substr($property, 1), 0, $obj);
                     $getter = "get$cammel";
@@ -619,7 +621,6 @@ abstract class SQLData extends Data {
                         $i++;
                     }
                 }
-            
             } else {
                 $cammel = substr(strtoupper(substr($property, 0, 1)) . substr($property, 1), 0, $arr);
                 $getter = "get$cammel";
@@ -630,22 +631,21 @@ abstract class SQLData extends Data {
                 $object2 = new $class2();
                 $subSetter = $setter . $class;
                 $object2->$subSetter($object->getId());
-                if(count($objects)>0){
+                if (count($objects) > 0) {
                     $this->borrar($object2);
-                    
                 }
             }
         }
-        
+
         //query execution
-        echo "$query<br />";
+        //echo "$query<br />";
         if (!$this->performWrite($query)) {
             return false;
         }
         //ending
         return true;
     }
-}
 
+}
 
 ?>
