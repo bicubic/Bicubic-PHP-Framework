@@ -1,13 +1,12 @@
 <?php
 
 /**
- * Aplicación de Acceso
+ * Bicubic PHP Framework
  *
- * @author     Juan Francisco Rodríguez <jrodriguez@bicubic.cl>
+ * @author     Juan Rodríguez-Covili <juan@bicubic.cl>
  * @copyright  2011 Bicubic Technology - http://www.bicubic.cl
- * @license    Bicubic Comercial Licence
- * @license
- * @framework  2.1
+ * @license    MIT
+ * @framework  2.2
  */
 class LoginApplication extends MainApplication {
 
@@ -17,6 +16,7 @@ class LoginApplication extends MainApplication {
      * @param array $lang  el array de lenguaje
      */
     function __construct($config, $lang) {
+        $data = new PostgreSQLData($config['database_host'], $config['database_user'], $config['database_password'], $config['database_database'], $lang);
         parent::__construct($config, $lang, "login");
     }
 

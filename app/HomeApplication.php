@@ -8,15 +8,15 @@
  * @license    MIT
  * @framework  2.2
  */
-class JsonApplication extends Application {
+class HomeApplication extends Application {
 
     /**
-     * Constructor
-     * @param array $config el array de configuracion
-     * @param array $lang el array de lenguaje
+     * El panel principal
+     * @param array $config el array de la configuracion
+     * @param array $lang el array del lenguaje
      */
     function __construct($config, $lang) {
-        parent::__construct($config, $lang, null, "json");
+        parent::__construct($config, $lang, null, "home");
     }
 
     /**
@@ -30,24 +30,26 @@ class JsonApplication extends Application {
             case "hello" : {
                     require_once('nav/HelloNavigation.php');
                     $navigation = new HelloNavigation($this);
-                    $navigation->helloJson();
+                    $navigation->hello();
                     break;
                 }
             default : {
-                    $this->error($this->lang['error_navnotfound']);
+                    $this->redirect("home", "hello");
                     break;
                 }
         }
     }
 
     /**
-     * Gatilla un error
-     * @param string $message  el mensaje del error
+     * Setea la vista dentro del template
+     * @param string $navigationFolder la carpeta de la vista
+     * @param string $navigationFile el nombre de los archivos de la vista
+     * @param string $title el titulo de la vista
      */
-    public function error($message) {
-        $this->setMainTemplate("message", "error");
-        $this->setJsonVariableTemplate('MESSAGE-TEXT', $message);
-        $this->render();
+    public function setMainTemplate($navigationFolder, $navigationFile, $title="") {
+        parent::setMainTemplate($navigationFolder, $navigationFile, $title);
+
+        $this->setHTMLVariableTemplate('HELLO-TEMPLATE', $this->lang['text_helloworld']);
     }
 
 }
