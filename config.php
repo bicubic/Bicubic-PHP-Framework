@@ -10,22 +10,22 @@
  */
 $config = array();
 //Server values
-$config['server_temp_folder'] = "/tmp/";
-$config['server_logg_file'] = "/tmp/logs/bicubic_";
-$config['server_app_folder'] = "/home/bicubic/";
+$config['server_temp_folder'] = "/Users/zenilt/Modificados/Proyectos/BicubicPHPFramework/MetaData/";
+$config['server_logg_file'] = "/Users/zenilt/Modificados/Proyectos/BicubicPHPFramework/MetaData/bicubic_";
+$config['server_app_folder'] = "/Users/zenilt/Modificados/Proyectos/BicubicPHPFramework/git/";
 //Web values
-$config['web_folder'] = "http://localhost/";
-$config['web_url'] = "http://localhost/index.php";
-$config['web_secure_url'] = "https://localhost/index.php";
-$config['web_contact_email'] = "";
-$config['web_contact_name'] = "";
+$config['web_folder'] = "http://localhost:8888/BicubicPHPFramework/";
+$config['web_url'] = "http://localhost:8888/BicubicPHPFramework/index.php";
+$config['web_secure_url'] = "http://localhost:8888/BicubicPHPFramework/index.php";
+$config['web_contact_email'] = "developer@bicubic.cl";
+$config['web_contact_name'] = "Bicubic";
 $config['web_time_out'] = 360000;
 $config['web_page_items'] = 15;
 //Data Base values
 $config['database_host'] = "localhost";
-$config['database_database'] = "5432";
+$config['database_database'] = "bicubic";
 $config['database_user'] = "postgres";
-$config['database_password'] = "";
+$config['database_password'] = "database";
 //Email values
 $config['email_host'] = "";
 $config['email_port'] = 25;
