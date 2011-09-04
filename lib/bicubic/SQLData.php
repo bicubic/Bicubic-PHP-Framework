@@ -36,16 +36,16 @@ abstract class SQLData extends Data {
                     $getter = "get$cammel";
                     $setter = "set$cammel";
                     $value = $object->$getter();
-
+                    $key = substr($key, 0, $obj);
                     if ($value->getId() != null) {
                         if ($i == 0) {
-                            $query .= "" . substr($key, 0, $obj) . " ";
+                            $query .= "" . $key . " ";
                             $i++;
                         } else {
-                            $query .= ", " . substr($key, 0, $obj) . " ";
+                            $query .= ", " . $key . " ";
                         }
 
-                        $params[substr($key, 0, $obj)] = $value->getId();
+                        $params[$key] = $value->getId();
                     } else {
                         $l = 0;
                         $properties1 = $value->__getProperties();
@@ -66,12 +66,12 @@ abstract class SQLData extends Data {
                             $value->setId($this->insert($value));
                             if ($value->getId() != -1) {
                                 if ($i == 0) {
-                                    $query .= "" . substr($key, 0, $obj) . " ";
+                                    $query .= "" . $key . " ";
                                     $i++;
                                 } else {
-                                    $query .= ", " . substr($key, 0, $obj) . " ";
+                                    $query .= ", " . $key . " ";
                                 }
-                                $params[substr($key, 0, $obj)] = $value->getId();
+                                $params[$key] = $value->getId();
                             }
                         }
                     }
@@ -158,6 +158,7 @@ abstract class SQLData extends Data {
                     $getter = "get$cammel";
                     $setter = "set$cammel";
                     $value = $object->$getter();
+                    $key = substr($key, 0, $obj);
                     if ($value->getId() != null) {
                         $value->setId($this->escapeChars($value->getId()));
                         if ($i == 0) {
@@ -222,9 +223,10 @@ abstract class SQLData extends Data {
                         $cammel = substr(strtoupper(substr($property, 0, 1)) . substr($property, 1), 0, $obj);
                         $getter = "get$cammel";
                         $setter = "set$cammel";
-                        if (isset($row[substr($key, 0, $obj) . "Id"])) {
+                        $key = substr($key, 0, $obj);
+                        if (isset($row[$key])) {
                             $subObject = $object->$getter();
-                            $subObject->setId($row[substr($key, 0, $obj) . "Id"]);
+                            $subObject->setId($row[$key]);
                         }
                     } else {
                         $cammel = strtoupper(substr($property, 0, 1)) . substr($property, 1);
@@ -306,7 +308,7 @@ abstract class SQLData extends Data {
                     $getter = "get$cammel";
                     $setter = "set$cammel";
                     $value = $object->$getter();
-                    $key = substr(substr($property, 0, 1) . substr($property, 1), 0, $obj);
+                    $key = substr($key, 0, $obj);
                     if ($j == 0) {
                         $query[0] .= "$l.$key as '" . "$l.$key'";
                         
@@ -502,14 +504,14 @@ abstract class SQLData extends Data {
                 $getter = "get$cammel";
                 $setter = "set$cammel";
                 $value = $object->$getter();
-
+                $key = substr($key, 0, $obj);
                 if ($value->getId() != null) {
                     if ($i == 0) {
-                        $query .= "SET " . substr($key, 0, $obj) . " ='" . $value->getId() . "' ";
+                        $query .= "SET " . $key . " ='" . $value->getId() . "' ";
                         $this->actualizar($value);
                         $i++;
                     } else {
-                        $query .= ", " . substr($key, 0, $obj) . " ='" . $value->getId() . "' ";
+                        $query .= ", " . $key . " ='" . $value->getId() . "' ";
                         $this->actualizar($value);
                     }
                 } else {
@@ -598,11 +600,12 @@ abstract class SQLData extends Data {
                     $getter = "get$cammel";
                     $setter = "set$cammel";
                     $value = $object->$getter();
+                    $key = substr($key, 0, $obj);
                     if ($value->getId() != null) {
                         if ($i == 0) {
-                            $query .= "WHERE " . substr($key, 0, $obj) . " = '" . $value->getId() . "' ";
+                            $query .= "WHERE " . $key . " = '" . $value->getId() . "' ";
                         } else {
-                            $query .= "AND " . substr($key, 0, $obj) . " = '" . $value->getId() . "' ";
+                            $query .= "AND " . $key . " = '" . $value->getId() . "' ";
                         }
                         $i++;
                     }
