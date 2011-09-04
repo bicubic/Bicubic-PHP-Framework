@@ -16,12 +16,12 @@ abstract class SQLData extends Data {
     //@param $object the object data to insert
     //@returns the id inserted if the operation was succesfully, false if not
     public function insert(DataObject $object, $idname = "id") {
-        $class = get_class($object);
+        $class = strtolower(get_class($object));
         $table = ($class);
         $params = array();
         $getters = array();
         //query preparation
-        $query = "INSERT INTO \"" . $table . "\" (";
+        $query = "INSERT INTO " . $table . " (";
         $i = 0;
         $j = 0;
         $a = 0;
@@ -39,10 +39,10 @@ abstract class SQLData extends Data {
 
                     if ($value->getId() != null) {
                         if ($i == 0) {
-                            $query .= "\"" . substr($key, 0, $obj) . "\" ";
+                            $query .= "" . substr($key, 0, $obj) . " ";
                             $i++;
                         } else {
-                            $query .= ", \"" . substr($key, 0, $obj) . "\" ";
+                            $query .= ", " . substr($key, 0, $obj) . " ";
                         }
 
                         $params[substr($key, 0, $obj)] = $value->getId();
@@ -66,10 +66,10 @@ abstract class SQLData extends Data {
                             $value->setId($this->insert($value));
                             if ($value->getId() != -1) {
                                 if ($i == 0) {
-                                    $query .= "\"" . substr($key, 0, $obj) . "\" ";
+                                    $query .= "" . substr($key, 0, $obj) . " ";
                                     $i++;
                                 } else {
-                                    $query .= ", \"" . substr($key, 0, $obj) . "\" ";
+                                    $query .= ", " . substr($key, 0, $obj) . " ";
                                 }
                                 $params[substr($key, 0, $obj)] = $value->getId();
                             }
@@ -83,10 +83,10 @@ abstract class SQLData extends Data {
                     if ($object->getId() == null) {
                         if ($value != null && $key != $idname) {
                             if ($i == 0) {
-                                $query .= "\"$key\"";
+                                $query .= "$key";
                                 $i++;
                             } else {
-                                $query .= ",\"$key\"";
+                                $query .= ",$key";
                             }
                             $params[$j] = $value;
                             $j++;
@@ -141,11 +141,11 @@ abstract class SQLData extends Data {
     //@param $object the target object that filters the data
     //@returns an array containing objects of the type of $object
     public function select(DataObject $object, $orderIndex = null, $orderDirection = null, $limit=null, $indexStart=null, $arrays=false) {
-        $class = get_class($object);
+        $class = strtolower(get_class($object));
         //query preparation
         $data = array();
-        $query = "SELECT * FROM  \"" . ($class) . "\" ";
-        $countQuery = "SELECT count(id) as total FROM \"" . ($class) . "\" ";
+        $query = "SELECT * FROM  " . ($class) . " ";
+        $countQuery = "SELECT count(id) as total FROM " . ($class) . " ";
         $i = 0;
         $properties = $object->__getProperties();
         foreach ($properties as $property) {
@@ -161,11 +161,11 @@ abstract class SQLData extends Data {
                     if ($value->getId() != null) {
                         $value->setId($this->escapeChars($value->getId()));
                         if ($i == 0) {
-                            $query .= "WHERE \"$key\" = '" . $value->getId() . "' ";
-                            $countQuery .= "WHERE \"$key\" = '" . $value->getId() . "' ";
+                            $query .= "WHERE $key = '" . $value->getId() . "' ";
+                            $countQuery .= "WHERE $key = '" . $value->getId() . "' ";
                         } else {
-                            $query .= "AND \"$key\" = '" . $value->getId() . "' ";
-                            $countQuery .= "AND \"$key\" = '" . $value->getId() . "' ";
+                            $query .= "AND $key = '" . $value->getId() . "' ";
+                            $countQuery .= "AND $key = '" . $value->getId() . "' ";
                         }
                         $i++;
                     }
@@ -177,11 +177,11 @@ abstract class SQLData extends Data {
                     if ($value != null) {
                         $value = $this->escapeChars($value);
                         if ($i == 0) {
-                            $query .= "WHERE \"$key\" = '$value' ";
-                            $countQuery .= "WHERE \"$key\" = '$value' ";
+                            $query .= "WHERE $key = '$value' ";
+                            $countQuery .= "WHERE $key = '$value' ";
                         } else {
-                            $query .= "AND \"$key\" = '$value' ";
-                            $countQuery .= "AND \"$key\" = '$value' ";
+                            $query .= "AND $key = '$value' ";
+                            $countQuery .= "AND $key = '$value' ";
                         }
                         $i++;
                     }
@@ -189,9 +189,9 @@ abstract class SQLData extends Data {
             }
         }
         if (isset($orderIndex) && isset($orderDirection)) {
-            $query .= "ORDER BY \"$orderIndex\" $orderDirection ";
+            $query .= "ORDER BY $orderIndex $orderDirection ";
         } else {
-            $query .= "ORDER BY \"id\" ASC ";
+            $query .= "ORDER BY id ASC ";
         }
         if (isset($limit) && isset($indexStart)) {
 
@@ -251,8 +251,8 @@ abstract class SQLData extends Data {
                         $class = substr(substr($property, 0, 1) . substr($property, 1), $arr, ($arr . 10));
                         $getter = "get$cammel";
                         $setter = "set$cammel";
-                        $subgetter = "get$cammel" . get_class($arrobject);
-                        $subsetter = "set$cammel" . get_class($arrobject);
+                        $subgetter = "get$cammel" . strtolower(get_class($arrobject));
+                        $subsetter = "set$cammel" . strtolower(get_class($arrobject));
                         $subObject = new $class();
                         $subObject->$subsetter($arrobject->getId());
                         $subdata1 = $this->select($subObject, "id", "ASC");
@@ -269,7 +269,7 @@ abstract class SQLData extends Data {
     //@param $object the target object to copy the data
     //@returns a new object of the type of $object
     public function selectOne(DataObject $object, $orderIndex = null, $orderDirection = null) {
-        $class = get_class($object);
+        $class = strtolower(get_class($object));
         $properties = $object->__getProperties();
         //query preparation
         $queryPrep = $this->getQuery($object);
@@ -277,7 +277,7 @@ abstract class SQLData extends Data {
         if (isset($orderIndex) && isset($orderDirection)) {
             $query .= "ORDER BY A.'$orderIndex' $orderDirection ";
         } else {
-            $query .= "ORDER BY A.\"id\" DESC ";
+            $query .= "ORDER BY A.id DESC ";
         }
 
         //query execution
@@ -308,22 +308,22 @@ abstract class SQLData extends Data {
                     $value = $object->$getter();
                     $key = substr(substr($property, 0, 1) . substr($property, 1), 0, $obj);
                     if ($j == 0) {
-                        $query[0] .= "$l.\"$key\" as \"" . "$l.$key\"";
+                        $query[0] .= "$l.$key as '" . "$l.$key'";
                         
                     } else {
-                        $query[0] .= ", $l.\"$key\" as \"" . "$l.$key\"";
+                        $query[0] .= ", $l.$key as '" . "$l.$key'";
                     }
                     $j++;
                     if ($j2 == 0) {
                         if ($value->getId() != null) {
                             $value->setId($this->escapeChars($value->getId()));
-                            $query[4] .= " $l.\"$key\" = '" . $value->getId() . "' ";
+                            $query[4] .= " $l.$key = '" . $value->getId() . "' ";
                             $j2++;
                         }
                     } else {
                         if ($value->getId() != null) {
                             $value->setId($this->escapeChars($value->getId()));
-                            $query[4] .= "AND $l.\"$key\" = '" . $value->getId() . "' ";
+                            $query[4] .= "AND $l.$key = '" . $value->getId() . "' ";
                         }
                     }
                 } else {
@@ -332,30 +332,30 @@ abstract class SQLData extends Data {
                     $setter = "set$cammel";
                     $value = $object->$getter();
                     if ($j == 0) {
-                        $query[0] .= "$l.\"$key\" as \"" . "$l.$key\" ";
+                        $query[0] .= "$l.$key as '" . "$l.$key' ";
                         
                     } else {
-                        $query[0] .= ", $l.\"$key\" as \"" . "$l.$key\" ";
+                        $query[0] .= ", $l.$key as '" . "$l.$key' ";
                     }
                     $j++;
                     if ($j2 == 0) {
                         if ($value != null) {
                             $value = $this->escapeChars($value);
-                            $query[4] .= " $l.\"$key\" = '$value' ";
+                            $query[4] .= " $l.$key = '$value' ";
                             $j2++;
                         }
                     } else {
                         if ($value != null) {
                             $value = $this->escapeChars($value);
-                            $query[4] .= "AND $l.\"$key\" = '$value' ";
+                            $query[4] .= "AND $l.$key = '$value' ";
                         }
                     }
                 }
             }
         }
         if ($l == "A") {
-            $class = get_class($object);
-            $query[1] .= " \"$class\" $l";
+            $class = strtolower(get_class($object));
+            $query[1] .= " $class $l";
             $i = $l;
             $l++;
             $e = $l;
@@ -369,7 +369,7 @@ abstract class SQLData extends Data {
                     $value = $object->$getter();
                     $class = substr(strtolower(substr($property, 0, 1)) . substr($property, 1), 0, $obj);
                     if ($a == 0) {
-                        $query[2] .= " $i.\"$class\" = $e.id ";
+                        $query[2] .= " $i.$class = $e.id ";
                         $aux = $this->getQuery($value, $j, $e, $a, $j2);
                         $query[0] .= $aux[0];
                         $query[1] .= $aux[1];
@@ -378,7 +378,7 @@ abstract class SQLData extends Data {
                         $e = $aux[3];
                         $a++;
                     } else {
-                        $query[2] .= "AND $i.\"$class\" = $e.id ";
+                        $query[2] .= "AND $i.$class = $e.id ";
                         $aux = $this->getQuery($value, $j, $e, $a, $j2);
                         $query[0] .= $aux[0];
                         $query[1] .= $aux[1];
@@ -390,8 +390,8 @@ abstract class SQLData extends Data {
                 }
             }
         } else {
-            $class = get_class($object);
-            $query[1] .= ", \"$class\" $l";
+            $class = strtolower(get_class($object));
+            $query[1] .= ", $class $l";
             $i = $l;
             $l++;
             $e = $l;
@@ -403,7 +403,7 @@ abstract class SQLData extends Data {
                     $getter = "get$cammel";
                     $value = $object->$getter();
                     $class = substr(strtolower(substr($property, 0, 1)) . substr($property, 1), 0, $obj);
-                    $query[2] .= "AND $i.\"$class\" = $e.id ";
+                    $query[2] .= "AND $i.$class = $e.id ";
                     $aux = $this->getQuery($value, $j, $e, $a, $j2);
                     $query[0] .= $aux[0];
                     $query[1] .= $aux[1];
@@ -419,7 +419,7 @@ abstract class SQLData extends Data {
 
     private function fillObject(DataObject $object, $row, $i = "A") {
         $fill = array();
-        $class = get_class($object);
+        $class = strtolower(get_class($object));
         $object = new $class();
         $fill[0] = $object;
         $e = $i;
@@ -435,8 +435,8 @@ abstract class SQLData extends Data {
                     $class = substr(substr($property, 0, 1) . substr($property, 1), $arr, ($arr . 10));
                     $getter = "get$cammel";
                     $setter1 = "set$cammel";
-                    $subgetter = "get$cammel" . get_class($object);
-                    $subsetter = "set$cammel" . get_class($object);
+                    $subgetter = "get$cammel" . strtolower(get_class($object));
+                    $subsetter = "set$cammel" . strtolower(get_class($object));
                     $subObject1 = new $class();
                     $subObject1->$subsetter($object->getId());
                     $subdata1 = $this->select($subObject1, "id", "ASC");
@@ -469,10 +469,10 @@ abstract class SQLData extends Data {
     }
 
     public function update(DataObject $object, $idname = "id") {
-        $class = get_class($object);
+        $class = strtolower(get_class($object));
         $table = ($class);
         //query preparation
-        $query = "UPDATE \"" . $table . "\" ";
+        $query = "UPDATE " . $table . " ";
         $i = 0;
         $properties = $object->__getProperties();
         foreach ($properties as $property) {
@@ -531,10 +531,10 @@ abstract class SQLData extends Data {
                     if ($j != 0) {
                         $value->setId($this->insert($value));
                         if ($i == 0) {
-                            $query .= "SET " . strtolower(substr(get_class($value), 0, $obj)) . " ='" . $value->getId() . "' ";
+                            $query .= "SET " . strtolower(substr(strtolower(get_class($value)), 0, $obj)) . " ='" . $value->getId() . "' ";
                             $i++;
                         } else {
-                            $query .= ", " . strtolower(substr(get_class($value), 0, $obj)) . " ='" . $value->getId() . "' ";
+                            $query .= ", " . strtolower(substr(strtolower(get_class($value)), 0, $obj)) . " ='" . $value->getId() . "' ";
                         }
                     }
                 }
@@ -547,17 +547,17 @@ abstract class SQLData extends Data {
                     if (isset($value)) {
                         $value = $this->escapeChars($value);
                         if ($i == 0) {
-                            $query .= "SET \"$key\"='$value' ";
+                            $query .= "SET $key='$value' ";
                             $i++;
                         } else {
-                            $query .= ", \"$key\"='$value' ";
+                            $query .= ", $key='$value' ";
                         }
                     } else {
                         if ($i == 0) {
-                            $query .= "SET \"$key\"=NULL ";
+                            $query .= "SET $key=NULL ";
                             $i++;
                         } else {
-                            $query .= ", \"$key\"=NULL ";
+                            $query .= ", $key=NULL ";
                         }
                     }
                 }
@@ -583,9 +583,9 @@ abstract class SQLData extends Data {
     //@param $object the object data to delete
     //@returns true if the operation was succesfully, false if not
     public function delete(DataObject $object) {
-        $class = get_class($object);
+        $class = strtolower(get_class($object));
         //query preparation
-        $query = "DELETE FROM \"$class\" ";
+        $query = "DELETE FROM $class ";
         $i = 0;
         $properties = $object->__getProperties();
         foreach ($properties as $property) {
@@ -614,9 +614,9 @@ abstract class SQLData extends Data {
                     if (isset($value)) {
                         $value = $this->escapeChars($value);
                         if ($i == 0) {
-                            $query .= "WHERE \"$key\" = '$value' ";
+                            $query .= "WHERE $key = '$value' ";
                         } else {
-                            $query .= "AND \"$key\" = '$value' ";
+                            $query .= "AND $key = '$value' ";
                         }
                         $i++;
                     }
