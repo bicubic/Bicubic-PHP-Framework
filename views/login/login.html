@@ -1,7 +1,15 @@
-<h1>{LANG-LOGIN}</h1>
-<form id="loginForm" name="{LOGIN-ID}" method="post" autocomplete="off" action="{LOGIN-ACTION}">
-    <input type="text" title="{LANG-USERNAME}" name="{LOGIN-PARAM-SYSTEMUSER-USERNAME}" class="required" maxlength="32">
-    <input type="password" title="{LANG-PASSWORD}" type="password" name="{LOGIN-PARAM-SYSTEMUSER-PASSWORD}" class="required" maxlength="32">
-    <input type="hidden" name="{LOGIN-PARAM-LOGINTOKEN}" value="{LOGIN-DATA-LOGINTOKEN}">
-    <button id="loginButton" type="button" class="text">{LANG-LOGIN}</button>
+<form name="{LOGIN-ID}" method="post" action="{LOGIN-ACTION}">
+    <fieldset>
+        <legend>{LANG-LOGINFORM}</legend>
+        <label>
+            {LANG-EMAIL}:
+        </label>
+        <input type="email" title="{LANG-EMAIL}" name="{LOGIN-NAME-SYSTEMUSER-EMAIL}" required="required" maxlength="32" />
+        <label>
+            {LANG-PASSWORD}:
+        </label>
+        <input type="password" title="{LANG-PASSWORD}" type="password" name="{LOGIN-NAME-SYSTEMUSER-PASSWORD}" required="required" maxlength="32" />
+    </fieldset>
+    <input type="hidden" name="{LOGIN-NAME-LOGINTOKEN}" value="{LOGIN-VALUE-LOGINTOKEN}" />
+    <button id="loginButton" type="submit">{LANG-LOGIN}</button> 
 </form>

@@ -43,7 +43,7 @@
 * @package Auth_SASL
 */
 
-require_once('Auth/SASL/Common.php');
+require_once('lib/ext/pear/Auth/SASL/Common.php');
 
 class Auth_SASL_CramMD5 extends Auth_SASL_Common
 {
