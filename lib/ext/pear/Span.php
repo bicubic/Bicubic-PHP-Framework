@@ -36,7 +36,7 @@
  * @copyright  1997-2006 Leandro Lucarella, Pierre-Alain Joye
  * @license    http://www.opensource.org/licenses/bsd-license.php
  *             BSD License
- * @version    CVS: $Id: Span.php,v 1.15 2007/11/29 19:26:08 c01234 Exp $
+ * @version    CVS: $Id$
  * @link       http://pear.php.net/package/Date
  * @since      File available since Release 1.4
  */
@@ -61,21 +61,25 @@ require_once 'Calc.php';
  * Non Numeric Separated Values (NNSV) Input Format
  *
  * Input format guessed from something like this:
- * days<sep>hours<sep>minutes<sep>seconds
- * Where <sep> is any quantity of non numeric chars. If no values are
- * given, time span is set to zero, if one value is given, it's used for
- * hours, if two values are given it's used for hours and minutes and if
- * three values are given, it's used for hours, minutes and seconds.<br>
- * Examples:<br>
- * ''                   -> 0, 0, 0, 0 (days, hours, minutes, seconds)<br>
- * '12'                 -> 0, 12, 0, 0
- * '12.30'              -> 0, 12, 30, 0<br>
- * '12:30:18'           -> 0, 12, 30, 18<br>
- * '3-12-30-18'         -> 3, 12, 30, 18<br>
- * '3 days, 12-30-18'   -> 3, 12, 30, 18<br>
- * '12:30 with 18 secs' -> 0, 12, 30, 18<br>
  *
- * @const int
+ *  <b>days</b><sep><b>hours</b><sep><b>minutes</b><sep><b>seconds</b>
+ *
+ * Where '<sep>' is any quantity of non numeric chars. If no values are
+ * given, time span is set to zero, if one value is given, it is used for
+ * hours, if two values are given it's used for hours and minutes and if
+ * three values are given, it is used for hours, minutes and seconds.
+ *
+ * Examples:
+ *
+ *  - <b>""</b>                   -> 0, 0, 0, 0 (days, hours, minutes, seconds)
+ *  - <b>"12"</b>                 -> 0, 12, 0, 0
+ *  - <b>"12.30"</b>              -> 0, 12, 30, 0
+ *  - <b>"12:30:18"</b>           -> 0, 12, 30, 18
+ *  - <b>"3-12-30-18"</b>         -> 3, 12, 30, 18
+ *  - <b>"3 days, 12-30-18"</b>   -> 3, 12, 30, 18
+ *  - <b>"12:30 with 18 secs"</b> -> 0, 12, 30, 18
+ *
+ * @see      Date_Span::setFromString()
  */
 define('DATE_SPAN_INPUT_FORMAT_NNSV', 1);
 
@@ -161,7 +165,7 @@ class Date_Span
     /**
      * Constructor
      *
-     * Creates the time span object calling the set() method.
+     * Creates the time span object calling {@link Date_Span::set()}
      *
      * @param mixed $time   time span expression
      * @param mixed $format format string to set it from a string or the
@@ -191,19 +195,20 @@ class Date_Span
      *
      * @return   bool       true on success
      * @access   public
-     * @see      setFromObject(), setFromArray(), setFromString(),
-     *            setFromSeconds(), setFromDateDiff()
+     * @see      Date_Span::copy(), Date_Span::setFromArray(),
+     *            Date_Span::setFromString(), Date_Span::setFromSeconds(),
+     *            Date_Span::setFromDateDiff()
      */
     function set($time = 0, $format = null)
     {
-        if (is_a($time, 'date_span')) {
+        if (is_a($time, 'Date_Span')) {
             return $this->copy($time);
-        } elseif (is_a($time, 'date') and is_a($format, 'date')) {
+        } elseif (is_a($time, 'Date') and is_a($format, 'Date')) {
             return $this->setFromDateDiff($time, $format);
         } elseif (is_array($time)) {
             return $this->setFromArray($time);
-        } elseif (is_string($time)) {
-            return $this->setFromString($time, $format);
+        } elseif (is_string($time) || is_string($format)) {
+            return $this->setFromString((string) $time, $format);
         } elseif (is_int($time)) {
             return $this->setFromSeconds($time);
         } else {
@@ -220,9 +225,9 @@ class Date_Span
      *
      * Any value can be a float (but it has no sense in seconds), for example:
      *
-     *  <code>array(23.5, 20, 0)</code>
+     *  <code>$object->setFromArray(array(23.5, 20, 0));</code>
      *
-     * is interpreted as 23 hours, .5*60 + 20 = 50 minutes and 0 seconds.
+     * is interpreted as 23 hours, 0.5 * 60 + 20 = 50 minutes and 0 seconds.
      *
      * @param array $time items are counted from right to left. First
      *                     item is for seconds, second for minutes, third
@@ -232,6 +237,7 @@ class Date_Span
      *
      * @return   bool       true on success
      * @access   public
+     * @see      Date_Span::set()
      */
     function setFromArray($time)
     {
@@ -263,45 +269,56 @@ class Date_Span
     // {{{ setFromString()
 
     /**
-     * Set the time span from a string based on an input format
+     * Sets the time span from a string, based on an input format
      *
-     * This is some like a mix of format() method and sscanf() PHP function.
+     * This is some like a mix of the PHP functions
+     * {@link http://www.php.net/strftime strftime()} and
+     * {@link http://www.php.net/sscanf sscanf()}.
      * The error checking and validation of this function is very primitive,
-     * so you should be carefull when using it with unknown $time strings.
+     * so you should be careful when using it with unknown strings.
      * With this method you are assigning day, hour, minute and second
      * values, and the last values are used. This means that if you use
-     * something like setFromString('10, 20', '%H, %h') your time span
-     * would be 20 hours long. Allways remember that this method sets
-     * <b>all</b> the values, so if you had a $time span 30 minutes long
-     * and you make $time->setFromString('20 hours', '%H hours'), $time
-     * span would be 20 hours long (and not 20 hours and 30 minutes).
-     * Input format options:<br>
-     *  <code>%C</code> Days with time, same as "%D, %H:%M:%S"<br>
-     *  <code>%d</code> Total days as a float number
-     *                  (2 days, 12 hours = 2.5 days)<br>
-     *  <code>%D</code> Days as a decimal number<br>
-     *  <code>%e</code> Total hours as a float number
-     *                  (1 day, 2 hours, 30 minutes = 26.5 hours)<br>
-     *  <code>%f</code> Total minutes as a float number
-     *                  (2 minutes, 30 seconds = 2.5 minutes)<br>
-     *  <code>%g</code> Total seconds as a decimal number
-     *                  (2 minutes, 30 seconds = 90 seconds)<br>
-     *  <code>%h</code> Hours as decimal number<br>
-     *  <code>%H</code> Hours as decimal number limited to 2 digits<br>
-     *  <code>%m</code> Minutes as a decimal number<br>
-     *  <code>%M</code> Minutes as a decimal number limited to 2 digits<br>
-     *  <code>%n</code> Newline character (\n)<br>
-     *  <code>%p</code> Either 'am' or 'pm' depending on the time. If 'pm'
+     * something like:
+     *
+     *   <code>$object->setFromString('10, 20', '%H, %h');</code>
+     *
+     * your time span would be 20 hours long.  Always remember that this
+     * method sets all the values, so if you had a span object 30
+     * minutes long and you call:
+     *
+     *   <code>$object->setFromString('20 hours', '%H hours');</code>
+     *
+     * the span object would be 20 hours long (and not 20 hours and 30
+     * minutes).
+     *
+     * Input format options:
+     *
+     *  - <b>%C</b> - Days with time, equivalent to '<b>D, %H:%M:%S</b>'
+     *  - <b>%d</b> - Total days as a float number
+     *                  (2 days, 12 hours = 2.5 days)
+     *  - <b>%D</b> - Days as a decimal number
+     *  - <b>%e</b> - Total hours as a float number
+     *                  (1 day, 2 hours, 30 minutes = 26.5 hours)
+     *  - <b>%f</b> - Total minutes as a float number
+     *                  (2 minutes, 30 seconds = 2.5 minutes)
+     *  - <b>%g</b> - Total seconds as a decimal number
+     *                  (2 minutes, 30 seconds = 90 seconds)
+     *  - <b>%h</b> - Hours as decimal number
+     *  - <b>%H</b> - Hours as decimal number limited to 2 digits
+     *  - <b>%m</b> - Minutes as a decimal number
+     *  - <b>%M</b> - Minutes as a decimal number limited to 2 digits
+     *  - <b>%n</b> - Newline character (\n)
+     *  - <b>%p</b> - Either 'am' or 'pm' depending on the time. If 'pm'
      *                  is detected it adds 12 hours to the resulting time
      *                  span (without any checks). This is case
-     *                  insensitive.<br>
-     *  <code>%r</code> Time in am/pm notation, same as "%H:%M:%S %p"<br>
-     *  <code>%R</code> Time in 24-hour notation, same as "%H:%M"<br>
-     *  <code>%s</code> Seconds as a decimal number<br>
-     *  <code>%S</code> Seconds as a decimal number limited to 2 digits<br>
-     *  <code>%t</code> Tab character (\t)<br>
-     *  <code>%T</code> Current time equivalent, same as "%H:%M:%S"<br>
-     *  <code>%%</code> Literal '%'<br>
+     *                  insensitive.
+     *  - <b>%r</b> - Time in am/pm notation, equivalent to '<b>H:%M:%S %p</b>'
+     *  - <b>%R</b> - Time in 24-hour notation, equivalent to '<b>H:%M</b>'
+     *  - <b>%s</b> - Seconds as a decimal number
+     *  - <b>%S</b> - Seconds as a decimal number limited to 2 digits
+     *  - <b>%t</b> - Tab character (\t)
+     *  - <b>%T</b> - Current time equivalent, equivalent to '<b>H:%M:%S</b>'
+     *  - <b>%%</b> - Literal '%'
      *
      * @param string $time   string from where to get the time span
      *                        information
@@ -309,6 +326,7 @@ class Date_Span
      *
      * @return   bool       true on success
      * @access   public
+     * @see      Date_Span::set(), DATE_SPAN_INPUT_FORMAT_NNSV
      */
     function setFromString($time, $format = null)
     {
@@ -482,6 +500,8 @@ class Date_Span
      *
      * @return   bool       true on success
      * @access   public
+     * @see      Date_Span::set(), Date_Span::setFromDays(),
+     *            Date_Span::setFromHours(), Date_Span::setFromMinutes()
      */
     function setFromSeconds($seconds)
     {
@@ -505,12 +525,14 @@ class Date_Span
     // {{{ setFromMinutes()
 
     /**
-     * Set the time span from a total number of minutes
+     * Sets the time span from a total number of minutes
      *
      * @param float $minutes total number of minutes
      *
      * @return   bool       true on success
      * @access   public
+     * @see      Date_Span::set(), Date_Span::setFromDays(),
+     *            Date_Span::setFromHours(), Date_Span::setFromSeconds()
      */
     function setFromMinutes($minutes)
     {
@@ -522,12 +544,14 @@ class Date_Span
     // {{{ setFromHours()
 
     /**
-     * Set the time span from a total number of hours
+     * Sets the time span from a total number of hours
      *
      * @param float $hours total number of hours
      *
      * @return   bool       true on success
      * @access   public
+     * @see      Date_Span::set(), Date_Span::setFromDays(),
+     *            Date_Span::setFromHours(), Date_Span::setFromMinutes()
      */
     function setFromHours($hours)
     {
@@ -539,12 +563,14 @@ class Date_Span
     // {{{ setFromDays()
 
     /**
-     * Set the time span from a total number of days
+     * Sets the time span from a total number of days
      *
      * @param float $days total number of days
      *
      * @return   bool       true on success
      * @access   public
+     * @see      Date_Span::set(), Date_Span::setFromHours(),
+     *            Date_Span::setFromMinutes(), Date_Span::setFromSeconds()
      */
     function setFromDays($days)
     {
@@ -556,7 +582,7 @@ class Date_Span
     // {{{ setFromDateDiff()
 
     /**
-     * Set the span from the elapsed time between two dates
+     * Sets the span from the elapsed time between two dates
      *
      * The time span is unsigned, so the date's order is not important.
      *
@@ -565,38 +591,50 @@ class Date_Span
      *
      * @return   bool       true on success
      * @access   public
+     * @see      Date_Span::set()
      */
     function setFromDateDiff($date1, $date2)
     {
         if (!is_a($date1, 'date') or !is_a($date2, 'date')) {
             return false;
         }
-        $date1->toUTC();
-        $date2->toUTC();
-        if ($date1->after($date2)) {
-            list($date1, $date2) = array($date2, $date1);
+
+        // create a local copy of instance, in order avoid changes the object
+        // reference when its object has converted to UTC due PHP5 is always
+        // passed the object by reference.
+        $tdate1 = new Date($date1);
+        $tdate2 = new Date($date2);
+
+        // convert to UTC
+        $tdate1->toUTC();
+        $tdate2->toUTC();
+
+        if ($tdate1->after($tdate2)) {
+            list($tdate1, $tdate2) = array($tdate2, $tdate1);
         }
-        $days  = Date_Calc::dateDiff($date1->getDay(),
-                                     $date1->getMonth(),
-                                     $date1->getYear(),
-                                     $date2->getDay(),
-                                     $date2->getMonth(),
-                                     $date2->getYear());
-        $hours = $date2->getHour() - $date1->getHour();
-        $mins  = $date2->getMinute() - $date1->getMinute();
-        $secs  = $date2->getSecond() - $date1->getSecond();
+
+        $days = Date_Calc::dateDiff($tdate1->getDay(),
+                                    $tdate1->getMonth(),
+                                    $tdate1->getYear(),
+                                    $tdate2->getDay(),
+                                    $tdate2->getMonth(),
+                                    $tdate2->getYear());
+
+        $hours = $tdate2->getHour() - $tdate1->getHour();
+        $mins  = $tdate2->getMinute() - $tdate1->getMinute();
+        $secs  = $tdate2->getSecond() - $tdate1->getSecond();
+
         $this->setFromSeconds($days * 86400 +
                               $hours * 3600 +
                               $mins * 60 + $secs);
         return true;
     }
 
-
     // }}}
     // {{{ copy()
 
     /**
-     * Set the time span from another time object
+     * Sets the time span from another time object
      *
      * @param object $time source time span object
      *
@@ -621,44 +659,45 @@ class Date_Span
     // {{{ format()
 
     /**
-     * Time span pretty printing (similar to Date::format())
+     * Formats time span according to specified code (similar to
+     * {@link Date::formatLikeStrftime()})
      *
-     * Formats the time span in the given format, similar to
-     * strftime() and Date::format().<br>
-     * <br>
-     * Formatting options:<br>
-     *  <code>%C</code> Days with time, same as "%D, %H:%M:%S"<br>
-     *  <code>%d</code> Total days as a float number
-     *                  (2 days, 12 hours = 2.5 days)<br>
-     *  <code>%D</code> Days as a decimal number<br>
-     *  <code>%e</code> Total hours as a float number
-     *                  (1 day, 2 hours, 30 minutes = 26.5 hours)<br>
-     *  <code>%E</code> Total hours as a decimal number
-     *                  (1 day, 2 hours, 40 minutes = 26 hours)<br>
-     *  <code>%f</code> Total minutes as a float number
-     *                  (2 minutes, 30 seconds = 2.5 minutes)<br>
-     *  <code>%F</code> Total minutes as a decimal number
-     *                  (1 hour, 2 minutes, 40 seconds = 62 minutes)<br>
-     *  <code>%g</code> Total seconds as a decimal number
-     *                  (2 minutes, 30 seconds = 90 seconds)<br>
-     *  <code>%h</code> Hours as decimal number (0 to 23)<br>
-     *  <code>%H</code> Hours as decimal number (00 to 23)<br>
-     *  <code>%i</code> Hours as decimal number on 12-hour clock
-     *                  (1 to 12)<br>
-     *  <code>%I</code> Hours as decimal number on 12-hour clock
-     *                  (01 to 12)<br>
-     *  <code>%m</code> Minutes as a decimal number (0 to 59)<br>
-     *  <code>%M</code> Minutes as a decimal number (00 to 59)<br>
-     *  <code>%n</code> Newline character (\n)<br>
-     *  <code>%p</code> Either 'am' or 'pm' depending on the time<br>
-     *  <code>%P</code> Either 'AM' or 'PM' depending on the time<br>
-     *  <code>%r</code> Time in am/pm notation, same as "%I:%M:%S %p"<br>
-     *  <code>%R</code> Time in 24-hour notation, same as "%H:%M"<br>
-     *  <code>%s</code> Seconds as a decimal number (0 to 59)<br>
-     *  <code>%S</code> Seconds as a decimal number (00 to 59)<br>
-     *  <code>%t</code> Tab character (\t)<br>
-     *  <code>%T</code> Current time equivalent, same as "%H:%M:%S"<br>
-     *  <code>%%</code> Literal '%'<br>
+     * Uses a code based on {@link http://www.php.net/strftime strftime()}.
+     *
+     * Formatting options:
+     *
+     *  - <b>%C</b> - Days with time, equivalent to '<b>%D, %H:%M:%S</b>'
+     *  - <b>%d</b> - Total days as a float number
+     *                  (2 days, 12 hours = 2.5 days)
+     *  - <b>%D</b> - Days as a decimal number
+     *  - <b>%e</b> - Total hours as a float number
+     *                  (1 day, 2 hours, 30 minutes = 26.5 hours)
+     *  - <b>%E</b> - Total hours as a decimal number
+     *                  (1 day, 2 hours, 40 minutes = 26 hours)
+     *  - <b>%f</b> - Total minutes as a float number
+     *                  (2 minutes, 30 seconds = 2.5 minutes)
+     *  - <b>%F</b> - Total minutes as a decimal number
+     *                  (1 hour, 2 minutes, 40 seconds = 62 minutes)
+     *  - <b>%g</b> - Total seconds as a decimal number
+     *                  (2 minutes, 30 seconds = 90 seconds)
+     *  - <b>%h</b> - Hours as decimal number (0 to 23)
+     *  - <b>%H</b> - Hours as decimal number (00 to 23)
+     *  - <b>%i</b> - Hours as decimal number on 12-hour clock
+     *                  (1 to 12)
+     *  - <b>%I</b> - Hours as decimal number on 12-hour clock
+     *                  (01 to 12)
+     *  - <b>%m</b> - Minutes as a decimal number (0 to 59)
+     *  - <b>%M</b> - Minutes as a decimal number (00 to 59)
+     *  - <b>%n</b> - Newline character (\n)
+     *  - <b>%p</b> - Either 'am' or 'pm' depending on the time
+     *  - <b>%P</b> - Either 'AM' or 'PM' depending on the time
+     *  - <b>%r</b> - Time in am/pm notation, equivalent to '<b>%I:%M:%S %p</b>'
+     *  - <b>%R</b> - Time in 24-hour notation, equivalent to '<b>%H:%M</b>'
+     *  - <b>%s</b> - Seconds as a decimal number (0 to 59)
+     *  - <b>%S</b> - Seconds as a decimal number (00 to 59)
+     *  - <b>%t</b> - Tab character (\t)
+     *  - <b>%T</b> - Current time equivalent, equivalent to '<b>%H:%M:%S</b>'
+     *  - <b>%%</b> - Literal '%'
      *
      * @param string $format the format string for returned time span
      *
@@ -784,10 +823,12 @@ class Date_Span
     // {{{ toSeconds()
 
     /**
-     * Convert time span to seconds
+     * Converts time span to seconds
      *
      * @return   int        time span as an integer number of seconds
      * @access   public
+     * @see      Date_Span::toDays(), Date_Span::toHours(),
+     *            Date_Span::toMinutes()
      */
     function toSeconds()
     {
@@ -800,10 +841,12 @@ class Date_Span
     // {{{ toMinutes()
 
     /**
-     * Convert time span to minutes
+     * Converts time span to minutes
      *
      * @return   float      time span as a decimal number of minutes
      * @access   public
+     * @see      Date_Span::toDays(), Date_Span::toHours(),
+     *            Date_Span::toSeconds()
      */
     function toMinutes()
     {
@@ -816,10 +859,12 @@ class Date_Span
     // {{{ toHours()
 
     /**
-     * Convert time span to hours
+     * Converts time span to hours
      *
      * @return   float      time span as a decimal number of hours
      * @access   public
+     * @see      Date_Span::toDays(), Date_Span::toMinutes(),
+     *            Date_Span::toSeconds()
      */
     function toHours()
     {
@@ -832,10 +877,12 @@ class Date_Span
     // {{{ toDays()
 
     /**
-     * Convert time span to days
+     * Converts time span to days
      *
      * @return   float      time span as a decimal number of days
      * @access   public
+     * @see      Date_Span::toHours(), Date_Span::toMinutes(),
+     *            Date_Span::toSeconds()
      */
     function toDays()
     {
@@ -854,6 +901,7 @@ class Date_Span
      *
      * @return   void
      * @access   public
+     * @see      Date_Span::subtract()
      */
     function add($time)
     {
@@ -875,6 +923,7 @@ class Date_Span
      *
      * @return   void
      * @access   public
+     * @see      Date_Span::add()
      */
     function subtract($time)
     {
@@ -897,6 +946,8 @@ class Date_Span
      *
      * @return   bool       true if the time spans are equal
      * @access   public
+     * @see      Date_Span::greater(), Date_Span::greaterEqual()
+     *            Date_Span::lower(), Date_Span::lowerEqual()
      */
     function equal($time)
     {
@@ -914,6 +965,8 @@ class Date_Span
      *
      * @return   bool       true if this time span is greater or equal than $time
      * @access   public
+     * @see      Date_Span::greater(), Date_Span::lower(),
+     *            Date_Span::lowerEqual(), Date_Span::equal()
      */
     function greaterEqual($time)
     {
@@ -931,6 +984,8 @@ class Date_Span
      *
      * @return   bool       true if this time span is lower or equal than $time
      * @access   public
+     * @see      Date_Span::lower(), Date_Span::greater(),
+     *            Date_Span::greaterEqual(), Date_Span::equal()
      */
     function lowerEqual($time)
     {
@@ -948,6 +1003,8 @@ class Date_Span
      *
      * @return   bool       true if this time span is greater than $time
      * @access   public
+     * @see      Date_Span::greaterEqual(), Date_Span::lower(),
+     *            Date_Span::lowerEqual(), Date_Span::equal()
      */
     function greater($time)
     {
@@ -965,6 +1022,8 @@ class Date_Span
      *
      * @return   bool       true if this time span is lower than $time
      * @access   public
+     * @see      Date_Span::lowerEqual(), Date_Span::greater(),
+     *            Date_Span::greaterEqual(), Date_Span::equal()
      */
     function lower($time)
     {
@@ -1019,13 +1078,14 @@ class Date_Span
     // {{{ setDefaultInputFormat()
 
     /**
-     * Set the default input format
+     * Sets the default input format
      *
      * @param mixed $format new default input format
      *
      * @return   mixed      previous default input format
      * @access   public
      * @static
+     * @see      Date_Span::getDefaultInputFormat(), Date_Span::setDefaultFormat()
      */
     function setDefaultInputFormat($format)
     {
@@ -1039,11 +1099,12 @@ class Date_Span
     // {{{ getDefaultInputFormat()
 
     /**
-     * Get the default input format
+     * Returns the default input format
      *
      * @return   mixed      default input format
      * @access   public
      * @static
+     * @see      Date_Span::setDefaultInputFormat(), Date_Span::getDefaultFormat()
      */
     function getDefaultInputFormat()
     {
@@ -1055,13 +1116,14 @@ class Date_Span
     // {{{ setDefaultFormat()
 
     /**
-     * Set the default format
+     * Sets the default format
      *
      * @param mixed $format new default format
      *
      * @return   mixed      previous default format
      * @access   public
      * @static
+     * @see      Date_Span::getDefaultFormat(), Date_Span::setDefaultInputFormat()
      */
     function setDefaultFormat($format)
     {
@@ -1075,11 +1137,12 @@ class Date_Span
     // {{{ getDefaultFormat()
 
     /**
-     * Get the default format
+     * Returns the default format
      *
      * @return   mixed      default format
      * @access   public
      * @static
+     * @see      Date_Span::setDefaultFormat(), Date_Span::getDefaultInputFormat()
      */
     function getDefaultFormat()
     {

@@ -16,21 +16,21 @@ class HelloNavigation extends Navigation{
     
   
     public function hello(){
-        $this->application->setMainTemplate("hello", "hello", $this->application->lang['text_helloworld']);
-        $this->application->setHtmlVariableTemplate("HELLO", $this->application->lang['text_helloworld']);
+        $this->application->setMainTemplate("hello", "hello", $this->lang('text_helloworld'));
+        $this->application->setHtmlVariableTemplate("HELLO", $this->lang('text_helloworld'));
         $this->application->render();
     }
     
     public function helloJson(){
-        $this->application->setMainTemplate("hello", "hello", "", "json");
-        $this->application->setJsonVariableTemplate("HELLO", $this->application->lang['text_helloworld']);
-        $this->application->render();
+        $json = new ObjectJson();
+        $json->myhello = $this->lang('text_helloworld');
+        $this->application->renderToJson($json);
     }
     
     public function helloPrivate(){
         $this->application->setMainTemplate("hello", "helloprivate", "", "json");
-        $this->application->setJsonVariableTemplate("USER", $this->application->user->getName());
-        $this->application->setJsonVariableTemplate("HELLO", $this->application->lang['text_helloworld']);
+        $this->application->setHtmlVariableTemplate("USER", $this->application->user->getName());
+        $this->application->setHtmlVariableTemplate("HELLO", $this->lang('text_helloworld'));
         $this->application->render();
     }
     
