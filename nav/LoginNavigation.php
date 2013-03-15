@@ -9,7 +9,7 @@
  * @license
  * @framework  2.1
  */
-require_once 'data/SystemUserData.php';
+require_once 'data/AtomManager.php';
 
 class LoginNavigation extends Navigation {
 
@@ -25,15 +25,16 @@ class LoginNavigation extends Navigation {
      * Formulario de Login y Registro
      */
     public function login() {
-        $this->application->setMainTemplate("login", "login", $this->application->lang['title_login']);
+        $this->application->setMainTemplate("login", "login", $this->lang('title_login'));
         $loginToken = $this->application->createRandomString(64);
         $this->application->setSessionParam("loginToken", $loginToken);
         // Formulario de ingreso
         $params = array(
             new SystemUser(),
-            new Param("loginToken", $loginToken),
+            new Param("loginToken", $loginToken)
         );
         $this->application->setFormTemplate("login", $params, "login", "loginSubmit", true);
+        //finito
         $this->application->render();
     }
 
@@ -41,39 +42,49 @@ class LoginNavigation extends Navigation {
      * Valida el formulario de login
      */
     public function loginSubmit() {
-        //Main Template
-        $this->application->setMainTemplate("login", "login");
+        //data
+        $data = new AtomManager($this->application->data);
+        $data->data->begin();
         //Valida el Token de Session
         $formToken = $this->application->getFormParam("loginToken", "string64");
         $loginToken = $this->application->getSessionParam("loginToken", "string64");
-        if($formToken != $loginToken) {
-            $this->application->error($this->application->lang['error_token_notvalid']);
+        if ($formToken != $loginToken) {
+            $data->data->rollback();
+            $this->application->error($this->lang('error_token_notvalid'));
         }
         //data del systemuser
-        $data = new SystemUserData($this->application->data);
-        $systemUser = new SystemUser();
+        $systemUser = $this->application->getFormObject(new SystemUser());
         //Valida el nombre de uusario o emial y la contraseña
-        $systemUser->setUsername($this->application->getFormParam("SystemUser_username", "string16"));
-        if ($systemUser->getUsername() === null) {
-            $this->application->error($this->application->lang['error_usernamenotvalid']);
+        if ($systemUser->getEmail() === null) {
+            $data->data->rollback();
+            $this->application->error($this->lang('error_usernamenotvalid'));
         }
-        $systemUser->setPassword($this->application->getFormParam("SystemUser_password", "string16"));
         if ($systemUser->getPassword() === null) {
-            $this->application->error($this->application->lang['error_passwordnotvalid']);
+            $data->data->rollback();
+            $this->application->error($this->lang('error_passwordnotvalid'));
         }
         //chequea que esten los datos correctos
-        $systemUser = $data->getSystemUser($systemUser);
-        if ($systemUser->getId() === null) {
-            $this->application->error($this->application->lang['error_login']);
+        $dbSystemUser = new SystemUser();
+        $dbSystemUser->setEmail($systemUser->getEmail());
+        $dbSystemUser = $data->getRecord($dbSystemUser);
+        if (!isset($dbSystemUser)) {
+            $data->data->rollback();
+            $this->application->error($this->lang('error_login'));
+        }
+        if (crypt($systemUser->getPassword(), $dbSystemUser->getPassword()) != $dbSystemUser->getPassword()) {
+            $data->data->rollback();
+            $this->application->error($this->lang('error_login'));
         }
         //Ingresa el Token de session
-        $systemUser->setToken($this->application->createRandomString(64));
-        if (!$data->updateSystemUser($systemUser)) {
-            $this->application->error($this->application->lang['error_token'] . " " . $data->error);
+        $dbSystemUser->setToken($this->application->createRandomString(64));
+        if (!$data->updateRecord($dbSystemUser)) {
+            $data->data->rollback();
+            $this->application->error($this->lang('error_server_error') . " " . $data->error);
         }
-        //Inicia la session
-        $rememberme = $this->application->getFormParam("rememberme", "int");
-        $this->application->loginSet($systemUser);
+        $this->application->loginSet($dbSystemUser);
+        
+        //finito
+        $data->data->commit();
         //Si se valida se retorna exito
         $this->application->secureRedirect("private", "hello");
     }

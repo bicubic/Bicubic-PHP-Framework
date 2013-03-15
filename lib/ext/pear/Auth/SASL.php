@@ -43,7 +43,7 @@
 * @package Auth_SASL
 */
 
-require_once('PEAR.php');
+require_once('lib/ext/pear/PEAR.php');
 
 class Auth_SASL
 {
