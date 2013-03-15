@@ -12,6 +12,7 @@ class PostgreSQLData extends SQLData {
 
     //Connection object
     private $connection;
+    private $debug = false;
 
     //Constructor
     //@param $config the base configuration
@@ -44,13 +45,16 @@ class PostgreSQLData extends SQLData {
     //@param $query a query to execute
     //@returns true if writting is performed or false if not
     public function performWrite($query, $params = array()) {
+        if ($this->debug) {
+            echo $query;
+            var_dump($params);
+        }
         if (count($params) > 1) {
-            if(pg_query_params($this->connection, $query, $params) === FALSE) {
+            if (pg_query_params($this->connection, $query, $params) === FALSE) {
                 return false;
             }
-        }
-        else {
-            if(pg_query($this->connection, $query) === FALSE) {
+        } else {
+            if (pg_query($this->connection, $query) === FALSE) {
                 return false;
             }
         }
@@ -61,7 +65,11 @@ class PostgreSQLData extends SQLData {
     //@param $query a query to execute
     //@returns the result object
     public function performRead($query) {
-        $result = pg_query($this->connection, $query) or die(pg_last_error($this->connection));
+        if ($this->debug) {
+            $result = pg_query($this->connection, $query) or die(pg_last_error($this->connection));
+        } else {
+            $result = pg_query($this->connection, $query) or die(pg_last_error("En estos momentos estamos colapsados"));
+        }
         return $result;
     }
 
@@ -82,10 +90,23 @@ class PostgreSQLData extends SQLData {
     }
 
     public function getError() {
-        return pg_last_error($this->connection);
+        $error = pg_last_error($this->connection);
+        if ($this->localError) {
+            $error .= " " . $this->localError;
+        }
+        return $error;
     }
 
     public function escapeChars($value) {
+        if ($value === false) {
+            $value = 'f';
+        }
+        if ($value === true) {
+            $value = 't';
+        }
+        if ($this->debug) {
+            var_dump($value);
+        }
         return pg_escape_string($this->connection, $value);
     }
 
@@ -97,7 +118,7 @@ class PostgreSQLData extends SQLData {
         $query = "BEGIN";
         $result = $this->performRead("SELECT currval('" . strtolower($table) . "_id_seq') as lastid");
         $row = $this->readNext($result);
-        if($row !== false) {
+        if ($row !== false) {
             return $row['lastid'];
         }
         return -1;

@@ -35,6 +35,28 @@ class SystemUser implements DataObject {
             "token"
         );
     }
+    
+    /**
+     * Tipos de las Propiedades de BD
+     * @return array de los tipos de las propiedades a serializar en la BD
+     */
+    public function __getTypes() {
+        return array(
+            "long",
+            "string256",
+            "string256",
+            "string1024",
+            "string256",
+            "string1024",
+        );
+    }
+    
+    public function __isComplete() {
+        if(!isset($this->email)) {
+            return false;
+        }
+        return true;
+    }
 
     /**
      * Setea el valor de una propiedad

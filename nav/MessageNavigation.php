@@ -23,10 +23,10 @@ class MessageNavigation extends Navigation{
      */
     public function message() {
         //Global information
-        $this->application->setMainTemplate("message", "message", $this->application->lang['object_message'], "message");
+        $this->application->setMainTemplate("message", "message", $this->lang('object_message'), "message");
         $messageParam = $this->application->getSessionParam("message");
         if (!isset($messageParam)) {
-            $this->application->error($this->application->lang['word_message'] . " " . $this->application->lang['error_notvalid']);
+            $this->application->error($this->lang('word_message') . " " . $this->lang('error_notvalid'));
         }
         foreach($messageParam->messages as $text) {
             $this->application->setHTMLArrayTemplate(array('MESSAGE-TEXT' => $text));
