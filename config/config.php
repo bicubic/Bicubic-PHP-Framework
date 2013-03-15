@@ -11,29 +11,29 @@
  */
 $config = array();
 //Server values
-$config['server_temp_folder'] = "/tmp/";
-$config['server_logg_file'] = "/tmp/log_";
-$config['server_app_folder'] = "/srv/http/path/";
+$config['server_temp_folder'] = "";
+$config['server_logg_file'] = "";
+$config['server_app_folder'] = "";
 //Web values
-$config['web_folder'] = "http://192.168.100.100/path/";
-$config['web_url'] = "http://192.168.100.100/path/index.php";
-$config['web_secure_url'] = "http://192.168.100.100/path/index.php";
-$config['storage_folder'] = "http://storage.mydomain/";   
-$config['web_contact_email'] = "contact@mmydomain";
-$config['web_contact_name'] = "MyName";
+$config['web_folder'] = "";
+$config['web_url'] = "";
+$config['web_secure_url'] = "";
+$config['storage_folder'] = "";   
+$config['web_contact_email'] = "";
+$config['web_contact_name'] = "";
 $config['web_time_out'] = 360000;
 $config['web_page_items'] = 100;
 //Data Base values
-$config['database_host'] = "localhost";
-$config['database_database'] = "mydb"; 
-$config['database_user'] = "myuser";
-$config['database_password'] = "mypass";
+$config['database_host'] = "";
+$config['database_database'] = ""; 
+$config['database_user'] = "";
+$config['database_password'] = "";
 //Email values
-$config['email_host'] = "ssl://smtp.gmail.com";
+$config['email_host'] = "";
 $config['email_port'] = 465;
 $config['email_auth'] = true;
-$config['email_user'] = "mygmailaccount";
-$config['email_password'] = "mygmailaccountpass";
+$config['email_user'] = "";
+$config['email_password'] = "";
 //System
 $config['system'] = "linux";
 //URL params value
@@ -61,8 +61,8 @@ $config['foursquareSecret'] = "";
 $config['instagramKey'] = "";
 $config['instagramSecret'] = "";
 //google storage
-$config['gsutil'] = "gsutilpath";
-$config['gsbucket'] = "gs://gsutildomain/";
+$config['gsutil'] = "";
+$config['gsbucket'] = "";
 $config['gsimages'] = "images/";
 $config['gsuploads'] = "uploads/";
 $config['gswines'] = "wines/";
