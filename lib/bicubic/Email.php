@@ -8,12 +8,13 @@
  * @license    MIT
  * @framework  2.2
  */
-abstract class Email {
+abstract class BicubicEmail {
 
     public $to;
     public $from;
     public $fromName;
     public $subject;
+    public $error;
 
     function __construct($to, $from, $fromName, $subject) {
         $this->to = $to;
@@ -39,10 +40,12 @@ abstract class Email {
         $params["username"] = $username;
         $params["password"] = $password;
         $mail_object = & Mail::factory("smtp", $params);
-        if (!$mail_object->send($this->to, $headers, $body)) {
-            return false;
+        $result = $mail_object->send($this->to, $headers, $body);
+        if ($result === true) {
+            return true;
         }
-        return true;
+        $this->error = $result;
+        return false;
     }
 
     function sendPlain($host, $port, $auth, $username, $password) {
