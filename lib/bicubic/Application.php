@@ -8,8 +8,6 @@
  * @license    MIT
  * @framework  2.2
  */
-
-
 class Application {
 
     public $user;
@@ -17,6 +15,8 @@ class Application {
     public $config;
     //language data
     public $lang;
+    //string del lenguaje
+    public $landString;
     //data acces of the controlling $application
     public $data;
     //name of the controlling $application
@@ -61,11 +61,25 @@ class Application {
     public function getSecureAppUrl($app, $navigation, $params = null) {
         $link = $this->config['web_secure_url'] . "?" . $this->config['param_app'] . "=" . $app;
         $link .= "&" . $this->config['param_navigation'] . "=" . $navigation;
+        $link .= "&" . $this->config['param_lang'] . "=" . $this->config["lang"];
         if ($params) {
             foreach ($params as $param) {
                 $link .= "&" . $param->name . "=" . $param->value;
             }
         }
+        return $link;
+    }
+    
+    /**
+     * Construye una nueva aplicacion
+     * @param string $config <p>El archivo de configuracion</p>
+     * @param string $lang <p>El archivo de lenguaje</p>
+     * @param string $data <p>El motor de base de datos</p>
+     * @param string $name <p>El nombre de la aplicacion</p>
+     * @return una nueva aplicacion
+     */
+    public function getSecureAppFlatUrl($app, $navigation, $id) {
+        $link = $this->config['web_folder'] . "$app/$navigation/$id";
         return $link;
     }
 
@@ -80,6 +94,7 @@ class Application {
     public function getAppUrl($app, $navigation, $params = null) {
         $link = $this->config['web_url'] . "?" . $this->config['param_app'] . "=" . $app;
         $link .= "&" . $this->config['param_navigation'] . "=" . $navigation;
+        $link .= "&" . $this->config['param_lang'] . "=" . $this->config["lang"];
         if ($params) {
             foreach ($params as $param) {
                 $link .= "&" . $param->name . "=" . $param->value;
@@ -127,13 +142,49 @@ class Application {
                 $this->error($this->lang['error_notvalid'] . " : " . (array_key_exists($name, $this->lang) ? $this->lang[$name] : $name));
             }
             return $value;
+        } else if (isset($_FILES[$name])) {
+            $value = $_FILES[$name]['name'];
+            $value = $this->filter($value, $type);
+            if ($force && !isset($value)) {
+                $this->error($this->lang['error_notvalid'] . " : " . (array_key_exists($name, $this->lang) ? $this->lang[$name] : $name));
+            }
+            return $value;
         }
         if ($force) {
             $this->error($this->lang['error_notvalid'] . " : " . (array_key_exists($name, $this->lang) ? $this->lang[$name] : $name));
         }
         return null;
     }
-    
+
+    /**
+     * Obtiene Un objeto de variables provenientes de un formulario
+     * @return
+     */
+    public function getFormObject(DataObject $object, $force = true) {
+        $objectName = get_class($object);
+        $properties = $object->__getProperties();
+        $types = $object->__getTypes();
+        $objectFormName = strtoupper($objectName);
+        $i = 0;
+        foreach ($properties as $property) {
+            $obj = strpos($property, "_object");
+            $arr = strpos($property, "_array");
+            if (!$arr) {
+                if ($obj <= 0) {
+                    $fieldname = $property;
+                    $paramName = strtoupper($fieldname);
+                    $cammelName = strtoupper(substr($fieldname, 0, 1)) . substr($fieldname, 1);
+                    $setter = "set$cammelName";
+                    $object->$setter($this->getFormParam("$objectName" . "_" . "$fieldname", $types[$i], false));
+                }
+            }
+            $i++;
+        }
+        if ($force && !$object->__isComplete()) {
+            $this->error($this->lang['error_notcomplete']);
+        }
+        return $object;
+    }
 
     public function getJsonParam($force = false) {
         $value = file_get_contents("php://input");
@@ -157,7 +208,8 @@ class Application {
     public function getSessionParam($name, $type="flat") {
         if (isset($_SESSION[$name])) {
             $value = $_SESSION[$name];
-            return $this->filter($value, $type);
+//            return $this->filter($value, $type);
+            return $value;
         }
         return null;
     }
@@ -195,6 +247,24 @@ class Application {
     public function filter($value, $type) {
         switch ($type) {
             case "int" : {
+                    if ($value !== "" && $value >= 0) {
+                        $vals = array("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "-", "+", ".", ",");
+                        $trimed = str_replace($vals, "", $value);
+                        if (is_numeric($value) && $trimed === "") {
+                            $dotpos = strpos($value, ".");
+                            if ($dotpos !== FALSE) {
+                                $value = substr($value, 0, $dotpos);
+                            }
+                            $dotpos = strpos($value, ",");
+                            if ($dotpos !== FALSE) {
+                                $value = substr($value, 0, $dotpos);
+                            }
+                            return $value;
+                        }
+                    }
+                    break;
+                }
+            case "long" : {
                     if ($value !== "" && $value >= 0) {
                         $vals = array("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "-", "+");
                         $trimed = str_replace($vals, "", $value);
@@ -239,99 +309,309 @@ class Application {
                 }
             case "string" : {
                     if ($value !== "") {
-                        if (!get_magic_quotes_gpc()) {
-                            if (isset($this->data)) {
-                                $value = $this->data->escapeChars($value);
-                            } else {
-                                $value = addslashes($value);
-                            }
+//                        $value = str_replace("'", " ", $value);
+                        $value = trim($value);
+                        if(true) {
+//                            if (isset($this->data)) {
+//                                $value = $this->data->escapeChars($value);
+//                            } else {
+//                                $value = addslashes($value);
+//                            }
                         }
                         return substr($value, 0, 1024);
                     }
                     break;
                 }
+            case "string2048" : {
+                    if ($value !== "") {
+//                        $value = str_replace("'", " ", $value);
+                        $value = trim($value);
+//                        if(true) {
+//                            if (isset($this->data)) {
+//                                $value = $this->data->escapeChars($value);
+//                            } else {
+//                                $value = addslashes($value);
+//                            }
+//                        }
+                        return (substr($value, 0, 2048));
+                    }
+                    break;
+                }
             case "string1024" : {
                     if ($value !== "") {
-                        if (!get_magic_quotes_gpc()) {
-                            if (isset($this->data)) {
-                                $value = $this->data->escapeChars($value);
-                            } else {
-                                $value = addslashes($value);
-                            }
-                        }
+//                        $value = str_replace("'", " ", $value);
+                        $value = trim($value);
+//                        if(true) {
+//                            if (isset($this->data)) {
+//                                $value = $this->data->escapeChars($value);
+//                            } else {
+//                                $value = addslashes($value);
+//                            }
+//                        }
                         return (substr($value, 0, 1024));
+                    }
+                    break;
+                }
+            case "string256" : {
+                    if ($value !== "") {
+//                        $value = str_replace("'", " ", $value);
+                        $value = trim($value);
+//                        if(true) {
+//                            if (isset($this->data)) {
+//                                $value = $this->data->escapeChars($value);
+//                            } else {
+//                                $value = addslashes($value);
+//                            }
+//                        }
+                        return (substr($value, 0, 256));
+                    }
+                    break;
+                }
+            case "string128" : {
+                    if ($value !== "") {
+//                        $value = str_replace("'", " ", $value);
+                        $value = trim($value);
+//                        if(true) {
+//                            if (isset($this->data)) {
+//                                $value = $this->data->escapeChars($value);
+//                            } else {
+//                                $value = addslashes($value);
+//                            }
+//                        }
+                        return (substr($value, 0, 128));
                     }
                     break;
                 }
             case "string64" : {
                     if ($value !== "") {
-                        if (!get_magic_quotes_gpc()) {
-                            if (isset($this->data)) {
-                                $value = $this->data->escapeChars($value);
-                            } else {
-                                $value = addslashes($value);
-                            }
-                        }
+//                        $value = str_replace("'", " ", $value);
+                        $value = trim($value);
+//                        if(true) {
+//                            if (isset($this->data)) {
+//                                $value = $this->data->escapeChars($value);
+//                            } else {
+//                                $value = addslashes($value);
+//                            }
+//                        }
                         return (substr($value, 0, 64));
                     }
                     break;
                 }
             case "string32" : {
                     if ($value !== "") {
-                        if (!get_magic_quotes_gpc()) {
-                            if (isset($this->data)) {
-                                $value = $this->data->escapeChars($value);
-                            } else {
-                                $value = addslashes($value);
-                            }
-                        }
+//                        $value = str_replace("'", " ", $value);
+                        $value = trim($value);
+//                        if(true) {
+//                            if (isset($this->data)) {
+//                                $value = $this->data->escapeChars($value);
+//                            } else {
+//                                $value = addslashes($value);
+//                            }
+//                        }
                         return (substr($value, 0, 32));
+                    }
+                    break;
+                }
+            case "string24" : {
+                    if ($value !== "") {
+//                        $value = str_replace("'", " ", $value);
+                        $value = trim($value);
+//                        if(true) {
+//                            if (isset($this->data)) {
+//                                $value = $this->data->escapeChars($value);
+//                            } else {
+//                                $value = addslashes($value);
+//                            }
+//                        }
+                        return (substr($value, 0, 24));
                     }
                     break;
                 }
             case "string16" : {
                     if ($value !== "") {
-                        if (!get_magic_quotes_gpc()) {
-                            if (isset($this->data)) {
-                                $value = $this->data->escapeChars($value);
-                            } else {
-                                $value = addslashes($value);
-                            }
-                        }
+//                        $value = str_replace("'", " ", $value);
+                        $value = trim($value);
+//                        if(true) {
+//                            if (isset($this->data)) {
+//                                $value = $this->data->escapeChars($value);
+//                            } else {
+//                                $value = addslashes($value);
+//                            }
+//                        }
                         return (substr($value, 0, 16));
+                    }
+                    break;
+                }
+            case "string8" : {
+                    if ($value !== "") {
+//                        $value = str_replace("'", " ", $value);
+                        $value = trim($value);
+//                        if(true) {
+//                            if (isset($this->data)) {
+//                                $value = $this->data->escapeChars($value);
+//                            } else {
+//                                $value = addslashes($value);
+//                            }
+//                        }
+                        return substr($value, 0, 8);
+                    }
+                    break;
+                }
+            case "string4" : {
+                    if ($value !== "") {
+//                        $value = str_replace("'", " ", $value);
+                        $value = trim($value);
+//                        if(true) {
+//                            if (isset($this->data)) {
+//                                $value = $this->data->escapeChars($value);
+//                            } else {
+//                                $value = addslashes($value);
+//                            }
+//                        }
+                        return substr($value, 0, 4);
+                    }
+                    break;
+                }
+            case "string2" : {
+                    if ($value !== "") {
+//                        $value = str_replace("'", " ", $value);
+                        $value = trim($value);
+//                        if(true) {
+//                            if (isset($this->data)) {
+//                                $value = $this->data->escapeChars($value);
+//                            } else {
+//                                $value = addslashes($value);
+//                            }
+//                        }
+                        return substr($value, 0, 2);
+                    }
+                    break;
+                }
+            case "string1" : {
+                    if ($value !== "") {
+//                        $value = str_replace("'", " ", $value);
+                        $value = trim($value);
+//                        if(true) {
+//                            if (isset($this->data)) {
+//                                $value = $this->data->escapeChars($value);
+//                            } else {
+//                                $value = addslashes($value);
+//                            }
+//                        }
+                        return substr($value, 0, 1);
+                    }
+                    break;
+                }
+            case "string2048excel" : {
+                    $value = strval($value);
+                    if ($value !== "") {
+//                        $value = str_replace("'", " ", $value);
+                        $value = trim($value);
+                        if (!$this->is_utf8($value)) {
+                            $value = utf8_encode($value);
+                        }
+//                        if(true) {
+//                            if (isset($this->data)) {
+//                                $value = $this->data->escapeChars($value);
+//                            } else {
+//                                $value = addslashes($value);
+//                            }
+//                        }
+                        return (substr($value, 0, 2048));
                     }
                     break;
                 }
             case "string1024excel" : {
                     $value = strval($value);
                     if ($value !== "") {
+//                        $value = str_replace("'", " ", $value);
+                        $value = trim($value);
                         if (!$this->is_utf8($value)) {
                             $value = utf8_encode($value);
                         }
-                        if (!get_magic_quotes_gpc()) {
-                            if (isset($this->data)) {
-                                $value = $this->data->escapeChars($value);
-                            } else {
-                                $value = addslashes($value);
-                            }
-                        }
+//                        if(true) {
+//                            if (isset($this->data)) {
+//                                $value = $this->data->escapeChars($value);
+//                            } else {
+//                                $value = addslashes($value);
+//                            }
+//                        }
                         return (substr($value, 0, 1024));
+                    }
+                    break;
+                }
+            case "string512excel" : {
+                    $value = strval($value);
+                    if ($value !== "") {
+//                        $value = str_replace("'", " ", $value);
+                        $value = trim($value);
+                        if (!$this->is_utf8($value)) {
+                            $value = utf8_encode($value);
+                        }
+//                        if(true) {
+//                            if (isset($this->data)) {
+//                                $value = $this->data->escapeChars($value);
+//                            } else {
+//                                $value = addslashes($value);
+//                            }
+//                        }
+                        return (substr($value, 0, 512));
+                    }
+                    break;
+                }
+            case "string256excel" : {
+                    $value = strval($value);
+                    if ($value !== "") {
+//                        $value = sstr_replace("'", " ", $value);
+                        $value = trim($value);
+                        if (!$this->is_utf8($value)) {
+                            $value = utf8_encode($value);
+                        }
+//                        if(true) {
+//                            if (isset($this->data)) {
+//                                $value = $this->data->escapeChars($value);
+//                            } else {
+//                                $value = addslashes($value);
+//                            }
+//                        }
+                        return (substr($value, 0, 256));
+                    }
+                    break;
+                }
+            case "string128excel" : {
+                    $value = strval($value);
+                    if ($value !== "") {
+//                        $value = str_replace("'", " ", $value);
+                        $value = trim($value);
+                        if (!$this->is_utf8($value)) {
+                            $value = utf8_encode($value);
+                        }
+//                        if(true) {
+//                            if (isset($this->data)) {
+//                                $value = $this->data->escapeChars($value);
+//                            } else {
+//                                $value = addslashes($value);
+//                            }
+//                        }
+                        return (substr($value, 0, 128));
                     }
                     break;
                 }
             case "string64excel" : {
                     $value = strval($value);
                     if ($value !== "") {
+//                        $value = str_replace("'", " ", $value);
+                        $value = trim($value);
                         if (!$this->is_utf8($value)) {
                             $value = utf8_encode($value);
                         }
-                        if (!get_magic_quotes_gpc()) {
-                            if (isset($this->data)) {
-                                $value = $this->data->escapeChars($value);
-                            } else {
-                                $value = addslashes($value);
-                            }
-                        }
+//                        if(true) {
+//                            if (isset($this->data)) {
+//                                $value = $this->data->escapeChars($value);
+//                            } else {
+//                                $value = addslashes($value);
+//                            }
+//                        }
                         return (substr($value, 0, 64));
                     }
                     break;
@@ -339,34 +619,133 @@ class Application {
             case "string32excel" : {
                     $value = strval($value);
                     if ($value !== "") {
+//                        $value = str_replace("'", " ", $value);
+                        $value = trim($value);
                         if (!$this->is_utf8($value)) {
                             $value = utf8_encode($value);
                         }
-                        if (!get_magic_quotes_gpc()) {
-                            if (isset($this->data)) {
-                                $value = $this->data->escapeChars($value);
-                            } else {
-                                $value = addslashes($value);
-                            }
-                        }
+//                        if(true) {
+//                            if (isset($this->data)) {
+//                                $value = $this->data->escapeChars($value);
+//                            } else {
+//                                $value = addslashes($value);
+//                            }
+//                        }
                         return (substr($value, 0, 32));
+                    }
+                    break;
+                }
+            case "string24excel" : {
+                    $value = strval($value);
+                    if ($value !== "") {
+//                        $value = str_replace("'", " ", $value);
+                        $value = trim($value);
+                        if (!$this->is_utf8($value)) {
+                            $value = utf8_encode($value);
+                        }
+//                        if(true) {
+//                            if (isset($this->data)) {
+//                                $value = $this->data->escapeChars($value);
+//                            } else {
+//                                $value = addslashes($value);
+//                            }
+//                        }
+                        return (substr($value, 0, 24));
                     }
                     break;
                 }
             case "string16excel" : {
                     $value = strval($value);
                     if ($value !== "") {
+//                        $value = str_replace("'", " ", $value);
+                        $value = trim($value);
                         if (!$this->is_utf8($value)) {
                             $value = utf8_encode($value);
                         }
-                        if (!get_magic_quotes_gpc()) {
-                            if (isset($this->data)) {
-                                $value = $this->data->escapeChars($value);
-                            } else {
-                                $value = addslashes($value);
-                            }
-                        }
+//                        if(true) {
+//                            if (isset($this->data)) {
+//                                $value = $this->data->escapeChars($value);
+//                            } else {
+//                                $value = addslashes($value);
+//                            }
+//                        }
                         return (substr($value, 0, 16));
+                    }
+                    break;
+                }
+            case "string8excel" : {
+                    $value = strval($value);
+                    if ($value !== "") {
+//                        $value = str_replace("'", " ", $value);
+                        $value = trim($value);
+                        if (!$this->is_utf8($value)) {
+                            $value = utf8_encode($value);
+                        }
+//                        if(true) {
+//                            if (isset($this->data)) {
+//                                $value = $this->data->escapeChars($value);
+//                            } else {
+//                                $value = addslashes($value);
+//                            }
+//                        }
+                        return (substr($value, 0, 8));
+                    }
+                    break;
+                }
+            case "string4excel" : {
+                    $value = strval($value);
+                    if ($value !== "") {
+//                        $value = str_replace("'", " ", $value);
+                        $value = trim($value);
+                        if (!$this->is_utf8($value)) {
+                            $value = utf8_encode($value);
+                        }
+//                        if(true) {
+//                            if (isset($this->data)) {
+//                                $value = $this->data->escapeChars($value);
+//                            } else {
+//                                $value = addslashes($value);
+//                            }
+//                        }
+                        return (substr($value, 0, 4));
+                    }
+                    break;
+                }
+            case "string2excel" : {
+                    $value = strval($value);
+                    if ($value !== "") {
+//                        $value = str_replace("'", " ", $value);
+                        $value = trim($value);
+                        if (!$this->is_utf8($value)) {
+                            $value = utf8_encode($value);
+                        }
+//                        if(true) {
+//                            if (isset($this->data)) {
+//                                $value = $this->data->escapeChars($value);
+//                            } else {
+//                                $value = addslashes($value);
+//                            }
+//                        }
+                        return (substr($value, 0, 2));
+                    }
+                    break;
+                }
+            case "string1excel" : {
+                    $value = strval($value);
+                    if ($value !== "") {
+//                        $value = str_replace("'", " ", $value);
+                        $value = trim($value);
+                        if (!$this->is_utf8($value)) {
+                            $value = utf8_encode($value);
+                        }
+//                        if(true) {
+//                            if (isset($this->data)) {
+//                                $value = $this->data->escapeChars($value);
+//                            } else {
+//                                $value = addslashes($value);
+//                            }
+//                        }
+                        return (substr($value, 0, 1));
                     }
                     break;
                 }
@@ -403,13 +782,17 @@ class Application {
                         if (preg_match("/^[0-9\-]*$/", $value)) {
                             $numbers = explode("-", $value);
                             if (count($numbers) == 3) {
-                                return strtotime("$numbers[1]/$numbers[0]/$numbers[2]");
+                                $time = strtotime("$numbers[1]/$numbers[2]/$numbers[0]");
+                                if ($time)
+                                    return $time;
                             }
                         }
                         if (preg_match("/^[0-9\/]*$/", $value)) {
                             $numbers = explode("/", $value);
                             if (count($numbers) == 3) {
-                                return strtotime("$numbers[1]/$numbers[0]/$numbers[2]");
+                                $time = strtotime("$numbers[1]/$numbers[2]/$numbers[0]");
+                                if ($time)
+                                    return $time;
                             }
                         }
                     }
@@ -417,16 +800,19 @@ class Application {
                 }
             case "boolean" : {
                     if ($value !== "") {
-                        $vals = array("0", "1");
+                        $vals = array("f", "t", "0", "1");
                         $trimed = str_replace($vals, "", $value);
-                        if (strlen($value) == 1 && empty($trimed)) {
-                            return $value;
+                        if (empty($trimed)) {
+                            return substr($value, 0, 1);
                         }
                     }
                     break;
                 }
             case "int-array" : {
                     $correct = true;
+                    if (!is_array($value)) {
+                        $value = explode(",", str_replace(array("(", ")"), "", $value));
+                    }
                     foreach ($value as $element) {
                         if ($element === "") {
                             $correct = false;
@@ -446,6 +832,9 @@ class Application {
                 }
             case "double-array" : {
                     $correct = true;
+                    if (!is_array($value)) {
+                        $value = explode(",", str_replace(array("(", ")"), "", $value));
+                    }
                     foreach ($value as $key => $element) {
                         if ($element === "") {
                             $correct = false;
@@ -465,20 +854,33 @@ class Application {
                     break;
                 }
             case "string-array" : {
+                    if (!is_array($value)) {
+                        $value = explode(",", str_replace(array("(", ")"), "", $value));
+                    }
                     foreach ($value as $element) {
                         if ($element === "") {
                             $correct = false;
                             break;
                         }
-                        if (!get_magic_quotes_gpc()) {
-                            if (isset($this->data)) {
-                                $element = $this->data->escapeChars($value);
-                            } else {
-                                $element = addslashes($value);
-                            }
-                        }
+//                        $element = str_replace("'", " ", $element);
+                        $element = trim($element);
+//                        if(true) {
+//                            if (isset($this->data)) {
+//                                $element = $this->data->escapeChars($value);
+//                            } else {
+//                                $element = addslashes($value);
+//                            }
+//                        }
                     }
                     return $value;
+                    break;
+                }
+            case "json" : {
+                    $object = json_decode(stripslashes($value));
+                    if ($object)
+                        return $object;
+                    else
+                        return null;
                     break;
                 }
             default : {
@@ -591,9 +993,9 @@ class Application {
 
         if ($user !== false) {
             if ($this->data != null) {
-                $data = new SystemUserData($this->data);
-                $dataBaseUser = $data->getSystemUser($user);
-                if ($user->getToken() === $dataBaseUser->getToken()) {
+                $data = new TransactionManager($this->data);
+                $dataBaseUser = $data->getRecord($user);
+                if (isset($dataBaseUser) && $user->getToken() === $dataBaseUser->getToken()) {
                     return $user;
                 }
             } else {
@@ -664,8 +1066,7 @@ class Application {
             if ($this->tpl->loadTemplateFile($this->config['folder_template'] . "$this->name/template." . $priority) === SIGMA_OK) {
                 $this->tpl->addBlockfile("TEMPLATE-CONTENT", $this->name, $this->config['folder_navigation'] . "$navigationFolder/$navigationFile." . $priority);
             }
-        }
-        else if ($this->tpl->loadTemplateFile($this->config['folder_template'] . "$this->name/template.html") === SIGMA_OK) {
+        } else if ($this->tpl->loadTemplateFile($this->config['folder_template'] . "$this->name/template.html") === SIGMA_OK) {
             $this->tpl->addBlockfile("TEMPLATE-CONTENT", $this->name, $this->config['folder_navigation'] . "$navigationFolder/$navigationFile.html");
             $this->setLangItems($this->name);
             $this->tpl->addBlockfile("TEMPLATE-JAVASCRIPT", $this->name . "_javascript", $this->config['folder_navigation'] . "$navigationFolder/$navigationFile.js");
@@ -693,7 +1094,7 @@ class Application {
             if (strpos($placeholder, "LANG-") !== false) {
                 $var = substr($placeholder, 5);
                 $name = strtolower($var);
-                $this->setVariableTemplate("LANG-$var", $this->lang["lang_$name"]);
+                $this->setVariableTemplate("LANG-$var", array_key_exists("lang_$name", $this->lang) ? $this->lang["lang_$name"] : "lang_$name");
             }
         }
 
@@ -703,7 +1104,7 @@ class Application {
             if (is_string($placeholder) && strpos($placeholder, "LANG-") !== false) {
                 $var = substr($placeholder, 5);
                 $name = strtolower($var);
-                $this->setVariableTemplate("LANG-$var", $this->lang["lang_$name"]);
+                $this->setVariableTemplate("LANG-$var", array_key_exists("lang_$name", $this->lang) ? $this->lang["lang_$name"] : "lang_$name");
             }
         }
     }
@@ -716,13 +1117,13 @@ class Application {
      * @param string $navigation el nombre de la navegacion de destino
      * @param boolean $secure si el formulario debe enviarse de forma segura
      */
-    public function setFormTemplate($name, array $params, $application, $navigation, $secure = false) {
+    public function setFormTemplate($name, array $params, $application, $navigation, $secure = false, $urlparams = null) {
         $name = strtoupper($name);
         $this->setVariableTemplate("$name-ID", $this->navigation . "$name");
         if ($secure) {
-            $this->setVariableTemplate("$name-ACTION", $this->getSecureAppUrl($application, $navigation));
+            $this->setVariableTemplate("$name-ACTION", $this->getSecureAppUrl($application, $navigation, $urlparams));
         } else {
-            $this->setVariableTemplate("$name-ACTION", $this->getAppUrl($application, $navigation));
+            $this->setVariableTemplate("$name-ACTION", $this->getAppUrl($application, $navigation, $urlparams));
         }
         foreach ($params as $param) {
             if (get_class($param) == "Param") {
@@ -741,29 +1142,30 @@ class Application {
     private function setFormObject(DataObject $object, $formName) {
         $objectName = get_class($object);
         $properties = $object->__getProperties();
+        $types = $object->__getTypes();
         $objectFormName = strtoupper($objectName);
+        $i = 0;
         foreach ($properties as $property) {
             $obj = strpos($property, "_object");
             $arr = strpos($property, "_array");
             if (!$arr) {
-                if ($obj > 0) {
-                    $fieldname = substr($property, 0, $obj);
-                    $paramName = strtoupper($fieldname);
-                    $cammelName = strtoupper(substr($fieldname, 0, 1)) . substr($fieldname, 1);
-                    $getter = "get$cammelName";
-                    $value = $object->$getter();
-                    $this->setVariableTemplate("$formName-PARAM-$objectFormName-$paramName", "$objectName" . "_" . "$fieldname");
-                    $this->setVariableTemplate("$formName-DATA-$objectFormName-$paramName", $this->utf8tohtml(strval($value->getId()), true));
-                } else {
+                if ($obj <= 0) {
                     $fieldname = $property;
                     $paramName = strtoupper($fieldname);
                     $cammelName = strtoupper(substr($fieldname, 0, 1)) . substr($fieldname, 1);
                     $getter = "get$cammelName";
                     $value = $object->$getter();
-                    $this->setVariableTemplate("$formName-PARAM-$objectFormName-$paramName", "$objectName" . "_" . "$fieldname");
-                    $this->setVariableTemplate("$formName-DATA-$objectFormName-$paramName", $this->utf8tohtml(strval($value), true));
+                    $this->setVariableTemplate("$formName-NAME-$objectFormName-$paramName", "$objectName" . "_" . "$fieldname");
+                    if ($types[$i] == "date") {
+                        $value = $this->formatWiredDate($value);
+                    } 
+                    else {
+                        $value = $this->utf8tohtml(strval($value), true);
+                    }
+                    $this->setVariableTemplate("$formName-VALUE-$objectFormName-$paramName", $value);
                 }
             }
+            $i++;
         }
     }
 
@@ -775,8 +1177,19 @@ class Application {
      */
     private function setFormParam(Param $param, $formName) {
         $viewParam = strtoupper($param->name);
-        $this->setVariableTemplate("$formName-PARAM-" . $viewParam, $param->name);
-        $this->setVariableTemplate("$formName-DATA-" . $viewParam, $this->utf8tohtml(strval($param->value), true));
+        $this->setVariableTemplate("$formName-NAME-" . $viewParam, $param->name);
+        $this->setVariableTemplate("$formName-VALUE-" . $viewParam, $this->utf8tohtml(strval($param->value), true));
+    }
+    
+    /**
+     * Parsea un Tag y le asigna el valor correspondiente
+     * @param string $name <p>El nombre del TAG</p>
+     * @param string $value <p>El valor a asignar</p>
+     * @return Nada
+     */
+    public function unescapeJsonVariable($value) {
+        $value = strval($value);
+        return $value;
     }
 
     /**
@@ -786,9 +1199,7 @@ class Application {
      * @return Nada
      */
     public function setVariableTemplate($name, $value) {
-        if (isset($this->data)) {
-            $value = $this->data->unEscapeChars($value);
-        }
+        $value = strval($value);
         $this->tpl->setVariable($name, $value);
     }
 
@@ -800,28 +1211,9 @@ class Application {
      */
     public function setHTMLVariableTemplate($name, $value) {
         $value = strval($value);
-        if (isset($this->data)) {
-            $value = $this->data->unEscapeChars($value);
-        }
         $var = $this->utf8tohtml($value, true);
         $var = str_replace("\r\n", "<br />", $var);
         $var = str_replace("\n", "<br />", $var);
-        $this->tpl->setVariable($name, $var);
-    }
-
-    /**
-     * Parsea un Tag y le asigna el valor correspondiente en formato HTML
-     * @param string $name <p>El nombre del TAG</p>
-     * @param string $value <p>El valor a asignar</p>
-     * @return Nada
-     */
-    public function setJsonVariableTemplate($name, $value) {
-        $value = strval($value);
-        if (isset($this->data)) {
-            $value = $this->data->unEscapeChars($value);
-        }
-        $var = str_replace("\r\n", " ", $value);
-        $var = str_replace("\n", " ", $var);
         $this->tpl->setVariable($name, $var);
     }
 
@@ -832,9 +1224,7 @@ class Application {
      */
     public function setArrayTemplate($array) {
         foreach ($array as &$value) {
-            if (isset($this->data)) {
-                $value = $this->data->unEscapeChars($value);
-            }
+            $value = strval($value);
         }
         $this->tpl->setVariable($array);
     }
@@ -847,29 +1237,9 @@ class Application {
     public function setHTMLArrayTemplate($array) {
         foreach ($array as &$value) {
             $value = strval($value);
-            if (isset($this->data)) {
-                $value = $this->data->unEscapeChars($value);
-            }
             $value = $this->utf8tohtml($value, true);
             $value = str_replace("\r\n", "<br />", $value);
             $value = str_replace("\n", "<br />", $value);
-        }
-        $this->tpl->setVariable($array);
-    }
-
-    /**
-     * Parsea Tags de un bloque BEGIN END en formato JSON
-     * @param array $array <p>El array con los tags como llaves y su valor correspondiente </p>
-     * @return Nada
-     */
-    public function setJsonArrayTemplate($array) {
-        foreach ($array as &$value) {
-            $value = strval($value);
-            if (isset($this->data)) {
-                $value = $this->data->unEscapeChars($value);
-            }
-            $value = str_replace("\r\n", " ", $value);
-            $value = str_replace("\n", " ", $value);
         }
         $this->tpl->setVariable($array);
     }
@@ -908,6 +1278,48 @@ class Application {
         $this->tpl->show();
         $this->log();
         $this->endApp();
+    }
+
+    public function renderToJson($jsonObject) {
+        //unsescape vars
+        $jsonObject = $this->unescapeJsonObject($jsonObject);
+        
+        header('Content-type: application/json;charset=UTF8;');
+        $str = json_encode($jsonObject);
+        $compress = $this->getFormParam("cp", "string", false);
+        if (isset($compress)) {
+            if ($compress == "zlib") {
+                //header("Content-Encoding: gzip"); 
+                $str = gzcompress($str, 9);
+            } else if ($compress == "gzip") {
+                header("Content-Encoding: gzip");
+                $str = gzencode($str, 9, FORCE_GZIP);
+            }
+        }
+        echo $str;
+        $this->log();
+        $this->endApp();
+    }
+    
+    private function unescapeJsonObject($object) {
+        if(is_string($object)) {
+            $object = $this->unescapeJsonVariable($object);
+            return $object;
+        }
+        if(is_array($object)) {
+            foreach($object as $key => $value) {
+                $object[$key] = $this->unescapeJsonObject($value);
+            }
+            return $object;
+        }
+        if(is_object($object)) {
+            $vars = get_object_vars($object);
+            foreach($vars as $key => $value) {
+                $object->$key = $this->unescapeJsonObject($value);
+            }
+            return $object;
+        }
+        return $object;
     }
 
     /**
@@ -976,6 +1388,17 @@ class Application {
         $this->endApp();
     }
 
+    public function renderToXls($contents, $filename) {
+        header('Content-type: application/ms-excel');
+        header('Content-Disposition: attachment; filename=' . $filename);
+        header('Content-Encoding: UTF-8');
+        echo $contents;
+    }
+    
+    public function renderToFile($contents, $filename) {
+        file_put_contents($filename, $contents);
+    }
+
     /**
      * Esconde un bloque BEGIN END
      * Esta funcion debe ser llamada antes de hacer render del template
@@ -993,10 +1416,10 @@ class Application {
      * @param string $navigation <p>El nombre de la navegacion a redirigir</p>
      * @return Nada
      */
-    public function redirect($app, $navigation) {
+    public function redirect($app, $navigation, $params = null) {
         $this->log();
         //Try redirect
-        header(sprintf("Location: %s", $this->getAppUrl($app, $navigation)));
+        header(sprintf("Location: %s", $this->getAppUrl($app, $navigation, $params)));
         $this->endApp();
     }
 
@@ -1018,10 +1441,10 @@ class Application {
      * @param string $navigation <p>El nombre de la navegacion a redirigir</p>
      * @return Nada
      */
-    public function secureRedirect($app, $navigation) {
+    public function secureRedirect($app, $navigation, $params = null) {
         $this->log();
         //Try redirect
-        header(sprintf("Location: %s", $this->getSecureAppUrl($app, $navigation)));
+        header(sprintf("Location: %s", $this->getSecureAppUrl($app, $navigation, $params)));
         $this->endApp();
     }
 
@@ -1033,7 +1456,7 @@ class Application {
     protected function log($elements = array()) {
         //adds user information to the log
         if (isset($this->user) && $this->user !== false) {
-            $elements["user"] = $this->user->getUsername();
+            $elements["user"] = $this->user->getEmail();
         }
 
         $doc = new DOMDocument();
@@ -1126,34 +1549,117 @@ class Application {
      * @param string $extensions_list <p>Extensiones MIME validas, separadas por coma</p>
      * @return Nada
      */
-    public function upload($fileParam, $destFolder, $override, $destname, $extensions_list = null) {
+    public function upload($fileParam, $destFolder, $override, $destname, $extensions_list = null, $optional = false) {
+
         if (!isset($_FILES[$fileParam])) {
-            $this->error($this->lang['error_filesize']);
+            if(!$optional) {
+                $this->error($this->lang['error_filenotfound']);
+            }
+            else {
+                return;
+            }
         }
         if ($_FILES[$fileParam]['error'] == UPLOAD_ERR_INI_SIZE) {
-            $this->error($this->lang['error_filesize']);
+            if(!$optional) {
+                $this->error($this->lang['error_filesize']);
+            }
+            else {
+                return;
+            }
+            
         }
         if (!is_uploaded_file($_FILES[$fileParam]['tmp_name'])) {
-            $this->error($this->lang['error_filenotuploaded']);
+            if(!$optional) {
+                $this->error($this->lang['error_filenotuploaded']);
+            }
+            else {
+                return;
+            }
+            
         }
-//        if ($extensions_list  null) {
-//            $extensions = explode(",", $extensions_list);
-//            $format_ok = false;
-//            foreach ($extensions as $ext) {
-//                if ($ext === $_FILES[$fileParam]['type']) {
-//                    $format_ok = true;
-//                }
-//            }
-//            if (!$format_ok) {
-//                $this->error($this->lang['error_fileformatnotvalid'] . " " . implode(", ", $extensions) . " - " . $_FILES[$fileParam]['type']);
-//            }
-//        }
+        //TODO calidate extensions
         if (!$override && file_exists($destFolder . $destname)) {
             $this->error($this->lang['error_fileexist']);
         }
         if (!move_uploaded_file($_FILES[$fileParam]['tmp_name'], $destFolder . $destname)) {
             $this->error($this->lang['error_filenotmoved']);
         }
+        
+        return $destFolder . $destname;
+    }
+    
+    /**
+     * Carga un archivo pasado como parametro de un formulario
+     * El formulario debe ser de enctype="multipart/form-data"
+     * En caso de error se arroja el error de la aplicacion
+     * @param string $fileParam <p>El nombre del parametro del campo file del formulario</p>
+     * @param string $destFolder <p>La carpeta en la cual dejar el archivo</p>
+     * @param string $destname <p>El nombre del archivo de destino</p>
+     * @param string $extensions_list <p>Extensiones MIME validas, separadas por coma</p>
+     * @return Nada
+     */
+    public function uploadGS($fileParam, $destFolder, $destname, $mandatory = false) {
+
+        if (!isset($_FILES[$fileParam])) {
+            if($mandatory) {
+                $this->error($this->lang['error_filenotfound']);
+            }
+            else {
+                return null;
+            }
+        }
+        if ($_FILES[$fileParam]['error'] == UPLOAD_ERR_INI_SIZE) {
+            if($mandatory) {
+                $this->error($this->lang['error_filesize']);
+            }
+            else {
+                return null;
+            }
+             
+        }
+        if (!is_uploaded_file($_FILES[$fileParam]['tmp_name'])) {
+            if($mandatory) {
+                $this->error($this->lang['error_filenotuploaded']);
+            }
+            else {
+                return null; 
+            }
+            
+        }
+        //validate extensions
+//        if($PNG) {
+//            $localPath = $_FILES[$fileParam]['tmp_name'];
+//            if(exif_imagetype($localPath) != IMAGETYPE_PNG) {
+//                $this->error($this->lang['error_filenotpng']);
+//            }
+//            if(isset($width) && isset($height)) {
+//                $imageData = getimagesize($localPath);
+//                if($imageData[0] != $width) {
+//                    $this->error($this->lang['error_filesizeimage']);
+//                }
+//                if($imageData[1] != $height) {
+//                    $this->error($this->lang['error_filesizeimage']);
+//                }
+//            }
+//        }
+        //save object to GS account
+        $localPath = $_FILES[$fileParam]['tmp_name'];
+        $gspath = $this->config["gsutil"] . " cp -a public-read $localPath " . $this->config['gsbucket'] . $destFolder . $destname;
+        $ouput;
+        $result;
+        exec($gspath, $ouput, $result);
+        foreach($ouput as $logoutput) {
+            $arraylog = array();
+            $arraylog["gs"] = $logoutput;
+            $this->log($logoutput);
+        }
+        if($result === 0) {
+            return $destFolder . $destname; 
+        }
+        else {
+            return null;
+        }
+         
     }
 
     /**
@@ -1162,7 +1668,7 @@ class Application {
      * @return una nuevo string aleatorio del largo indicado
      */
     public function createRandomString($lenght) {
-        $chars = "abcdefghijkmnopqrstuvwxyz023456789";
+        $chars = "abcdefghijkmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ-.";
         srand((double) microtime() * 1000000);
         $i = 1;
         $pass = '';
@@ -1213,18 +1719,19 @@ class Application {
      * @param string $nav <p>LA navegación a la cual redirigir</p>
      * @return Nada
      */
-    public function setPageNavigation($currentPage, $totalPages, $app, $nav) {
+    public function setPageNavigation($currentPage, $totalItems, $app, $nav) {
+        $totalPages = $this->getTotalPages($totalItems);
         $this->setHTMLVariableTemplate("PAGE-NUMBER", $currentPage + 1);
         $this->setHTMLVariableTemplate("PAGE-TOTAL", $totalPages);
         $linkback = $this->getSecureAppUrl($app, $nav, array(new Param($this->config['param_page'], $currentPage - 1)));
         $linkfordware = $this->getSecureAppUrl($app, $nav, array(new Param($this->config['param_page'], $currentPage + 1)));
         if ($currentPage + 1 > 1) {
             $this->setHTMLVariableTemplate("PAGE-LINK-BACK", $linkback);
-            $this->setHTMLVariableTemplate("PAGE-TEXT-BACK", $this->lang['word_back']);
+            $this->setHTMLVariableTemplate("PAGE-TEXT-BACK", array_key_exists('lang_back', $this->lang) ? $this->lang['lang_back'] : 'lang_back');
         }
         if ($currentPage + 1 < $totalPages) {
             $this->setHTMLVariableTemplate("PAGE-LINK-NEXT", $linkfordware);
-            $this->setHTMLVariableTemplate("PAGE-TEXT-NEXT", $this->lang['word_next']);
+            $this->setHTMLVariableTemplate("PAGE-TEXT-NEXT", array_key_exists('lang_next', $this->lang) ? $this->lang['lang_next'] : 'lang_next');
         }
     }
 
@@ -1244,7 +1751,7 @@ class Application {
      */
     public function formatMount($mount) {
         if (isset($mount)) {
-            return '$' . number_format($mount, 0, ",", ".");
+            return '$' . number_format($mount, 2, ",", ".");
         } else {
             return '';
         }
@@ -1269,7 +1776,7 @@ class Application {
      * @return string el porcentaje formateado
      */
     public function formatPercentage($percentage) {
-        if (isset($percentage)) {
+        if (isset($percentage) && $percentage > 0) {
             return number_format($percentage, 2, ",", ".") . ' %';
         } else {
             return '';
@@ -1282,10 +1789,100 @@ class Application {
      * @return string la fecha formateada
      */
     public function formatDate($date) {
-        if (isset($date)) {
+        if (isset($date) && $date != "") {
             return date('d/m/Y', $date);
         } else {
             return '';
+        }
+    }
+    
+    /**
+     * Formatea una fecha
+     * @param long $date la fecha en timestamp
+     * @return string la fecha formateada
+     */
+    public function formatWiredDate($date) {
+        if (isset($date) && $date != "") {
+            return date('Y-m-d', $date);
+        } else {
+            return '';
+        }
+    }
+
+    function blowfishCrypt($password, $cost) {
+        $chars = './ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        $salt = sprintf('$2a$%02d$', $cost);
+        for ($i = 0; $i < 22; $i++)
+            $salt.=$chars[rand(0, 63)];
+        return crypt($password, $salt);
+    }
+    
+    function distance($lat1, $lon1, $lat2, $lon2, $unit) {
+        $theta = $lon1 - $lon2;
+        $dist = sin(deg2rad($lat1)) * sin(deg2rad($lat2)) + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * cos(deg2rad($theta));
+        $dist = acos($dist);
+        $dist = rad2deg($dist);
+        $miles = $dist * 60 * 1.1515;
+        $unit = strtoupper($unit);
+        if ($unit == "K") {
+
+            return ($miles * 1.609344);
+        } else if ($unit == "N") {
+
+            return ($miles * 0.8684);
+        } else {
+
+            return $miles;
+        }
+    }
+    
+    public function lang($string, $langstr = null) {
+
+        if (isset($langstr)) {
+            $lang = null;
+
+            if (@require("lang/lang.$langstr.php")) {
+                if (array_key_exists($string, $lang)) {
+                    return $lang[$string];
+                } else {
+                    if (array_key_exists($string, $this->lang)) {
+                        return $this->lang[$string];
+                    } else {
+                        return $string;
+                    }
+                }
+            } else {
+                if (array_key_exists($string, $this->lang)) {
+                    return $this->lang[$string];
+                } else {
+                    return $string;
+                }
+            }
+        } else {
+            if (array_key_exists($string, $this->lang)) {
+                return $this->lang[$string];
+            } else {
+                return $string;
+            }
+        }
+    }
+    
+    public function config($string) {
+        if (array_key_exists($string, $this->config)) {
+            return $this->config[$string];
+        } else {
+            return $string;
+        }
+    }
+    
+    public function photoUrl($baseUrl) {
+        if (!isset($baseUrl)) {
+            return null;
+        }
+        if (strstr($baseUrl, "http") === false) {
+            return $this->config("storage_folder") . $baseUrl;
+        } else {
+            return $baseUrl;
         }
     }
 
