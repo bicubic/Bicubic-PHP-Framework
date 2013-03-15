@@ -116,7 +116,7 @@ if (isset($argv)) {
                 break;
             }
         default: {
-                $application->secureRedirect("login", "login");
+                $application->secureRedirect("home", "home");
                 break;
             }
     }
