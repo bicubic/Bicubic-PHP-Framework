@@ -60,14 +60,6 @@ $config['foursquareSecret'] = "";
 //instagram
 $config['instagramKey'] = "";
 $config['instagramSecret'] = "";
-//google storage
-$config['gsutil'] = "";
-$config['gsbucket'] = "";
-$config['gsimages'] = "images/";
-$config['gsuploads'] = "uploads/";
-$config['gswines'] = "wines/";
-$config['gsvinas'] = "vinas/";
-$config['gsprofiles'] = "profiles/";
 //default images
 $config['default256'] = "images/noimage.png";
 //certificates
