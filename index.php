@@ -10,6 +10,7 @@
  */
 //base
 require_once("config/config.php");
+require_once("config/configgs.php");
 require_once("error.php");
 //lib
 require_once("lib/ext/pear/Sigma.php");
