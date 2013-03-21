@@ -1598,7 +1598,7 @@ class Application {
      * @param string $extensions_list <p>Extensiones MIME validas, separadas por coma</p>
      * @return Nada
      */
-    public function uploadGS($fileParam, $destFolder, $destname, $mandatory = false) {
+    public function uploadGS($fileParam, $destFolder, $destname, $mandatory = false, $public = true) {
 
         if (!isset($_FILES[$fileParam])) {
             if($mandatory) {
@@ -1644,7 +1644,59 @@ class Application {
 //        }
         //save object to GS account
         $localPath = $_FILES[$fileParam]['tmp_name'];
-        $gspath = $this->config["gsutil"] . " cp -a public-read $localPath " . $this->config['gsbucket'] . $destFolder . $destname;
+        $permission = "";
+        if($public) {
+            $permission = "-a public-read";
+        }
+        
+        $gspath = $this->config["gsutil"] . " cp $permission $localPath " . $this->config['gsbucket'] . $destFolder . $destname;
+        $ouput;
+        $result;
+        exec($gspath, $ouput, $result);
+        foreach($ouput as $logoutput) {
+            $arraylog = array();
+            $arraylog["gs"] = $logoutput;
+            $this->log($logoutput);
+        }
+        if($result === 0) {
+            return $destFolder . $destname; 
+        }
+        else {
+            return null;
+        }
+         
+    }
+    
+
+    public function uploadLocalGS($localPath, $destFolder, $destname, $public = false) {
+
+        //save object to GS account
+        $permission = "";
+        if($public) {
+            $permission = "-a public-read";
+        }
+        
+        $gspath = $this->config["gsutil"] . " cp $permission $localPath " . $this->config['gsbucketprivate'] . $destFolder . $destname;
+        $ouput;
+        $result;
+        exec($gspath, $ouput, $result);
+        foreach($ouput as $logoutput) {
+            $arraylog = array();
+            $arraylog["gs"] = $logoutput;
+            $this->log($logoutput);
+        }
+        if($result === 0) {
+            return $destFolder . $destname; 
+        }
+        else {
+            return null;
+        }
+         
+    }
+    
+    public function downloadLocalGS($gspathPath, $destFolder, $destname) {
+        
+        $gspath = $this->config["gsutil"] . " cp gs://" . $gspathPath . " " . $destFolder . $destname;
         $ouput;
         $result;
         exec($gspath, $ouput, $result);
