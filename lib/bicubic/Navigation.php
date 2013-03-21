@@ -70,6 +70,17 @@ class Navigation {
         return ucwords(strtolower(trim($string)));
     }
     
+    public function compareWineLocalsByPricePerLitter(WineLocal $a, WineLocal $b) {
+        if ($a->priceperlitter < $b->priceperlitter) {
+            return -1;
+        }
+        if ($a->priceperlitter == $b->priceperlitter) {
+            return 0;
+        }
+        if ($a->priceperlitter > $b->priceperlitter) {
+            return 1;
+        }
+    }
 
 }
 
