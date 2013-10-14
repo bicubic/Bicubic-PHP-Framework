@@ -69,7 +69,7 @@ class Application {
         }
         return $link;
     }
-    
+
     /**
      * Construye una nueva aplicacion
      * @param string $config <p>El archivo de configuracion</p>
@@ -291,7 +291,7 @@ class Application {
                         if ($trimed === "") {
                             $value = str_replace(array("$", "(", ")", "%"), "", $value);
                             $value = str_replace(array(","), ".", $value);
-                            return $value;
+                            return doubleval($value);
                         }
                     }
                     break;
@@ -308,444 +308,131 @@ class Application {
                     break;
                 }
             case "string" : {
-                    if ($value !== "") {
-//                        $value = str_replace("'", " ", $value);
+                    if ($value) {
                         $value = trim($value);
-                        if(true) {
-//                            if (isset($this->data)) {
-//                                $value = $this->data->escapeChars($value);
-//                            } else {
-//                                $value = addslashes($value);
-//                            }
+                        if ($value) {
+                            return $value;
                         }
-                        return substr($value, 0, 1024);
                     }
                     break;
                 }
             case "string2048" : {
-                    if ($value !== "") {
-//                        $value = str_replace("'", " ", $value);
+                    if ($value) {
                         $value = trim($value);
-//                        if(true) {
-//                            if (isset($this->data)) {
-//                                $value = $this->data->escapeChars($value);
-//                            } else {
-//                                $value = addslashes($value);
-//                            }
-//                        }
-                        return (substr($value, 0, 2048));
+                        $value = (substr($value, 0, 2048));
+                        if ($value) {
+                            return $value;
+                        }
                     }
                     break;
                 }
             case "string1024" : {
-                    if ($value !== "") {
-//                        $value = str_replace("'", " ", $value);
+                    if ($value) {
                         $value = trim($value);
-//                        if(true) {
-//                            if (isset($this->data)) {
-//                                $value = $this->data->escapeChars($value);
-//                            } else {
-//                                $value = addslashes($value);
-//                            }
-//                        }
-                        return (substr($value, 0, 1024));
+                        $value = (substr($value, 0, 1024));
+                        if ($value) {
+                            return $value;
+                        }
                     }
                     break;
                 }
             case "string256" : {
-                    if ($value !== "") {
-//                        $value = str_replace("'", " ", $value);
+                    if ($value) {
                         $value = trim($value);
-//                        if(true) {
-//                            if (isset($this->data)) {
-//                                $value = $this->data->escapeChars($value);
-//                            } else {
-//                                $value = addslashes($value);
-//                            }
-//                        }
-                        return (substr($value, 0, 256));
+                        $value = (substr($value, 0, 256));
+                        if ($value) {
+                            return $value;
+                        }
                     }
                     break;
                 }
             case "string128" : {
-                    if ($value !== "") {
-//                        $value = str_replace("'", " ", $value);
+                    if ($value) {
                         $value = trim($value);
-//                        if(true) {
-//                            if (isset($this->data)) {
-//                                $value = $this->data->escapeChars($value);
-//                            } else {
-//                                $value = addslashes($value);
-//                            }
-//                        }
-                        return (substr($value, 0, 128));
+                        $value = (substr($value, 0, 128));
+                        if ($value) {
+                            return $value;
+                        }
                     }
                     break;
                 }
             case "string64" : {
-                    if ($value !== "") {
-//                        $value = str_replace("'", " ", $value);
+                    if ($value) {
                         $value = trim($value);
-//                        if(true) {
-//                            if (isset($this->data)) {
-//                                $value = $this->data->escapeChars($value);
-//                            } else {
-//                                $value = addslashes($value);
-//                            }
-//                        }
-                        return (substr($value, 0, 64));
+                        $value = (substr($value, 0, 64));
+                        if ($value) {
+                            return $value;
+                        }
                     }
                     break;
                 }
             case "string32" : {
-                    if ($value !== "") {
-//                        $value = str_replace("'", " ", $value);
+                    if ($value) {
                         $value = trim($value);
-//                        if(true) {
-//                            if (isset($this->data)) {
-//                                $value = $this->data->escapeChars($value);
-//                            } else {
-//                                $value = addslashes($value);
-//                            }
-//                        }
-                        return (substr($value, 0, 32));
+                        $value = (substr($value, 0, 32));
+                        if ($value) {
+                            return $value;
+                        }
                     }
                     break;
                 }
             case "string24" : {
-                    if ($value !== "") {
-//                        $value = str_replace("'", " ", $value);
+                    if ($value) {
                         $value = trim($value);
-//                        if(true) {
-//                            if (isset($this->data)) {
-//                                $value = $this->data->escapeChars($value);
-//                            } else {
-//                                $value = addslashes($value);
-//                            }
-//                        }
-                        return (substr($value, 0, 24));
+                        $value = (substr($value, 0, 24));
+                        if ($value) {
+                            return $value;
+                        }
                     }
                     break;
                 }
             case "string16" : {
-                    if ($value !== "") {
-//                        $value = str_replace("'", " ", $value);
+                    if ($value) {
                         $value = trim($value);
-//                        if(true) {
-//                            if (isset($this->data)) {
-//                                $value = $this->data->escapeChars($value);
-//                            } else {
-//                                $value = addslashes($value);
-//                            }
-//                        }
-                        return (substr($value, 0, 16));
+                        $value = (substr($value, 0, 16));
+                        if ($value) {
+                            return $value;
+                        }
                     }
                     break;
                 }
             case "string8" : {
-                    if ($value !== "") {
-//                        $value = str_replace("'", " ", $value);
+                    if ($value) {
                         $value = trim($value);
-//                        if(true) {
-//                            if (isset($this->data)) {
-//                                $value = $this->data->escapeChars($value);
-//                            } else {
-//                                $value = addslashes($value);
-//                            }
-//                        }
-                        return substr($value, 0, 8);
+                        $value = (substr($value, 0, 8));
+                        if ($value) {
+                            return $value;
+                        }
                     }
                     break;
                 }
             case "string4" : {
-                    if ($value !== "") {
-//                        $value = str_replace("'", " ", $value);
+                    if ($value) {
                         $value = trim($value);
-//                        if(true) {
-//                            if (isset($this->data)) {
-//                                $value = $this->data->escapeChars($value);
-//                            } else {
-//                                $value = addslashes($value);
-//                            }
-//                        }
-                        return substr($value, 0, 4);
+                        $value = (substr($value, 0, 4));
+                        if ($value) {
+                            return $value;
+                        }
                     }
                     break;
                 }
             case "string2" : {
-                    if ($value !== "") {
-//                        $value = str_replace("'", " ", $value);
+                    if ($value) {
                         $value = trim($value);
-//                        if(true) {
-//                            if (isset($this->data)) {
-//                                $value = $this->data->escapeChars($value);
-//                            } else {
-//                                $value = addslashes($value);
-//                            }
-//                        }
-                        return substr($value, 0, 2);
+                        $value = (substr($value, 0, 2));
+                        if ($value) {
+                            return $value;
+                        }
                     }
                     break;
                 }
             case "string1" : {
-                    if ($value !== "") {
-//                        $value = str_replace("'", " ", $value);
+                    if ($value) {
                         $value = trim($value);
-//                        if(true) {
-//                            if (isset($this->data)) {
-//                                $value = $this->data->escapeChars($value);
-//                            } else {
-//                                $value = addslashes($value);
-//                            }
-//                        }
-                        return substr($value, 0, 1);
-                    }
-                    break;
-                }
-            case "string2048excel" : {
-                    $value = strval($value);
-                    if ($value !== "") {
-//                        $value = str_replace("'", " ", $value);
-                        $value = trim($value);
-                        if (!$this->is_utf8($value)) {
-                            $value = utf8_encode($value);
+                        $value = (substr($value, 0, 1));
+                        if ($value) {
+                            return $value;
                         }
-//                        if(true) {
-//                            if (isset($this->data)) {
-//                                $value = $this->data->escapeChars($value);
-//                            } else {
-//                                $value = addslashes($value);
-//                            }
-//                        }
-                        return (substr($value, 0, 2048));
-                    }
-                    break;
-                }
-            case "string1024excel" : {
-                    $value = strval($value);
-                    if ($value !== "") {
-//                        $value = str_replace("'", " ", $value);
-                        $value = trim($value);
-                        if (!$this->is_utf8($value)) {
-                            $value = utf8_encode($value);
-                        }
-//                        if(true) {
-//                            if (isset($this->data)) {
-//                                $value = $this->data->escapeChars($value);
-//                            } else {
-//                                $value = addslashes($value);
-//                            }
-//                        }
-                        return (substr($value, 0, 1024));
-                    }
-                    break;
-                }
-            case "string512excel" : {
-                    $value = strval($value);
-                    if ($value !== "") {
-//                        $value = str_replace("'", " ", $value);
-                        $value = trim($value);
-                        if (!$this->is_utf8($value)) {
-                            $value = utf8_encode($value);
-                        }
-//                        if(true) {
-//                            if (isset($this->data)) {
-//                                $value = $this->data->escapeChars($value);
-//                            } else {
-//                                $value = addslashes($value);
-//                            }
-//                        }
-                        return (substr($value, 0, 512));
-                    }
-                    break;
-                }
-            case "string256excel" : {
-                    $value = strval($value);
-                    if ($value !== "") {
-//                        $value = sstr_replace("'", " ", $value);
-                        $value = trim($value);
-                        if (!$this->is_utf8($value)) {
-                            $value = utf8_encode($value);
-                        }
-//                        if(true) {
-//                            if (isset($this->data)) {
-//                                $value = $this->data->escapeChars($value);
-//                            } else {
-//                                $value = addslashes($value);
-//                            }
-//                        }
-                        return (substr($value, 0, 256));
-                    }
-                    break;
-                }
-            case "string128excel" : {
-                    $value = strval($value);
-                    if ($value !== "") {
-//                        $value = str_replace("'", " ", $value);
-                        $value = trim($value);
-                        if (!$this->is_utf8($value)) {
-                            $value = utf8_encode($value);
-                        }
-//                        if(true) {
-//                            if (isset($this->data)) {
-//                                $value = $this->data->escapeChars($value);
-//                            } else {
-//                                $value = addslashes($value);
-//                            }
-//                        }
-                        return (substr($value, 0, 128));
-                    }
-                    break;
-                }
-            case "string64excel" : {
-                    $value = strval($value);
-                    if ($value !== "") {
-//                        $value = str_replace("'", " ", $value);
-                        $value = trim($value);
-                        if (!$this->is_utf8($value)) {
-                            $value = utf8_encode($value);
-                        }
-//                        if(true) {
-//                            if (isset($this->data)) {
-//                                $value = $this->data->escapeChars($value);
-//                            } else {
-//                                $value = addslashes($value);
-//                            }
-//                        }
-                        return (substr($value, 0, 64));
-                    }
-                    break;
-                }
-            case "string32excel" : {
-                    $value = strval($value);
-                    if ($value !== "") {
-//                        $value = str_replace("'", " ", $value);
-                        $value = trim($value);
-                        if (!$this->is_utf8($value)) {
-                            $value = utf8_encode($value);
-                        }
-//                        if(true) {
-//                            if (isset($this->data)) {
-//                                $value = $this->data->escapeChars($value);
-//                            } else {
-//                                $value = addslashes($value);
-//                            }
-//                        }
-                        return (substr($value, 0, 32));
-                    }
-                    break;
-                }
-            case "string24excel" : {
-                    $value = strval($value);
-                    if ($value !== "") {
-//                        $value = str_replace("'", " ", $value);
-                        $value = trim($value);
-                        if (!$this->is_utf8($value)) {
-                            $value = utf8_encode($value);
-                        }
-//                        if(true) {
-//                            if (isset($this->data)) {
-//                                $value = $this->data->escapeChars($value);
-//                            } else {
-//                                $value = addslashes($value);
-//                            }
-//                        }
-                        return (substr($value, 0, 24));
-                    }
-                    break;
-                }
-            case "string16excel" : {
-                    $value = strval($value);
-                    if ($value !== "") {
-//                        $value = str_replace("'", " ", $value);
-                        $value = trim($value);
-                        if (!$this->is_utf8($value)) {
-                            $value = utf8_encode($value);
-                        }
-//                        if(true) {
-//                            if (isset($this->data)) {
-//                                $value = $this->data->escapeChars($value);
-//                            } else {
-//                                $value = addslashes($value);
-//                            }
-//                        }
-                        return (substr($value, 0, 16));
-                    }
-                    break;
-                }
-            case "string8excel" : {
-                    $value = strval($value);
-                    if ($value !== "") {
-//                        $value = str_replace("'", " ", $value);
-                        $value = trim($value);
-                        if (!$this->is_utf8($value)) {
-                            $value = utf8_encode($value);
-                        }
-//                        if(true) {
-//                            if (isset($this->data)) {
-//                                $value = $this->data->escapeChars($value);
-//                            } else {
-//                                $value = addslashes($value);
-//                            }
-//                        }
-                        return (substr($value, 0, 8));
-                    }
-                    break;
-                }
-            case "string4excel" : {
-                    $value = strval($value);
-                    if ($value !== "") {
-//                        $value = str_replace("'", " ", $value);
-                        $value = trim($value);
-                        if (!$this->is_utf8($value)) {
-                            $value = utf8_encode($value);
-                        }
-//                        if(true) {
-//                            if (isset($this->data)) {
-//                                $value = $this->data->escapeChars($value);
-//                            } else {
-//                                $value = addslashes($value);
-//                            }
-//                        }
-                        return (substr($value, 0, 4));
-                    }
-                    break;
-                }
-            case "string2excel" : {
-                    $value = strval($value);
-                    if ($value !== "") {
-//                        $value = str_replace("'", " ", $value);
-                        $value = trim($value);
-                        if (!$this->is_utf8($value)) {
-                            $value = utf8_encode($value);
-                        }
-//                        if(true) {
-//                            if (isset($this->data)) {
-//                                $value = $this->data->escapeChars($value);
-//                            } else {
-//                                $value = addslashes($value);
-//                            }
-//                        }
-                        return (substr($value, 0, 2));
-                    }
-                    break;
-                }
-            case "string1excel" : {
-                    $value = strval($value);
-                    if ($value !== "") {
-//                        $value = str_replace("'", " ", $value);
-                        $value = trim($value);
-                        if (!$this->is_utf8($value)) {
-                            $value = utf8_encode($value);
-                        }
-//                        if(true) {
-//                            if (isset($this->data)) {
-//                                $value = $this->data->escapeChars($value);
-//                            } else {
-//                                $value = addslashes($value);
-//                            }
-//                        }
-                        return (substr($value, 0, 1));
                     }
                     break;
                 }
@@ -809,48 +496,43 @@ class Application {
                     break;
                 }
             case "int-array" : {
-                    $correct = true;
+                    $newvalue = array();
                     if (!is_array($value)) {
                         $value = explode(",", str_replace(array("(", ")"), "", $value));
                     }
                     foreach ($value as $element) {
                         if ($element === "") {
-                            $correct = false;
-                            break;
+                            continue;
                         }
                         $vals = array("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "-", "+");
                         $trimed = str_replace($vals, "", $element);
                         if ((!is_numeric($element) || !empty($trimed))) {
-                            $correct = false;
-                            break;
+                            continue;
                         }
+                        $element = str_replace(array("-", "+"), "", $element);
+                        $newvalue [] = $element;
                     }
-                    if ($correct) {
-                        return $value;
-                    }
+                    return $newvalue;
                     break;
                 }
             case "double-array" : {
-                    $correct = true;
+                    $newvalue = array();
                     if (!is_array($value)) {
                         $value = explode(",", str_replace(array("(", ")"), "", $value));
                     }
                     foreach ($value as $key => $element) {
                         if ($element === "") {
-                            $correct = false;
-                            break;
+                            continue;
                         }
                         $trimed = str_replace(array("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "-", "+", ",", ".", "$", "(", ")", "%"), "", $element);
                         if (!empty($trimed)) {
-                            $correct = false;
-                            break;
+                            continue;
                         }
                         $element = str_replace(array("$", "(", ")", "%"), "", $element);
-                        $value[$key] = str_replace(array(","), ".", $element);
+                        $element = str_replace(array(","), ".", $element);
+                        $newvalue [] = $element;
                     }
-                    if ($correct) {
-                        return $value;
-                    }
+                    return $newvalue;
                     break;
                 }
             case "string-array" : {
@@ -858,25 +540,22 @@ class Application {
                         $value = explode(",", str_replace(array("(", ")"), "", $value));
                     }
                     foreach ($value as $element) {
-                        if ($element === "") {
+                        if ($element) {
+                            $element = trim($element);
+                            if (!$element) {
+                                $correct = false;
+                                break;
+                            }
+                        } else {
                             $correct = false;
                             break;
                         }
-//                        $element = str_replace("'", " ", $element);
-                        $element = trim($element);
-//                        if(true) {
-//                            if (isset($this->data)) {
-//                                $element = $this->data->escapeChars($value);
-//                            } else {
-//                                $element = addslashes($value);
-//                            }
-//                        }
                     }
                     return $value;
                     break;
                 }
             case "json" : {
-                    $object = json_decode(stripslashes($value));
+                    $object = json_decode(($value));
                     if ($object)
                         return $object;
                     else
@@ -967,9 +646,9 @@ class Application {
      */
     public function loginCheck() {
         //Check Params
-        $login = $this->getSessionParam("login");
-        $user = $this->getSessionParam("user");
-        $rememberme = $this->getSessionParam("rememberme");
+        $login = $this->getSessionParam("BAClogin");
+        $user = $this->getSessionParam("BACuser");
+        $rememberme = $this->getSessionParam("BACrememberme");
         if (!isset($login)) {
             return false;
         }
@@ -981,7 +660,7 @@ class Application {
         }
         //Check time out
         if (!$rememberme && $this->config['web_time_out'] > 0) {
-            $time = $this->getSessionParam("time");
+            $time = $this->getSessionParam("BACtime");
             if (!isset($time)) {
                 return false;
             }
@@ -1011,10 +690,10 @@ class Application {
      * @return Nada
      */
     public function loginSet($user, $rememberme = false) {
-        $this->setSessionParam("login", true);
-        $this->setSessionParam("user", $user);
-        $this->setSessionParam("time", time());
-        $this->setSessionParam("rememberme", $rememberme);
+        $this->setSessionParam("BAClogin", true);
+        $this->setSessionParam("BACuser", $user);
+        $this->setSessionParam("BACtime", time());
+        $this->setSessionParam("BACrememberme", $rememberme);
     }
 
     /**
@@ -1022,10 +701,10 @@ class Application {
      * @return Nada
      */
     public function loginUnset() {
-        $this->killSessionParam("login");
-        $this->killSessionParam("user");
-        $this->killSessionParam("time");
-        $this->killSessionParam("rememberme");
+        $this->killSessionParam("BAClogin");
+        $this->killSessionParam("BACuser");
+        $this->killSessionParam("BACtime");
+        $this->killSessionParam("BACrememberme");
 
         session_destroy();
     }
@@ -1041,6 +720,7 @@ class Application {
         $this->name = "error";
         $this->navigation = "error";
         $this->setMainTemplate("message", "error");
+        $this->setHTMLVariableTemplate("BASE-URL", $this->config["web_folder"]);
         if (is_array($message)) {
             foreach ($message as $text) {
                 $this->setHTMLVariableTemplate('MESSAGE-TEXT', $text);
@@ -1094,7 +774,7 @@ class Application {
             if (strpos($placeholder, "LANG-") !== false) {
                 $var = substr($placeholder, 5);
                 $name = strtolower($var);
-                $this->setVariableTemplate("LANG-$var", array_key_exists("lang_$name", $this->lang) ? $this->lang["lang_$name"] : "lang_$name");
+                $this->setVariableTemplate("LANG-$var", $this->lang("lang_$name"));
             }
         }
 
@@ -1104,7 +784,7 @@ class Application {
             if (is_string($placeholder) && strpos($placeholder, "LANG-") !== false) {
                 $var = substr($placeholder, 5);
                 $name = strtolower($var);
-                $this->setVariableTemplate("LANG-$var", array_key_exists("lang_$name", $this->lang) ? $this->lang["lang_$name"] : "lang_$name");
+                $this->setVariableTemplate("LANG-$var", $this->lang("lang_$name"));
             }
         }
     }
@@ -1158,8 +838,7 @@ class Application {
                     $this->setVariableTemplate("$formName-NAME-$objectFormName-$paramName", "$objectName" . "_" . "$fieldname");
                     if ($types[$i] == "date") {
                         $value = $this->formatWiredDate($value);
-                    } 
-                    else {
+                    } else {
                         $value = $this->utf8tohtml(strval($value), true);
                     }
                     $this->setVariableTemplate("$formName-VALUE-$objectFormName-$paramName", $value);
@@ -1180,7 +859,7 @@ class Application {
         $this->setVariableTemplate("$formName-NAME-" . $viewParam, $param->name);
         $this->setVariableTemplate("$formName-VALUE-" . $viewParam, $this->utf8tohtml(strval($param->value), true));
     }
-    
+
     /**
      * Parsea un Tag y le asigna el valor correspondiente
      * @param string $name <p>El nombre del TAG</p>
@@ -1281,9 +960,9 @@ class Application {
     }
 
     public function renderToJson($jsonObject) {
-        //unsescape vars
+         //unsescape vars
         $jsonObject = $this->unescapeJsonObject($jsonObject);
-        
+
         header('Content-type: application/json;charset=UTF8;');
         $str = json_encode($jsonObject);
         $compress = $this->getFormParam("cp", "string", false);
@@ -1300,21 +979,21 @@ class Application {
         $this->log();
         $this->endApp();
     }
-    
+
     private function unescapeJsonObject($object) {
-        if(is_string($object)) {
+        if (is_string($object)) {
             $object = $this->unescapeJsonVariable($object);
             return $object;
         }
-        if(is_array($object)) {
-            foreach($object as $key => $value) {
+        if (is_array($object)) {
+            foreach ($object as $key => $value) {
                 $object[$key] = $this->unescapeJsonObject($value);
             }
             return $object;
         }
-        if(is_object($object)) {
+        if (is_object($object)) {
             $vars = get_object_vars($object);
-            foreach($vars as $key => $value) {
+            foreach ($vars as $key => $value) {
                 $object->$key = $this->unescapeJsonObject($value);
             }
             return $object;
@@ -1394,7 +1073,7 @@ class Application {
         header('Content-Encoding: UTF-8');
         echo $contents;
     }
-    
+
     public function renderToFile($contents, $filename) {
         file_put_contents($filename, $contents);
     }
@@ -1473,9 +1152,9 @@ class Application {
         $logentry->appendChild($element);
         $element = $doc->createElement("ip", isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : "localdaemon");
         $logentry->appendChild($element);
-        $element = $doc->createElement("host", $_SERVER['SERVER_NAME']);
+        $element = $doc->createElement("host", array_key_exists('SERVER_NAME', $_SERVER) ? $_SERVER['SERVER_NAME'] : "");
         $logentry->appendChild($element);
-        $element = $doc->createElement("file", $_SERVER['PHP_SELF']);
+        $element = $doc->createElement("file", array_key_exists('PHP_SELF', $_SERVER) ? $_SERVER['PHP_SELF'] : "");
         $logentry->appendChild($element);
         $doc->appendChild($logentry);
         $log = $doc->saveXML($logentry) . "\n";
@@ -1552,30 +1231,25 @@ class Application {
     public function upload($fileParam, $destFolder, $override, $destname, $extensions_list = null, $optional = false) {
 
         if (!isset($_FILES[$fileParam])) {
-            if(!$optional) {
+            if (!$optional) {
                 $this->error($this->lang['error_filenotfound']);
-            }
-            else {
+            } else {
                 return;
             }
         }
         if ($_FILES[$fileParam]['error'] == UPLOAD_ERR_INI_SIZE) {
-            if(!$optional) {
+            if (!$optional) {
                 $this->error($this->lang['error_filesize']);
-            }
-            else {
+            } else {
                 return;
             }
-            
         }
         if (!is_uploaded_file($_FILES[$fileParam]['tmp_name'])) {
-            if(!$optional) {
+            if (!$optional) {
                 $this->error($this->lang['error_filenotuploaded']);
-            }
-            else {
+            } else {
                 return;
             }
-            
         }
         //TODO calidate extensions
         if (!$override && file_exists($destFolder . $destname)) {
@@ -1584,10 +1258,10 @@ class Application {
         if (!move_uploaded_file($_FILES[$fileParam]['tmp_name'], $destFolder . $destname)) {
             $this->error($this->lang['error_filenotmoved']);
         }
-        
+
         return $destFolder . $destname;
     }
-    
+
     /**
      * Carga un archivo pasado como parametro de un formulario
      * El formulario debe ser de enctype="multipart/form-data"
@@ -1598,120 +1272,189 @@ class Application {
      * @param string $extensions_list <p>Extensiones MIME validas, separadas por coma</p>
      * @return Nada
      */
-    public function uploadGS($fileParam, $destFolder, $destname, $mandatory = false, $public = true) {
+    public function uploadGS($fileParam, $destFolder, $destname, $mandatory = false, $public = true, $image = false, $width = 256, $height = 256) {
 
         if (!isset($_FILES[$fileParam])) {
-            if($mandatory) {
+            if ($mandatory) {
                 $this->error($this->lang['error_filenotfound']);
-            }
-            else {
+            } else {
                 return null;
             }
         }
         if ($_FILES[$fileParam]['error'] == UPLOAD_ERR_INI_SIZE) {
-            if($mandatory) {
+            if ($mandatory) {
                 $this->error($this->lang['error_filesize']);
-            }
-            else {
+            } else {
                 return null;
             }
-             
         }
         if (!is_uploaded_file($_FILES[$fileParam]['tmp_name'])) {
-            if($mandatory) {
-                $this->error($this->lang['error_filenotuploaded']);
+            if ($mandatory) {
+                $this->error($this->lang['error_filenotuploaded'] . " " . $_FILES[$fileParam]['error']);
+            } else {
+                return null;
             }
-            else {
-                return null; 
-            }
-            
         }
+        
+        
         //validate extensions
-//        if($PNG) {
-//            $localPath = $_FILES[$fileParam]['tmp_name'];
-//            if(exif_imagetype($localPath) != IMAGETYPE_PNG) {
-//                $this->error($this->lang['error_filenotpng']);
-//            }
-//            if(isset($width) && isset($height)) {
-//                $imageData = getimagesize($localPath);
-//                if($imageData[0] != $width) {
-//                    $this->error($this->lang['error_filesizeimage']);
-//                }
-//                if($imageData[1] != $height) {
-//                    $this->error($this->lang['error_filesizeimage']);
-//                }
-//            }
-//        }
+        if ($image) {
+            $localPath = $_FILES[$fileParam]['tmp_name'];
+            if (exif_imagetype($localPath) != IMAGETYPE_PNG) {
+                if (exif_imagetype($localPath) != IMAGETYPE_JPEG) {
+                    if ($mandatory) {
+                        $this->error($this->lang['error_filenotjpg']);
+                    } else {
+                        return null;
+                    }
+                }
+            }
+
+            if (isset($width) && isset($height) && $width == $height) {
+                $imageData = getimagesize($localPath);
+                $origin_w = $imageData[0];
+                $origin_h = $imageData[1];
+                if ($origin_w != $width || $origin_h != $height) {
+                    $image_p = imagecreatetruecolor($width, $height);
+                    if (!imagealphablending($image_p, false)) {
+                        $this->error($this->lang['error_imageblend']);
+                    }
+                    if (!imagesavealpha($image_p, true)) {
+                        $this->error($this->lang['error_imagealpha']);
+                    }
+                    $originalimage = FALSE;
+                    if (exif_imagetype($localPath) == IMAGETYPE_PNG) {
+                        $originalimage = imagecreatefrompng($localPath);
+                    } else if (exif_imagetype($localPath) == IMAGETYPE_JPEG) {
+                        $originalimage = imagecreatefromjpeg($localPath);
+                    }
+                    if ($originalimage === FALSE) {
+                        $this->error($this->lang['error_imagecreate']);
+                    }
+                    $bg = imagecolorallocate($image_p, 255, 255, 255);
+                    if ($bg === FALSE) {
+                        $this->error($this->lang['error_imagecolor']);
+                    }
+                    if (!imagefill($image_p, 0, 0, $bg)) {
+                        $this->error($this->lang['error_imagefill']);
+                    }
+
+                    $x = 0;
+                    $y = 0;
+                    $w = $width;
+                    $h = $height;
+
+                    if ($origin_w <= $width && $origin_h <= $height) {
+                        $x = ($width - $origin_w) / 2;
+                        $y = ($height - $origin_h) / 2;
+                        $w = $origin_w;
+                        $h = $origin_h;
+                    } else if ($origin_w > $width && $origin_h <= $height) {
+                        $p = ($width) / $origin_w;
+                        $x = 0;
+                        $y = ($height - ($p * $origin_h)) / 2;
+                        $w = $width;
+                        $h = $p * $origin_h;
+                    } else if ($origin_w <= $width && $origin_h > $height) {
+                        $p = ($height) / $origin_h;
+                        $x = ($width - ($p * $origin_w)) / 2;
+                        $y = 0;
+                        $w = $p * $origin_w;
+                        $h = $height;
+                    } else if ($origin_w > $width && $origin_h > $height) {
+                        if ($origin_w == $origin_h) {
+                            $x = 0;
+                            $y = 0;
+                            $w = $width;
+                            $h = $height;
+                        } else if ($origin_w > $origin_h) {
+                            $p = ($width) / $origin_w;
+                            $x = 0;
+                            $y = ($height - ($p * $origin_h)) / 2;
+                            $w = $width;
+                            $h = $p * $origin_h;
+                        } else if ($origin_w < $origin_h) {
+                            $p = ($height) / $origin_h;
+                            $x = ($width - ($p * $origin_w)) / 2;
+                            $y = 0;
+                            $w = $p * $origin_w;
+                            $h = $height;
+                        }
+                    }
+
+                    if (!imagecopyresampled($image_p, $originalimage, $x, $y, 0, 0, $w, $h, $origin_w, $origin_h)) {
+                        $this->error($this->lang['error_resample']);
+                    }
+                    if (!imagepng($image_p, $localPath, 9)) {
+                        $this->error($this->lang['error_save']);
+                    }
+                }
+            }
+        }
+        
         //save object to GS account
         $localPath = $_FILES[$fileParam]['tmp_name'];
         $permission = "";
-        if($public) {
+        if ($public) {
             $permission = "-a public-read";
         }
-        
+
         $gspath = $this->config["gsutil"] . " cp $permission $localPath " . $this->config['gsbucket'] . $destFolder . $destname;
         $ouput;
         $result;
         exec($gspath, $ouput, $result);
-        foreach($ouput as $logoutput) {
+        foreach ($ouput as $logoutput) {
             $arraylog = array();
             $arraylog["gs"] = $logoutput;
             $this->log($logoutput);
         }
-        if($result === 0) {
-            return $destFolder . $destname; 
-        }
-        else {
+        if ($result === 0) {
+            return $destFolder . $destname;
+        } else {
             return null;
         }
-         
     }
-    
 
     public function uploadLocalGS($localPath, $destFolder, $destname, $public = false) {
 
         //save object to GS account
         $permission = "";
-        if($public) {
+        if ($public) {
             $permission = "-a public-read";
         }
-        
+
         $gspath = $this->config["gsutil"] . " cp $permission $localPath " . $this->config['gsbucketprivate'] . $destFolder . $destname;
         $ouput;
         $result;
         exec($gspath, $ouput, $result);
-        foreach($ouput as $logoutput) {
+        foreach ($ouput as $logoutput) {
             $arraylog = array();
             $arraylog["gs"] = $logoutput;
             $this->log($logoutput);
         }
-        if($result === 0) {
-            return $destFolder . $destname; 
-        }
-        else {
+        if ($result === 0) {
+            return $destFolder . $destname;
+        } else {
             return null;
         }
-         
     }
-    
+
     public function downloadLocalGS($gspathPath, $destFolder, $destname) {
-        
+
         $gspath = $this->config["gsutil"] . " cp gs://" . $gspathPath . " " . $destFolder . $destname;
         $ouput;
         $result;
         exec($gspath, $ouput, $result);
-        foreach($ouput as $logoutput) {
+        foreach ($ouput as $logoutput) {
             $arraylog = array();
             $arraylog["gs"] = $logoutput;
             $this->log($logoutput);
         }
-        if($result === 0) {
-            return $destFolder . $destname; 
-        }
-        else {
+        if ($result === 0) {
+            return $destFolder . $destname;
+        } else {
             return null;
         }
-         
     }
 
     /**
@@ -1732,6 +1475,18 @@ class Application {
         }
 
         return $pass;
+    }
+    
+    /**
+     * Crea un string aleatoreo
+     * @param int $lenght <p>El largo del string a crear</p>
+     * @return una nuevo string aleatorio del largo indicado
+     */
+    public function createRandomNumber() {
+        srand((double) microtime() * 1000000);
+        $num = rand();
+
+        return $num;
     }
 
     /**
@@ -1847,7 +1602,7 @@ class Application {
             return '';
         }
     }
-    
+
     /**
      * Formatea una fecha
      * @param long $date la fecha en timestamp
@@ -1868,7 +1623,7 @@ class Application {
             $salt.=$chars[rand(0, 63)];
         return crypt($password, $salt);
     }
-    
+
     function distance($lat1, $lon1, $lat2, $lon2, $unit) {
         $theta = $lon1 - $lon2;
         $dist = sin(deg2rad($lat1)) * sin(deg2rad($lat2)) + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * cos(deg2rad($theta));
@@ -1887,10 +1642,14 @@ class Application {
             return $miles;
         }
     }
-    
+
     public function lang($string, $langstr = null) {
 
-        if (isset($langstr)) {
+        if ($langstr && !array_key_exists($langstr, Lang::$_ENUM)) {
+            $langstr = Lang::$_DEFAULT;
+        }
+
+        if ($langstr && $langstr != $this->config("lang")) {
             $lang = null;
 
             if (@require("lang/lang.$langstr.php")) {
@@ -1903,22 +1662,16 @@ class Application {
                         return $string;
                     }
                 }
-            } else {
-                if (array_key_exists($string, $this->lang)) {
-                    return $this->lang[$string];
-                } else {
-                    return $string;
-                }
-            }
-        } else {
-            if (array_key_exists($string, $this->lang)) {
-                return $this->lang[$string];
-            } else {
-                return $string;
             }
         }
+
+        if (array_key_exists($string, $this->lang)) {
+            return $this->lang[$string];
+        } else {
+            return $string;
+        }
     }
-    
+
     public function config($string) {
         if (array_key_exists($string, $this->config)) {
             return $this->config[$string];
@@ -1926,7 +1679,7 @@ class Application {
             return $string;
         }
     }
-    
+
     public function photoUrl($baseUrl) {
         if (!isset($baseUrl)) {
             return null;
@@ -1936,6 +1689,24 @@ class Application {
         } else {
             return $baseUrl;
         }
+    }
+    
+    public function normalize($string) {
+        return ucwords(strtolower(trim($string)));
+    }
+    
+    public function item($array, $key, $default = null, $langstr = null) {
+        if (array_key_exists($key, $array)) {
+            $string = $array[$key];
+            if (is_string($string) && stripos($string, "lang_") !== false) {
+                return $this->lang($string, $langstr);
+            } else if (is_string($string) && strpos($string, "db_") !== false) {
+                return $this->lang($string, $langstr);
+            } else {
+                return $string;
+            }
+        }
+        return $default;
     }
 
 }
