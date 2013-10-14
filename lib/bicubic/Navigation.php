@@ -25,17 +25,7 @@ class Navigation {
     }
 
     public function item($array, $key, $default = null, $langstr = null) {
-        if (array_key_exists($key, $array)) {
-            $string = $array[$key];
-            if (stripos($string, "lang_") !== false) {
-                return $this->lang($string, $langstr);
-            } else if (strpos($string, "db_") !== false) {
-                return $this->lang($string, $langstr);
-            } else {
-                return $string;
-            }
-        }
-        return $default;
+        return $this->application->item($array, $key, $default, $langstr);
     }
 
     public function photoUrl($baseUrl) {
@@ -43,15 +33,51 @@ class Navigation {
     }
 
     public function compareLangStrings($a, $b) {
-        return strcmp($this->lang($a), $this->lang($b));
-    }
-
-    public function compareObjectsByName($a, $b) {
-        return strcmp($a->getName(), $b->getName());
+        return strcasecmp($this->lang($a), $this->lang($b));
     }
 
     public function compareObjectsByLangName($a, $b) {
-        return strcmp($this->lang($a->getName()), $this->lang($b->getName()));
+        return strcasecmp($a->getName(), $b->getName());
+    }
+    
+    public function compareObjectsByComparer($a, $b) {
+        if ($a->comparer < $b->comparer) {
+            return -1;
+        }
+        if ($a->comparer == $b->comparer) {
+            return 0;
+        }
+        if ($a->comparer > $b->comparer) {
+            return 1;
+        }
+    }
+    
+    public function compareObjectsByTimeBack($a, $b) {
+        if ($a->time > $b->time) {
+            return -1;
+        }
+        if ($a->time == $b->time) {
+            return 0;
+        }
+        if ($a->time < $b->time) {
+            return 1;
+        }
+    }
+    
+    public function compareObjectsByComparerAndName($a, $b) {
+        if ($a->comparer < $b->comparer) {
+            return -1;
+        }
+        if ($a->comparer == $b->comparer) {
+            return strcasecmp($a->getName(), $b->getName());
+        }
+        if ($a->comparer > $b->comparer) {
+            return 1;
+        }
+    }
+
+    public function compareObjectsByName($a, $b) {
+        return strcasecmp($this->lang($a->getName()), $this->lang($b->getName()));
     }
 
     public function compareObjectsByDistance($a, $b) {
@@ -65,22 +91,24 @@ class Navigation {
             return 1;
         }
     }
+    
+    public function compareJsonObjectsByDistance($a, $b) {
+        if ($a->distance < $b->distance) {
+            return -1;
+        }
+        if ($a->distance == $b->distance) {
+            return 0;
+        }
+        if ($a->distance > $b->distance) {
+            return 1;
+        }
+    }
 
     public function normalize($string) {
         return ucwords(strtolower(trim($string)));
     }
     
-    public function compareWineLocalsByPricePerLitter(WineLocal $a, WineLocal $b) {
-        if ($a->priceperlitter < $b->priceperlitter) {
-            return -1;
-        }
-        if ($a->priceperlitter == $b->priceperlitter) {
-            return 0;
-        }
-        if ($a->priceperlitter > $b->priceperlitter) {
-            return 1;
-        }
-    }
+    
 
 }
 

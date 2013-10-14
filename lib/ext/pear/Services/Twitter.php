@@ -112,7 +112,7 @@ class Services_Twitter
      *
      * @var string $uri
      */
-    public static $uri = 'http://api.twitter.com/1';
+    public static $uri = 'http://api.twitter.com/1.1';
 
     /**
      * Public URI of Twitter's Search API
@@ -556,17 +556,20 @@ class Services_Twitter
     protected function loadAPI()
     {
         // initialize xml mapping
-        $p = is_dir('@data_dir@') 
-            ? array('@data_dir@', 'Services_Twitter', 'data')
+        $p = is_dir('lib/ext/pear/') 
+            ? array('lib/ext/pear/', 'Services_Twitter', 'data')
             : array(dirname(__FILE__), '..', 'data');
         $d = implode(DIRECTORY_SEPARATOR, $p) . DIRECTORY_SEPARATOR;
         if ($this->getOption('validate') && class_exists('DomDocument')) {
             // this should be done only when testing
             $doc = new DomDocument();
-            $doc->load($d . 'api.xml');
-            $doc->relaxNGValidate($d . 'api.rng');
+            $doc->load('lib/ext/pear/data/api.xml');
+            $doc->relaxNGValidate('lib/ext/pear/data/api.rng');
         }
-        $xmlApi = simplexml_load_file($d . 'api.xml');
+        $xmlApi = is_dir('lib/ext/pear/') ? simplexml_load_file('lib/ext/pear/data/api.xml') : simplexml_load_file(dirname(__FILE__) . '../data/api.xml');
+        if(!$xmlApi) {
+            return;
+        }
         foreach ($xmlApi->category as $category) {
             $catName             = (string)$category['name'];
             $this->api[$catName] = array();

@@ -318,6 +318,10 @@ http://pear.php.net/packages/Services_Twitter
             <param name="screen_name" type="id_or_screenname" required="false"/>
             <param name="cursor" type="integer" required="false"/>
         </endpoint>
+        <endpoint name="list" method="GET" auth_required="false" min_args="1">
+            <formats>xml,json</formats>
+            <param name="screen_name" type="id_or_screenname" required="false"/>
+        </endpoint>
     </category>
     <category name="followers">
         <endpoint name="ids" method="GET" auth_required="false" min_args="1">
