@@ -66,9 +66,10 @@ class PostgreSQLData extends SQLData {
     //@returns the result object
     public function performRead($query) {
         if ($this->debug) {
+            echo $query;
             $result = pg_query($this->connection, $query) or die(pg_last_error($this->connection));
         } else {
-            $result = pg_query($this->connection, $query) or die(pg_last_error("En estos momentos estamos colapsados"));
+            $result = pg_query($this->connection, $query) or die("data connection error");
         }
         return $result;
     }
