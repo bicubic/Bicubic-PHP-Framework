@@ -36,6 +36,7 @@ require_once("lib/bicubic/SearchParam.php");
 require_once("lib/bicubic/TransactionManager.php");
 //beans
 require_once("beans/SystemUser.php");
+require_once("beans/Constant.php");
 //params
 require_once("param/MessageParam.php");
 //json
@@ -48,17 +49,16 @@ require_once("json/SuccessJson.php");
 
 
 //set languaje
-require_once("lang/lang.en.php");
+$langfile = Lang::$_DEFAULT;
+require_once("lang/lang.$langfile.php");
 $application = new Application($config, $lang, null, null);
-$langfile = "en";
-
 //sacamos el lang del browser
 if (array_key_exists('HTTP_ACCEPT_LANGUAGE', $_SERVER)) {
     $langfile = substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2);
 }
 //sacamos el lang de la url
 $urllocale = $application->getUrlParam($config['param_lang'], "string256", false);
-if(isset($urllocale)) {
+if (isset($urllocale)) {
     $langfile = $urllocale;
 }
 //sacamos el lang de facebook Crowl
@@ -66,14 +66,15 @@ $fblocale = $application->getUrlParam("fb_locale", "string", false);
 if (isset($fblocale)) {
     $langfile = substr($fblocale, 0, 2);
 }
-
-
-if ($langfile == "es") {
-    require_once("lang/lang.es.php");
-    $config["lang"] = "es";
-} else {
-    $config["lang"] = "en";
+//vemos si existe en lang
+if (!array_key_exists($langfile, Lang::$_ENUM)) {
+    $langfile = Lang::$_DEFAULT;
 }
+//cargamos denuevo el lang por si es distinto al default
+require_once("lang/lang.$langfile.php");
+$config["lang"] = $langfile;
+
+
 
 //Set Input Data into GET
 if (isset($argv)) {
