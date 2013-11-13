@@ -362,7 +362,7 @@ abstract class SQLData extends Data {
             $query .= " WHERE " . ($queryPrep[4]);
         }
         if (isset($orderIndex) && isset($orderDirection)) {
-            $query .= " ORDER BY A.'$orderIndex' $orderDirection LIMIT 1";
+            $query .= " ORDER BY A.$orderIndex $orderDirection LIMIT 1";
         } else {
             $query .= " ORDER BY A.id DESC LIMIT 1";
         }
