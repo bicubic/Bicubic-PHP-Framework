@@ -94,9 +94,6 @@ class MySQLData extends SQLData {
         return mysqli_insert_id($this->connection);
     }
 
-    public function getTotalRows() {
-        return 0;
-    }
 
     public function unEscapeChars($value) {
         return $value;

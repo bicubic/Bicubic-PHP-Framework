@@ -17,7 +17,6 @@ $config['sslavailable'] = false;
 $config['web_contact_email'] = "";
 $config['web_contact_name'] = "";
 $config['web_time_out'] = 360000;
-$config['web_page_items'] = 100;
 //Data Base values
 $config['database_host'] = "localhost";
 $config['database_database'] = "bicubic"; 
