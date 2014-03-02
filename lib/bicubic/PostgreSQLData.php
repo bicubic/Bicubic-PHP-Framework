@@ -9,11 +9,7 @@
  * @framework  2.2
  */
 class PostgreSQLData extends SQLData {
-
-    //Connection object
-    private $connection;
-    private $debug = false;
-
+    
     //Constructor
     //@param $config the base configuration
     public function __construct($host, $user, $password, $database) {
@@ -125,9 +121,6 @@ class PostgreSQLData extends SQLData {
         return -1;
     }
 
-    public function getTotalRows() {
-        return $this->totalRows;
-    }
 
     public function unEscapeChars($value) {
         return $value;
