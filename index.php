@@ -11,6 +11,7 @@
 //base
 require_once("config/config.php");
 require_once("error.php");
+date_default_timezone_set("America/Santiago");
 //lib
 require_once("lib/ext/pear/Sigma.php");
 require_once("lib/ext/simple_html_dom.php");
@@ -36,8 +37,6 @@ require_once("lib/bicubic/TransactionManager.php");
 //beans
 require_once("beans/SystemUser.php");
 require_once("beans/Constant.php");
-//params
-require_once("param/MessageParam.php");
 //json
 require_once("json/ErrorJson.php");
 require_once("json/LoginErrorJson.php");
