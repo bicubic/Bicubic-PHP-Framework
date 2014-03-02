@@ -915,10 +915,11 @@ class Application {
             $paramName = strtoupper($fieldname);
             $cammelName = strtoupper(substr($fieldname, 0, 1)) . substr($fieldname, 1);
             $getter = "get$cammelName";
-            if (array_key_exists("category", $property)) {
+            if($this->item($property, "list", false)) {
+                $listgetter = "get".$cammelName."List";
                 $propertyName = $property["name"];
                 $paramName = strtoupper($propertyName);
-                $values = $property["category"];
+                $values = $object->$listgetter();
                 $selected = $object->$getter();
                 foreach ($values as $value => $text) {
                     $this->setHTMLArrayTemplate(array(
@@ -929,10 +930,11 @@ class Application {
                     ));
                     $this->parseTemplate($paramName);
                 }
-            } else if (array_key_exists("option", $property)) {
+            } else if ($this->item($property, "shortlist", false)) {
+                $listgetter = "get".$cammelName."List";
                 $propertyName = $property["name"];
                 $paramName = strtoupper($propertyName);
-                $values = $property["category"];
+                $values = $object->$listgetter();
                 $selected = $object->$getter();
                 foreach ($values as $value => $text) {
                     $this->setHTMLArrayTemplate(array(
