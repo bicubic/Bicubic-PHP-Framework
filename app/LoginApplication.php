@@ -30,7 +30,7 @@ class LoginApplication extends Application {
         //Session
         session_start();
         //Navigation
-        $this->navigation = $this->getUrlParam($this->config['param_navigation'], "letters");
+        $this->navigation = $this->getUrlParam($this->config('param_navigation'), "letters");
         switch ($this->navigation) {
             case "login" : {
                     require_once("nav/LoginNavigation.php");
@@ -48,12 +48,6 @@ class LoginApplication extends Application {
                     require_once("nav/LoginNavigation.php");
                     $navigation = new LoginNavigation($this);
                     $navigation->logout();
-                    break;
-                }
-            case "message" : {
-                    require_once("nav/MessageNavigation.php");
-                    $messageNavigation = new MessageNavigation($this);
-                    $messageNavigation->message();
                     break;
                 }
             default : {
