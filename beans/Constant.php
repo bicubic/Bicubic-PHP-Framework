@@ -1,4 +1,4 @@
-<?php
+<?php 
 
 
 
@@ -67,7 +67,7 @@ class CurrencyLang {
 class Lang {
 
     public static $_ENUM = array(
-        "es" => "Espa–ol",
+        "es" => "EspaÃ±ol",
         "en" => "English",
     );
     
@@ -98,6 +98,19 @@ class ObjectBoolean {
     public static $_ENUM = array(
         0 => "lang_no",
         1 => "lang_yes",
+    );
+
+}
+
+class Usernames {
+
+    public static $_USERNAME1 = 1;
+    public static $_USERNAME2 = 2;
+    public static $_USERNAME3 = 3;
+    public static $_ENUM = array(
+        1 => "lang_username1",
+        2 => "lang_username2",
+        3 => "lang_username3",
     );
 
 }

@@ -28,13 +28,18 @@ class ScriptApplication extends Application {
         parent::execute();
 
         //Navigation
-        $this->navigation = $this->getUrlParam($this->config['param_navigation'], "letters");
+        $this->navigation = $this->getUrlParam($this->config('param_navigation'), "letters");
         switch ($this->navigation) {
             case "password" : {
                     $this->generatePassword();
                     break;
                 }
-
+            case "message" : {
+                    require_once("nav/MessageNavigation.php");
+                    $messageNavigation = new MessageNavigation($this);
+                    $messageNavigation->message();
+                    break;
+                }
             default : {
                     echo "no nav";
                     break;

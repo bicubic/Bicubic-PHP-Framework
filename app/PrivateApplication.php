@@ -34,7 +34,7 @@ class PrivateApplication extends Application {
             $this->secureRedirect("login", "login");
         }
         //Navigation
-        $this->navigation = $this->getUrlParam($this->config['param_navigation'], "letters");
+        $this->navigation = $this->getUrlParam($this->config('param_navigation'), "letters");
         switch ($this->navigation) {
             case "hello" : {
                     require_once("nav/HelloNavigation.php");
@@ -43,7 +43,7 @@ class PrivateApplication extends Application {
                     break;
                 }
             default : {
-                    $this->error($this->lang['error_navnotfound']);
+                    $this->error($this->lang('error_navnotfound'));
                     break;
                 }
         }
