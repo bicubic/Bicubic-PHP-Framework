@@ -1,24 +1,23 @@
 <!doctype html>
-<html lang="en">
+<html lang="{TEMPLATE-LANG}">
     <head>
         <meta charset="utf-8">
         <title>{TEMPLATE-TITLE}</title>
-        <!--[if lt IE 9]><script src=http://html5shim.googlecode.com/svn/trunk/html5.js></script><![endif]-->
-        <link rel="stylesheet" href="templates/login/css/template.css">
+        <link rel="stylesheet" href="templates/common/styles.css">
         <style>
             {TEMPLATE-CSS}
         </style>
     </head>
     <body>
         {TEMPLATE-CONTENT}
+        
+        <footer>
+            <!-- BEGIN LANGS -->
+            <a href="{LANG-LINK}">{LANG-TEXT}</a>
+            <!-- END LANGS -->
+        </footer>
     </body>
-    <script src="templates/common/javascript/mootools.js"></script>
-    <script src="templates/common/javascript/mootools-more.js"></script>
-    <script src="templates/common/javascript/MooDialog.js"></script>
-    <script src="templates/common/javascript/MooDialog.Alert.js"></script>
-    <script src="templates/common/javascript/MooDialog.Fx.js"></script>
-    <script src="templates/common/javascript/Overlay.js"></script>
-    <script src="templates/login/javascript/template.js"></script>
+    <script src="templates/common/scripts.js"></script>
     <script>
         {TEMPLATE-JAVASCRIPT}
     </script>

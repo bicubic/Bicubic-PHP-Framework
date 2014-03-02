@@ -1,2 +1,10 @@
 <label>{PROPERTY-LABEL}</label>
-<input type="number" step="0.1" placeholder="{PROPERTY-PLACEHOLDER}" name="{OBJECT-NAME-PROPERTY-NAME}" value="{OBJECT-NAME-PROPERTY-VALUE}"/>
+<input type="number" step="0.1" placeholder="{PROPERTY-PLACEHOLDER}" id="{OBJECT-NAME-PROPERTY-NAME}" name="{OBJECT-NAME-PROPERTY-NAME}" value="{OBJECT-NAME-PROPERTY-VALUE}" {OBJECT-NAME-PROPERTY-REQUIRED} />
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var input = document.getElementById('{OBJECT-NAME-PROPERTY-NAME}');
+        if (input.required) {
+            input.addEventListener('blur', checkEmpty);
+        }
+    });
+</script>
