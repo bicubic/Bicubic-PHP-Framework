@@ -37,7 +37,7 @@ class TransactionManager {
      */
     public function getAllPaged(DataObject $dataObject, $orderIndex, $orderDirection, $page, $itemsPerPage, $keyword = null, $keywordfield = null) {
         $data = array();
-        $data = $this->data->select($dataObject, $orderIndex, $orderDirection, $itemsPerPage, $itemsPerPage * $page, false, $keyword, $keywordfield);
+        $data = $this->data->select($dataObject, $orderIndex, $orderDirection, $itemsPerPage, $itemsPerPage * $page, $keyword, $keywordfield);
         $this->totalrows = $this->data->getTotalRows();
         return $data;
     }
@@ -49,8 +49,7 @@ class TransactionManager {
      */
     public function getRecord(DataObject $dataObject) {
         $dataObject = $this->data->selectOne($dataObject);
-        $id = $dataObject->getId();
-        if (!isset($id)) {
+        if (!$dataObject) {
             return null;
         }
         return $dataObject;

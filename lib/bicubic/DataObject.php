@@ -8,25 +8,102 @@
  * @license    MIT
  * @framework  2.2
  */
-interface DataObject {
+abstract class DataObject {
 
     /**
      * Propiedades de BD
      * @return array las propiedades a serializar en la BD
      */
-    public function __getProperties();
-    
-    /**
-     * Tipos de las Propiedades de BD
-     * @return array de los tipos de las propiedades a serializar en la BD
-     */
-    public function __getTypes();
-    
+    public abstract function __getProperties();
+
     /**
      * Verifica que Contenga todos las propiedades necesarias para ingresar a BD
      * @return true si contiene todas las propiedades necesarias, false si no
      */
-    public function __isComplete();
+    public abstract function __isComplete();
+
+    public abstract function __isChild();
     
+
+    public function __getParentProperties() {
+        if($this->__isChild()) {
+            return $this->__getParentObject()->__getProperties();
+        }
+        return null;
+    }
+    
+
+    public function __getParentObject() {
+        if ($this->__isChild()) {
+            $parentClassName = get_parent_class($this);
+            $parentObject = new $parentClassName();
+            $properties = $parentObject->__getProperties();
+            foreach ($properties as $property) {
+                $pname = $property["name"];
+                $setter = "set$pname";
+                $getter = "get$pname";
+                $parentObject->$setter($this->$getter());
+            }
+            return $parentObject;
+        }
+        return null;
+    }
+
+    public function fillFromDB(array $row) {
+        $class = strtolower(get_class($this));
+        $properties = $this->__getProperties();
+        foreach ($properties as $property) {
+            $key = $property["name"];
+            $obj = strpos($key, "_object");
+            $arr = strpos($key, "_array");
+            if (!$arr) {
+                if (!$obj) {
+                    $cammel = strtoupper(substr($key, 0, 1)) . substr($key, 1);
+                    $setter = "set$cammel";
+                    $dbprop1 = $key;
+                    $dbprop2 = $class . $key;
+                    $dbprop3 = $key . "id";
+
+                    if (array_key_exists($dbprop1, $row)) {
+                        $this->$setter($row[$dbprop1]);
+                    } else if (array_key_exists($dbprop2, $row)) {
+                        $this->$setter($row[$dbprop2]);
+                    } else if (array_key_exists($dbprop3, $row)) {
+                        $this->$setter($row[$dbprop3]);
+                    }
+                }
+            }
+        }
+    }
+
+    public function fillFromJson($row) {
+        $class = strtolower(get_class($this));
+        $properties = $this->__getProperties();
+        foreach ($properties as $property) {
+            $key = $property["name"];
+            $obj = strpos($key, "_object");
+            $arr = strpos($key, "_array");
+            if (!$arr) {
+                if (!$obj) {
+                    $cammel = strtoupper(substr($key, 0, 1)) . substr($key, 1);
+                    $setter = "set$cammel";
+                    $dbprop1 = $key;
+                    $dbprop2 = $class . $key;
+                    $dbprop3 = $key . "id";
+                    if (property_exists($row, $dbprop1)) {
+                        $this->$setter($row->$dbprop1);
+                    } else if (property_exists($row, $dbprop2)) {
+                        $this->$setter($row->$dbprop2);
+                    } else if (property_exists($row, $dbprop3)) {
+                        $this->$setter($row->$dbprop3);
+                    }
+                }
+            }
+        }
+    }
+    
+    
+
 }
+
 ?>
