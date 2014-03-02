@@ -28,15 +28,23 @@ class SystemUser extends DataObject {
      */
     public function __getProperties() {
         return array(
-            "id"        => array("name" => "id",        "type" => "long",       "required" => false, "serializable" => true,  "updatenull" => true,  "hidden"    => true),
-            "name"      => array("name" => "name",      "type" => "string256",  "required" => true,  "serializable" => true,  "updatenull" => true                      ),
-            "username"  => array("name" => "username",  "type" => "string256",  "required" => true,  "serializable" => true,  "updatenull" => true                      ),
-            "password"  => array("name" => "password",  "type" => "string1024", "required" => true,  "serializable" => true,  "updatenull" => true                      ),
-            "email"     => array("name" => "email",     "type" => "string256",  "required" => true,  "serializable" => true,  "updatenull" => true                      ),
-            "token"     => array("name" => "token",     "type" => "string1024", "required" => false, "serializable" => true,  "updatenull" => false, "private"   => true),
-            "category"  => array("name" => "category",  "type" => "int",        "required" => false, "serializable" => false, "updatenull" => true,  "list"      => true),
-            "option"    => array("name" => "option",    "type" => "int",        "required" => false, "serializable" => false, "updatenull" => true,  "shortlist" => true),
+            "id"        => ["name" => "id",        "type" => "long",       "required" => false, "serializable" => true,  "updatenull" => true,   "hidden" => true,  "private" => false],
+            "name"      => ["name" => "name",      "type" => "string256",  "required" => true,  "serializable" => true,  "updatenull" => true,   "hidden" => false, "private" => false],
+            "username"  => ["name" => "username",  "type" => "string256",  "required" => true,  "serializable" => true,  "updatenull" => true,   "hidden" => false, "private" => false],
+            "password"  => ["name" => "password",  "type" => "password",   "required" => true,  "serializable" => true,  "updatenull" => true,   "hidden" => false, "private" => false],
+            "email"     => ["name" => "email",     "type" => "email",      "required" => true,  "serializable" => true,  "updatenull" => true,   "hidden" => false, "private" => false],
+            "token"     => ["name" => "token",     "type" => "string1024", "required" => false, "serializable" => true,  "updatenull" => false,  "hidden" => false, "private" => true ],
+            "category"  => ["name" => "category",  "type" => "list",       "required" => true,  "serializable" => false, "updatenull" => true,   "hidden" => false, "private" => false],
+            "option"    => ["name" => "option",    "type" => "shortlist",  "required" => true,  "serializable" => false, "updatenull" => true,   "hidden" => false, "private" => false],
         );
+    }
+    
+    public function __isComplete() {
+        if(!$this->token) {
+            $this->token = "";
+        }
+        
+        return parent::__isComplete();
     }
     
 

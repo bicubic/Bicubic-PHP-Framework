@@ -212,7 +212,7 @@ class Application {
      * @param string $type <p>El tipo de la variable para aplicar el filtro</p>
      * @return la variable de session o null si no existe o el filtro no corresponde
      */
-    public function getSessionParam($name, $type="flat") {
+    public function getSessionParam($name, $type = "flat") {
         if (isset($_SESSION[$name])) {
             $value = $_SESSION[$name];
 //            return $this->filter($value, $type);
@@ -253,7 +253,9 @@ class Application {
      */
     public function filter($value, $type) {
         switch ($type) {
-            case "int" : {
+            case "int" :
+            case "list" :
+            case "shortlist" : {
                     if ($value !== "" && $value >= 0) {
                         $vals = array("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "-", "+", ".", ",");
                         $trimed = str_replace($vals, "", $value);
@@ -310,6 +312,26 @@ class Application {
                             $value = str_replace(array("$", "(", ")", "%"), "", $value);
                             $value = str_replace(array(","), ".", $value);
                             return $value * 100;
+                        }
+                    }
+                    break;
+                }
+            case "email" : {
+                    if ($value) {
+                        $value = trim($value);
+                        $value = (substr($value, 0, 256));
+                        if ($value) {
+                            return $value;
+                        }
+                    }
+                    break;
+                }
+            case "password" : {
+                    if ($value) {
+                        $value = trim($value);
+                        $value = (substr($value, 0, 2048));
+                        if ($value) {
+                            return $value;
                         }
                     }
                     break;
@@ -745,7 +767,7 @@ class Application {
      * @param string $navigationFile <p>El nombre del archivo de vista (sin la extension)</p>
      * @return Nada
      */
-    public function setMainTemplate($navigationFolder, $navigationFile, $title="", $priority="html") {
+    public function setMainTemplate($navigationFolder, $navigationFile, $title = "", $priority = "html") {
         if ($priority != "html") {
             if ($this->tpl->loadTemplateFile($this->config('folder_template') . "$this->name/template." . $priority) === SIGMA_OK) {
                 $this->tpl->addBlockfile("TEMPLATE-CONTENT", $this->name, $this->config('folder_navigation') . "$navigationFolder/$navigationFile." . $priority);
@@ -761,6 +783,13 @@ class Application {
         }
 
         $this->setHTMLVariableTemplate("TEMPLATE-TITLE", $title);
+        foreach (Lang::$_ENUM as $lang => $langname) {
+            $this->setHtmlArrayTemplate(array(
+                'LANG-LINK' => $this->getSecureAppUrl($this->name, $this->navigation, array(new Param($this->config('param_lang'), $lang))),
+                'LANG-TEXT' => $langname,
+            ));
+            $this->parseTemplate('LANGS');
+        }
     }
 
     public function setCustomTemplate($navigationFolder, $navigationFile) {
@@ -794,7 +823,7 @@ class Application {
         $this->setArrayLangCustomItems($tpl, $name);
         $tpl->parse($name);
     }
-    
+
     private function setArrayLangCustomItems($tpl, $blockName) {
         $prefix = "TEXT";
         $placeholders = $tpl->getPlaceholderList($blockName);
@@ -811,7 +840,7 @@ class Application {
         $this->setLangCustomItems($tpl);
         return $tpl->get();
     }
-    
+
     private function setLangCustomItems($tpl) {
         $prefix = "LANG";
         $placeholders = $tpl->getPlaceholderList();
@@ -896,8 +925,6 @@ class Application {
         }
     }
 
-
-
     /**
      * Setea un objeto dentro de un formulario
      * @param DataObject $object el objeto del formulario
@@ -915,8 +942,8 @@ class Application {
             $paramName = strtoupper($fieldname);
             $cammelName = strtoupper(substr($fieldname, 0, 1)) . substr($fieldname, 1);
             $getter = "get$cammelName";
-            if($this->item($property, "list", false)) {
-                $listgetter = "get".$cammelName."List";
+            if ($property["type"] == "list") {
+                $listgetter = "get" . $cammelName . "List";
                 $propertyName = $property["name"];
                 $paramName = strtoupper($propertyName);
                 $values = $object->$listgetter();
@@ -930,8 +957,8 @@ class Application {
                     ));
                     $this->parseTemplate($paramName);
                 }
-            } else if ($this->item($property, "shortlist", false)) {
-                $listgetter = "get".$cammelName."List";
+            } else if ($property["type"] == "shortlist") {
+                $listgetter = "get" . $cammelName . "List";
                 $propertyName = $property["name"];
                 $paramName = strtoupper($propertyName);
                 $values = $object->$listgetter();
@@ -945,8 +972,7 @@ class Application {
                     ));
                     $this->parseTemplate($paramName);
                 }
-            }
-            else {
+            } else {
                 $value = $object->$getter();
                 $this->setVariableTemplate("$formName-NAME-$objectFormName-$paramName", "$objectName" . "_" . "$fieldname");
                 if ($property["type"] == "date") {

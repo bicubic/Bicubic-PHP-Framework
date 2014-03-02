@@ -1,7 +1,15 @@
 <label>{PROPERTY-LABEL}</label>
-<select name="{OBJECT-NAME-PROPERTY-NAME}">
-    <option value="0">{LANG-PLEASESELECT}</option>
+<select id="{OBJECT-NAME-PROPERTY-NAME}" name="{OBJECT-NAME-PROPERTY-NAME}" {OBJECT-NAME-PROPERTY-REQUIRED} >
+    <option value="">{LANG-PLEASESELECT}</option>
     <!-- BEGIN CATEGORIES -->
     <option value="{CATEGORY-VALUE}" {CATEGORY-SELECTED}>{CATEGORY-NAME}</option>
     <!-- END CATEGORIES -->
 </select>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var input = document.getElementById('{OBJECT-NAME-PROPERTY-NAME}');
+        if (input.required) {
+            input.addEventListener('blur', checkEmpty);
+        }
+    });
+</script>
