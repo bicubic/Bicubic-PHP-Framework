@@ -8,7 +8,7 @@
  * @license    MIT
  * @framework  2.2
  */
-class SystemUser implements DataObject {
+class SystemUser extends DataObject {
 
     private $id;
     private $name;
@@ -27,35 +27,25 @@ class SystemUser implements DataObject {
      */
     public function __getProperties() {
         return array(
-            "id",
-            "name",
-            "username",
-            "password",
-            "email",
-            "token"
+            "id"        => array("name" => "id",        "type" => "long",       "hidden" => true),
+            "name"      => array("name" => "name",      "type" => "string256",  ),
+            "username"  => array("name" => "username",  "type" => "string256",  "option" => Usernames::$_ENUM),
+            "password"  => array("name" => "password",  "type" => "string1024", ),
+            "email"     => array("name" => "email",     "type" => "string256",  "category" => Usernames::$_ENUM),
+            "token"     => array("name" => "token",     "type" => "string1024", "private" => true),
         );
     }
     
-    /**
-     * Tipos de las Propiedades de BD
-     * @return array de los tipos de las propiedades a serializar en la BD
-     */
-    public function __getTypes() {
-        return array(
-            "long",
-            "string256",
-            "string256",
-            "string1024",
-            "string256",
-            "string1024",
-        );
-    }
     
     public function __isComplete() {
         if(!isset($this->email)) {
             return false;
         }
         return true;
+    }
+    
+    public function __isChild() {
+        return false;
     }
 
     /**
