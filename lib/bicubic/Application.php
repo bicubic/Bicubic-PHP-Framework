@@ -746,16 +746,12 @@ class Application {
      * @return Nada
      */
     public function error($message) {
-        $this->name = "error";
-        $this->navigation = "error";
         $this->setMainTemplate("message", "error");
         $this->setHTMLVariableTemplate('MESSAGE-TEXT', $this->lang($message));
         $this->render();
     }
 
     public function message($message) {
-        $this->name = "message";
-        $this->navigation = "message";
         $this->setMainTemplate("message", "message");
         $this->setHTMLVariableTemplate('MESSAGE-TEXT', $this->lang($message));
         $this->render();
@@ -931,50 +927,40 @@ class Application {
      * @param string $formName el nombre del formulario
      */
     private function setFormObject(DataObject $object, $formName) {
-        $objectName = get_class($object);
         $properties = $object->__getProperties();
         if ($object->__isChild()) {
             $properties = array_merge($properties, $object->__getParentProperties());
         }
+        $objectName = get_class($object);
         $objectFormName = strtoupper($objectName);
         foreach ($properties as $property) {
-            $fieldname = $property["name"];
-            $paramName = strtoupper($fieldname);
-            $cammelName = strtoupper(substr($fieldname, 0, 1)) . substr($fieldname, 1);
-            $getter = "get$cammelName";
+            $paramName = strtoupper($property["name"]);
+            $getter = "get" . strtoupper(substr($property["name"], 0, 1)) . substr($property["name"], 1);
+            $value = $object->$getter();
             if ($property["type"] == "list") {
-                $listgetter = "get" . $cammelName . "List";
-                $propertyName = $property["name"];
-                $paramName = strtoupper($propertyName);
-                $values = $object->$listgetter();
-                $selected = $object->$getter();
-                foreach ($values as $value => $text) {
+                $items = $object->__getList(new TransactionManager($this->data), $property["name"]);
+                foreach ($items as $item => $text) {
                     $this->setHTMLArrayTemplate(array(
-                        "$formName-LISTNAME-$objectFormName-$paramName" => "$objectName" . "_" . "$propertyName",
-                        "$formName-LISTVALUE-$objectFormName-$paramName" => $value,
+                        "$formName-LISTNAME-$objectFormName-$paramName" => "$objectName" . "_" . $property["name"],
+                        "$formName-LISTVALUE-$objectFormName-$paramName" => $this->utf8tohtml(strval($item), true),
                         "$formName-LISTTEXT-$objectFormName-$paramName" => $this->lang($text),
-                        "$formName-LISTSELECTED-$objectFormName-$paramName" => ($value == $selected) ? "selected" : ""
+                        "$formName-LISTSELECTED-$objectFormName-$paramName" => ($item == $value) ? "selected" : ""
                     ));
                     $this->parseTemplate($paramName);
                 }
             } else if ($property["type"] == "shortlist") {
-                $listgetter = "get" . $cammelName . "List";
-                $propertyName = $property["name"];
-                $paramName = strtoupper($propertyName);
-                $values = $object->$listgetter();
-                $selected = $object->$getter();
-                foreach ($values as $value => $text) {
+                $items = $object->__getList(new TransactionManager($this->data), $property["name"]);
+                foreach ($items as $item => $text) {
                     $this->setHTMLArrayTemplate(array(
-                        "$formName-LISTNAME-$objectFormName-$paramName" => "$objectName" . "_" . "$propertyName",
-                        "$formName-LISTVALUE-$objectFormName-$paramName" => $value,
+                        "$formName-LISTNAME-$objectFormName-$paramName" => "$objectName" . "_" . $property["name"],
+                        "$formName-LISTVALUE-$objectFormName-$paramName" => $this->utf8tohtml(strval($item), true),
                         "$formName-LISTTEXT-$objectFormName-$paramName" => $this->lang($text),
-                        "$formName-LISTSELECTED-$objectFormName-$paramName" => ($value == $selected) ? "checked" : ""
+                        "$formName-LISTSELECTED-$objectFormName-$paramName" => ($item == $value) ? "checked" : ""
                     ));
                     $this->parseTemplate($paramName);
                 }
             } else {
-                $value = $object->$getter();
-                $this->setVariableTemplate("$formName-NAME-$objectFormName-$paramName", "$objectName" . "_" . "$fieldname");
+                $this->setVariableTemplate("$formName-NAME-$objectFormName-$paramName", "$objectName" . "_" . $property["name"]);
                 if ($property["type"] == "date") {
                     $value = $this->formatWiredDate($value);
                 } else {
@@ -1559,59 +1545,59 @@ class Application {
 
         return $num;
     }
-
-    /**
-     * Obtiene el numero total de paginas a mostrar en una navegacion con paginamiento
-     * @param int $totalItems <p>El numero total de items a mostrar en una pagina</p>
-     * @return el numero total de paginas
-     */
-    public function getTotalPages($totalItems) {
-        $totalPages = ceil($totalItems / $this->config('web_page_items'));
-        if ($totalPages <= 0) {
-            $totalPages = 1;
-        }
-        return $totalPages;
-    }
-
-    /**
-     * Obtiene la página actual de navegación con paginamiento
-     * Las páginas comienzan en 0
-     * @return El numero de la pagina actual
-     */
-    public function getCurrentPage() {
-        $page = $this->getUrlParam($this->config('param_page'), "int", false);
-        if (!isset($page)) {
-            $page = 0;
-        }
-        if ($page < 0) {
-            $this->error($this->lang('lang_pagnotfound'));
-        }
-        return $page;
-    }
-
-    /**
-     * Setea la navegación con paginación
-     * @param int $currentPage <p>La página actual</p>
-     * @param int $totalPages <p>El número total de páginas</p>
-     * @param string $app <p>La Aplicación a la cual redirigir</p>
-     * @param string $nav <p>LA navegación a la cual redirigir</p>
-     * @return Nada
-     */
-    public function setPageNavigation($currentPage, $totalItems, $app, $nav) {
-        $totalPages = $this->getTotalPages($totalItems);
-        $this->setHTMLVariableTemplate("PAGE-NUMBER", $currentPage + 1);
-        $this->setHTMLVariableTemplate("PAGE-TOTAL", $totalPages);
-        $linkback = $this->getSecureAppUrl($app, $nav, array(new Param($this->config('param_page'), $currentPage - 1)));
-        $linkfordware = $this->getSecureAppUrl($app, $nav, array(new Param($this->config('param_page'), $currentPage + 1)));
-        if ($currentPage + 1 > 1) {
-            $this->setHTMLVariableTemplate("PAGE-LINK-BACK", $linkback);
-            $this->setHTMLVariableTemplate("PAGE-TEXT-BACK", array_key_exists('lang_back', $this->lang) ? $this->lang('lang_back') : 'lang_back');
-        }
-        if ($currentPage + 1 < $totalPages) {
-            $this->setHTMLVariableTemplate("PAGE-LINK-NEXT", $linkfordware);
-            $this->setHTMLVariableTemplate("PAGE-TEXT-NEXT", array_key_exists('lang_next', $this->lang) ? $this->lang('lang_next') : 'lang_next');
-        }
-    }
+//
+//    /**
+//     * Obtiene el numero total de paginas a mostrar en una navegacion con paginamiento
+//     * @param int $totalItems <p>El numero total de items a mostrar en una pagina</p>
+//     * @return el numero total de paginas
+//     */
+//    public function getTotalPages($totalItems) {
+//        $totalPages = ceil($totalItems / $this->config('web_page_items'));
+//        if ($totalPages <= 0) {
+//            $totalPages = 1;
+//        }
+//        return $totalPages;
+//    }
+//
+//    /**
+//     * Obtiene la página actual de navegación con paginamiento
+//     * Las páginas comienzan en 0
+//     * @return El numero de la pagina actual
+//     */
+//    public function getCurrentPage() {
+//        $page = $this->getUrlParam($this->config('param_page'), "int", false);
+//        if (!isset($page)) {
+//            $page = 0;
+//        }
+//        if ($page < 0) {
+//            $this->error($this->lang('lang_pagnotfound'));
+//        }
+//        return $page;
+//    }
+//
+//    /**
+//     * Setea la navegación con paginación
+//     * @param int $currentPage <p>La página actual</p>
+//     * @param int $totalPages <p>El número total de páginas</p>
+//     * @param string $app <p>La Aplicación a la cual redirigir</p>
+//     * @param string $nav <p>LA navegación a la cual redirigir</p>
+//     * @return Nada
+//     */
+//    public function setPageNavigation($currentPage, $totalItems, $app, $nav) {
+//        $totalPages = $this->getTotalPages($totalItems);
+//        $this->setHTMLVariableTemplate("PAGE-NUMBER", $currentPage + 1);
+//        $this->setHTMLVariableTemplate("PAGE-TOTAL", $totalPages);
+//        $linkback = $this->getSecureAppUrl($app, $nav, array(new Param($this->config('param_page'), $currentPage - 1)));
+//        $linkfordware = $this->getSecureAppUrl($app, $nav, array(new Param($this->config('param_page'), $currentPage + 1)));
+//        if ($currentPage + 1 > 1) {
+//            $this->setHTMLVariableTemplate("PAGE-LINK-BACK", $linkback);
+//            $this->setHTMLVariableTemplate("PAGE-TEXT-BACK", array_key_exists('lang_back', $this->lang) ? $this->lang('lang_back') : 'lang_back');
+//        }
+//        if ($currentPage + 1 < $totalPages) {
+//            $this->setHTMLVariableTemplate("PAGE-LINK-NEXT", $linkfordware);
+//            $this->setHTMLVariableTemplate("PAGE-TEXT-NEXT", array_key_exists('lang_next', $this->lang) ? $this->lang('lang_next') : 'lang_next');
+//        }
+//    } 
 
     /**
      * formatea un booleano a texto

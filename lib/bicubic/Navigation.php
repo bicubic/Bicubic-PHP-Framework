@@ -117,15 +117,15 @@ class Navigation {
     }
 
     public function objectFormElement(DataObject $object, $property) {
-        $name = get_class($object);
-        $cammelName = strtoupper(substr($property["name"], 0, 1)) . substr($property["name"], 1);
-        $getter = "get$cammelName";
+        $objectName = get_class($object);
+        $getter = "get" . strtoupper(substr($property["name"], 0, 1)) . substr($property["name"], 1);
+        $value = $object->$getter();
         if ($this->item($property, "private", false)) {
             return "";
         } else if ($this->item($property, "hidden", false)) {
             $result = $this->application->setCustomTemplate("bicubic", "hidden");
-            $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-NAME", $name . "_" . $property["name"]);
-            $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-VALUE", $object->$getter());
+            $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-NAME", $objectName . "_" . $property["name"]);
+            $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-VALUE", $value);
             return $this->application->renderCustomTemplate($result);
         } else {
             switch ($property["type"]) {
@@ -158,8 +158,8 @@ class Navigation {
                         $result = $this->application->setCustomTemplate("bicubic", $property["type"]);
                         $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LABEL", $this->lang("lang_" . $property["name"]));
                         $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-PLACEHOLDER", $this->lang("lang_" . $property["name"] . "placeholder"));
-                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-NAME", $name . "_" . $property["name"]);
-                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-VALUE", $object->$getter());
+                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-NAME", $objectName . "_" . $property["name"]);
+                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-VALUE", $value);
                         $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-REQUIRED", $property["required"] ? "required" : "");
                         return $this->application->renderCustomTemplate($result);
                         break;
@@ -167,9 +167,9 @@ class Navigation {
                 case "boolean" : {
                         $result = $this->application->setCustomTemplate("bicubic", $property["type"]);
                         $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LABEL", $this->lang("lang_" . $property["name"]));
-                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-NAME", $name . "_" . $property["name"]);
+                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-NAME", $objectName . "_" . $property["name"]);
                         $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-REQUIRED", $property["required"] ? "required" : "");
-                        if ($object->$getter()) {
+                        if ($value) {
                             $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-SELECTED-YES", "selected");
                         } else {
                             $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-SELECTED-NO", "selected");
@@ -180,16 +180,14 @@ class Navigation {
                 case "list" : {
                         $result = $this->application->setCustomTemplate("bicubic", "category");
                         $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LABEL", $this->lang("lang_" . $property["name"]));
-                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-NAME", $name . "_" . $property["name"]);
+                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-NAME", $objectName . "_" . $property["name"]);
                         $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-REQUIRED", $property["required"] ? "required" : "");
-                        $selected = $object->$getter();
-                        $listgetter = "get" . $cammelName . "List";
-                        $values = $object->$listgetter();
-                        foreach ($values as $value => $text) {
+                        $items = $object->__getList(new TransactionManager($this->application->data), $property["name"]);
+                        foreach ($items as $item => $text) {
                             $this->application->setHTMLArrayCustomTemplate($result, array(
-                                "CATEGORY-VALUE" => $value,
+                                "CATEGORY-VALUE" => $item,
                                 "CATEGORY-NAME" => $this->lang($text),
-                                "CATEGORY-SELECTED" => ($value == $selected) ? "selected" : "",
+                                "CATEGORY-SELECTED" => ($item == $value) ? "selected" : "",
                             ));
                             $this->application->parseCustomTemplate($result, "CATEGORIES");
                         }
@@ -198,15 +196,13 @@ class Navigation {
                 case "shortlist" : {
                         $result = $this->application->setCustomTemplate("bicubic", "option");
                         $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LABEL", $this->lang("lang_" . $property["name"]));
-                        $selected = $object->$getter();
-                        $listgetter = "get" . $cammelName . "List";
-                        $values = $object->$listgetter();
-                        foreach ($values as $value => $text) {
+                        $items = $object->__getList(new TransactionManager($this->application->data), $property["name"]);
+                        foreach ($items as $item => $text) {
                             $this->application->setHTMLArrayCustomTemplate($result, array(
-                                "OBJECT-NAME-PROPERTY-NAME" => $name . "_" . $property["name"],
-                                "OPTION-VALUE" => $value,
+                                "OBJECT-NAME-PROPERTY-NAME" => $objectName . "_" . $property["name"],
+                                "OPTION-VALUE" => $item,
                                 "OPTION-NAME" => $this->lang($text),
-                                "OPTION-SELECTED" => ($value == $selected) ? "checked" : "",
+                                "OPTION-SELECTED" => ($item == $value) ? "checked" : "",
                                 "OBJECT-NAME-PROPERTY-REQUIRED" => $property["required"] ? "required" : "",
                             ));
                             $this->application->parseCustomTemplate($result, "CATEGORIES");
@@ -230,8 +226,8 @@ class Navigation {
             }
         }
         $this->application->setMainTemplate("bicubic", "form");
-        $name = get_class($object);
-        $this->application->setVariableTemplate("FORM-ID", $this->application->navigation . "$name");
+        $objectName = get_class($object);
+        $this->application->setVariableTemplate("FORM-ID", $this->application->navigation . "$objectName");
         $this->application->setVariableTemplate("FORM-ACTION", $this->application->getSecureAppUrl($this->application->name, $callback));
         $properties = $object->__getProperties();
         if ($object->__isChild()) {
@@ -248,29 +244,19 @@ class Navigation {
     public function objectFormSubmit(DataObject $object, $callback) {
         $object = $this->application->getFormObject($object);
         $data = new TransactionManager($this->application->data);
+        $data->data->begin();
         if (!$object->getId()) {
-            if ($object->__isChild()) {
-                $parent = $object->__getParentObject();
-                $id = $data->insertRecord($parent);
-                if (!$id) {
-                    $this->error("lang_errordatabase");
-                }
-                $object->setId($data->insertRecord($parent));
-            }
             if (!$data->insertRecord($object)) {
+                $data->data->rollback();
                 $this->error("lang_errordatabase");
             }
         } else {
-            if ($object->__isChild()) {
-                $parent = $object->__getParentObject();
-                if (!$data->updateRecord($parent)) {
-                    $this->error("lang_errordatabase");
-                }
-            }
             if (!$data->updateRecord($object)) {
+                $data->data->rollback();
                 $this->error("lang_errordatabase");
             }
         }
+        $data->data->commit();
         $this->application->redirectToUrl($this->application->getSecureAppUrl($this->application->name, $callback));
     }
 

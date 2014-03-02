@@ -35,6 +35,10 @@ abstract class DataObject {
     public function __isChild() {
         return false;
     }
+    
+    public function __getList(TransactionManager $data, $paramname) {
+        return [];
+    }
 
     public function __getParentProperties() {
         if ($this->__isChild()) {

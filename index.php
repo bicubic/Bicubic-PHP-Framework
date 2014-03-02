@@ -46,7 +46,6 @@ require_once("json/SuccessJson.php");
 $config['param_app'] = "app";
 $config['param_navigation'] = "nav";
 $config['param_id'] = "id";
-$config['param_page'] = "page";
 $config['param_compress'] = "cp";
 $config['param_lang'] = "lang";
 //set languaje
