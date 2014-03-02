@@ -36,12 +36,12 @@ class HomeApplication extends Application {
                 }
             case "object" : {
                     $navigation = new Navigation($this);
-                    $navigation->objectForm(new SystemUser());
+                    $navigation->objectForm(new SystemUser(), "objectSubmit");
                     break;
                 }
             case "objectSubmit" : {
                     $navigation = new Navigation($this);
-                    $navigation->objectFormSubmit(new SystemUser(), $this->getSecureAppUrl($this->name, "object"));
+                    $navigation->objectFormSubmit(new SystemUser(), "object");
                     break;
                 }
             default : {

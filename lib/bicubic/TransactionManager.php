@@ -81,22 +81,15 @@ class TransactionManager {
      * @param DataObject $dataObject
      * @return Boolean 
      */
-    public function updateRecord(DataObject $dataObject, $notNulls = false) {
+    public function updateRecord(DataObject $dataObject) {
         $id = $dataObject->getId();
         if (!isset($id)) {
             $this->error = "null id";
             return false;
         }
-        if (!$notNulls) {
-            if (!$this->data->update($dataObject)) {
-                $this->error = $this->data->getError();
-                return false;
-            }
-        } else {
-            if (!$this->data->updateNotNulls($dataObject)) {
-                $this->error = $this->data->getError();
-                return false;
-            }
+        if (!$this->data->update($dataObject)) {
+            $this->error = $this->data->getError();
+            return false;
         }
         return true;
     }
