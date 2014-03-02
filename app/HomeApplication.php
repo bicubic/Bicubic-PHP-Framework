@@ -16,7 +16,8 @@ class HomeApplication extends Application {
      * @param array $lang el array del lenguaje
      */
     function __construct($config, $lang) {
-        parent::__construct($config, $lang, null, "home");
+        $data = new PostgreSQLData($config['database_host'], $config['database_user'], $config['database_password'], $config['database_database'], $lang);
+        parent::__construct($config, $lang, $data, "home");
     }
 
     /**
@@ -25,12 +26,22 @@ class HomeApplication extends Application {
     public function execute() {
         parent::execute();
         //Navigation
-        $this->navigation = $this->getUrlParam($this->config['param_navigation'], "letters");
+        $this->navigation = $this->getUrlParam($this->config('param_navigation'), "letters");
         switch ($this->navigation) {
             case "hello" : {
                     require_once('nav/HelloNavigation.php');
                     $navigation = new HelloNavigation($this);
                     $navigation->hello();
+                    break;
+                }
+            case "object" : {
+                    $navigation = new Navigation($this);
+                    $navigation->objectForm(new SystemUser());
+                    break;
+                }
+            case "objectSubmit" : {
+                    $navigation = new Navigation($this);
+                    $navigation->objectFormSubmit(new SystemUser(), $this->getSecureAppUrl($this->name, "object"));
                     break;
                 }
             default : {

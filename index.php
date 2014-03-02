@@ -10,7 +10,6 @@
  */
 //base
 require_once("config/config.php");
-require_once("config/configgs.php");
 require_once("error.php");
 //lib
 require_once("lib/ext/pear/Sigma.php");
@@ -44,10 +43,13 @@ require_once("json/ErrorJson.php");
 require_once("json/LoginErrorJson.php");
 require_once("json/ObjectJson.php");
 require_once("json/SuccessJson.php");
-
-
-
-
+//URL params value
+$config['param_app'] = "app";
+$config['param_navigation'] = "nav";
+$config['param_id'] = "id";
+$config['param_page'] = "page";
+$config['param_compress'] = "cp";
+$config['param_lang'] = "lang";
 //set languaje
 $langfile = Lang::$_DEFAULT;
 require_once("lang/lang.$langfile.php");
@@ -73,8 +75,25 @@ if (!array_key_exists($langfile, Lang::$_ENUM)) {
 //cargamos denuevo el lang por si es distinto al default
 require_once("lang/lang.$langfile.php");
 $config["lang"] = $langfile;
-
-
+//set temp folder
+$config['server_temp_folder'] = sys_get_temp_dir() . "/";
+//set working foler
+$url = $_SERVER['REQUEST_URI']; //returns the current URL
+$parts = explode('/',$url);
+$dir = $_SERVER['SERVER_NAME'];
+for ($i = 0; $i < count($parts) - 1; $i++) {
+ $dir .= $parts[$i] . "/";
+}
+$dir = rtrim($dir, "/");
+$protocol = ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') || $_SERVER['SERVER_PORT'] == 443) ? "https" : "http";
+$config['web_folder'] = "$protocol://$dir/";
+$config['web_url'] = "$protocol://$dir/index.php";
+if($config['sslavailable']) {
+    $config['web_secure_url'] = "https://$dir/index.php";
+}
+else {
+    $config['web_secure_url'] = "http://$dir/index.php";
+}
 
 //Set Input Data into GET
 if (isset($argv)) {
@@ -82,7 +101,6 @@ if (isset($argv)) {
         $request = preg_split('/=/', $argv[$i]);
         $_GET[$request[0]] = $request[1];
     }
-
     $application = new Application($config, $lang, null, null);
     $app = $application->getUrlParam($config['param_app'], "letters");
     switch ($app) {

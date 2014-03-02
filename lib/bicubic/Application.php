@@ -10,24 +10,23 @@
  */
 class Application {
 
+    //logged user object
     public $user;
-    //Datos de Configuracion
+    //configuration data
     public $config;
-    //language data
+    //languaje data
     public $lang;
-    //string del lenguaje
-    public $landString;
     //data acces of the controlling $application
     public $data;
     //name of the controlling $application
     public $name;
     //template
-    protected $tpl;
+    public $tpl;
     //navigation
     public $navigation;
 
     /**
-     * Construye una nueva aplicacion
+     * generates a new application with HTLM parser
      * @param string $config <p>El archivo de configuracion</p>
      * @param string $lang <p>El archivo de lenguaje</p>
      * @param string $data <p>El motor de base de datos</p>
@@ -48,6 +47,9 @@ class Application {
      */
     public function execute() {
         session_start();
+        if ($this->config("maintenance")) {
+            $this->error($this->lang('lang_maintenance'));
+        }
     }
 
     /**
@@ -59,13 +61,19 @@ class Application {
      * @return una nueva aplicacion
      */
     public function getSecureAppUrl($app, $navigation, $params = null) {
-        $link = $this->config['web_secure_url'] . "?" . $this->config['param_app'] . "=" . $app;
-        $link .= "&" . $this->config['param_navigation'] . "=" . $navigation;
-        $link .= "&" . $this->config['param_lang'] . "=" . $this->config["lang"];
+        $link = $this->config('web_secure_url') . "?" . $this->config('param_app') . "=" . $app;
+        $link .= "&" . $this->config('param_navigation') . "=" . $navigation;
+        $hasLang = false;
         if ($params) {
             foreach ($params as $param) {
                 $link .= "&" . $param->name . "=" . $param->value;
             }
+            if ($param->name == $this->config('param_lang')) {
+                $hasLang = true;
+            }
+        }
+        if (!$hasLang) {
+            $link .= "&" . $this->config('param_lang') . "=" . $this->config("lang");
         }
         return $link;
     }
@@ -79,7 +87,7 @@ class Application {
      * @return una nueva aplicacion
      */
     public function getSecureAppFlatUrl($app, $navigation, $id) {
-        $link = $this->config['web_folder'] . "$app/$navigation/$id";
+        $link = $this->config('web_folder') . "$app/$navigation/$id";
         return $link;
     }
 
@@ -92,13 +100,19 @@ class Application {
      * @return una nueva aplicacion
      */
     public function getAppUrl($app, $navigation, $params = null) {
-        $link = $this->config['web_url'] . "?" . $this->config['param_app'] . "=" . $app;
-        $link .= "&" . $this->config['param_navigation'] . "=" . $navigation;
-        $link .= "&" . $this->config['param_lang'] . "=" . $this->config["lang"];
+        $link = $this->config('web_url') . "?" . $this->config('param_app') . "=" . $app;
+        $link .= "&" . $this->config('param_navigation') . "=" . $navigation;
+        $hasLang = false;
         if ($params) {
             foreach ($params as $param) {
                 $link .= "&" . $param->name . "=" . $param->value;
             }
+            if ($param->name == $this->config('param_lang')) {
+                $hasLang = true;
+            }
+        }
+        if (!$hasLang) {
+            $link .= "&" . $this->config('param_lang') . "=" . $this->config("lang");
         }
         return $link;
     }
@@ -116,12 +130,12 @@ class Application {
             $value = $_GET[$name];
             $value = $this->filter($value, $type);
             if ($force && !isset($value)) {
-                $this->error($this->lang['error_notvalid'] . " : " . (array_key_exists($name, $this->lang) ? $this->lang[$name] : $name));
+                $this->error($this->lang('notvalid') . " : " . (array_key_exists($name, $this->lang) ? $this->lang($name) : $name));
             }
             return $value;
         }
         if ($force) {
-            $this->error($this->lang['error_notvalid'] . " : " . (array_key_exists($name, $this->lang) ? $this->lang[$name] : $name));
+            $this->error($this->lang('notvalid') . " : " . (array_key_exists($name, $this->lang) ? $this->lang($name) : $name));
         }
         return null;
     }
@@ -139,19 +153,19 @@ class Application {
             $value = $_POST[$name];
             $value = $this->filter($value, $type);
             if ($force && !isset($value)) {
-                $this->error($this->lang['error_notvalid'] . " : " . (array_key_exists($name, $this->lang) ? $this->lang[$name] : $name));
+                $this->error($this->lang('lang_notvalid') . " : " . (array_key_exists($name, $this->lang) ? $this->lang($name) : $name));
             }
             return $value;
         } else if (isset($_FILES[$name])) {
             $value = $_FILES[$name]['name'];
             $value = $this->filter($value, $type);
             if ($force && !isset($value)) {
-                $this->error($this->lang['error_notvalid'] . " : " . (array_key_exists($name, $this->lang) ? $this->lang[$name] : $name));
+                $this->error($this->lang('lang_notvalid') . " : " . (array_key_exists($name, $this->lang) ? $this->lang($name) : $name));
             }
             return $value;
         }
         if ($force) {
-            $this->error($this->lang['error_notvalid'] . " : " . (array_key_exists($name, $this->lang) ? $this->lang[$name] : $name));
+            $this->error($this->lang('lang_notvalid') . " : " . (array_key_exists($name, $this->lang) ? $this->lang($name) : $name));
         }
         return null;
     }
@@ -163,25 +177,18 @@ class Application {
     public function getFormObject(DataObject $object, $force = true) {
         $objectName = get_class($object);
         $properties = $object->__getProperties();
-        $types = $object->__getTypes();
-        $objectFormName = strtoupper($objectName);
-        $i = 0;
+        if ($object->__isChild()) {
+            $properties = array_merge($properties, $object->__getParentProperties());
+        }
         foreach ($properties as $property) {
-            $obj = strpos($property, "_object");
-            $arr = strpos($property, "_array");
-            if (!$arr) {
-                if ($obj <= 0) {
-                    $fieldname = $property;
-                    $paramName = strtoupper($fieldname);
-                    $cammelName = strtoupper(substr($fieldname, 0, 1)) . substr($fieldname, 1);
-                    $setter = "set$cammelName";
-                    $object->$setter($this->getFormParam("$objectName" . "_" . "$fieldname", $types[$i], false));
-                }
-            }
-            $i++;
+            $fieldname = $property["name"];
+            $paramName = strtoupper($fieldname);
+            $cammelName = strtoupper(substr($fieldname, 0, 1)) . substr($fieldname, 1);
+            $setter = "set$cammelName";
+            $object->$setter($this->getFormParam("$objectName" . "_" . "$fieldname", $property["type"], false));
         }
         if ($force && !$object->__isComplete()) {
-            $this->error($this->lang['error_notcomplete']);
+            $this->error($this->lang('lang_notcomplete'));
         }
         return $object;
     }
@@ -194,7 +201,7 @@ class Application {
             return $json;
         }
         if ($force) {
-            $this->error($this->lang['error_jsonnotvalid']);
+            $this->error($this->lang('lang_jsonnotvalid'));
         }
         return null;
     }
@@ -659,12 +666,12 @@ class Application {
             return false;
         }
         //Check time out
-        if (!$rememberme && $this->config['web_time_out'] > 0) {
+        if (!$rememberme && $this->config('web_time_out') > 0) {
             $time = $this->getSessionParam("BACtime");
             if (!isset($time)) {
                 return false;
             }
-            if ($time + $this->config['web_time_out'] < time()) {
+            if ($time + $this->config('web_time_out') < time()) {
                 return false;
             }
             $this->setSessionParam("time", time());
@@ -716,22 +723,19 @@ class Application {
      * @param string $linkText <p>El texto del link</p>
      * @return Nada
      */
-    public function error($message, $link="", $linkText="") {
+    public function error($message) {
         $this->name = "error";
         $this->navigation = "error";
         $this->setMainTemplate("message", "error");
-        $this->setHTMLVariableTemplate("BASE-URL", $this->config["web_folder"]);
-        if (is_array($message)) {
-            foreach ($message as $text) {
-                $this->setHTMLVariableTemplate('MESSAGE-TEXT', $text);
-                $this->parseTemplate('MESSAGES');
-            }
-        } else {
-            $this->setHTMLVariableTemplate('MESSAGE-TEXT', $message);
-            $this->parseTemplate('MESSAGES');
-        }
-        $this->setHTMLVariableTemplate("MESSAGE-LINK", $link);
-        $this->setHTMLVariableTemplate("MESSAGE-LINK-TEXT", $linkText);
+        $this->setHTMLVariableTemplate('MESSAGE-TEXT', $this->lang($message));
+        $this->render();
+    }
+
+    public function message($message) {
+        $this->name = "message";
+        $this->navigation = "message";
+        $this->setMainTemplate("message", "message");
+        $this->setHTMLVariableTemplate('MESSAGE-TEXT', $this->lang($message));
         $this->render();
     }
 
@@ -743,22 +747,81 @@ class Application {
      */
     public function setMainTemplate($navigationFolder, $navigationFile, $title="", $priority="html") {
         if ($priority != "html") {
-            if ($this->tpl->loadTemplateFile($this->config['folder_template'] . "$this->name/template." . $priority) === SIGMA_OK) {
-                $this->tpl->addBlockfile("TEMPLATE-CONTENT", $this->name, $this->config['folder_navigation'] . "$navigationFolder/$navigationFile." . $priority);
+            if ($this->tpl->loadTemplateFile($this->config('folder_template') . "$this->name/template." . $priority) === SIGMA_OK) {
+                $this->tpl->addBlockfile("TEMPLATE-CONTENT", $this->name, $this->config('folder_navigation') . "$navigationFolder/$navigationFile." . $priority);
             }
-        } else if ($this->tpl->loadTemplateFile($this->config['folder_template'] . "$this->name/template.html") === SIGMA_OK) {
-            $this->tpl->addBlockfile("TEMPLATE-CONTENT", $this->name, $this->config['folder_navigation'] . "$navigationFolder/$navigationFile.html");
-            $this->setLangItems($this->name);
-            $this->tpl->addBlockfile("TEMPLATE-JAVASCRIPT", $this->name . "_javascript", $this->config['folder_navigation'] . "$navigationFolder/$navigationFile.js");
-            $this->setLangItems($this->name . "_javascript");
-            $this->tpl->addBlockfile("TEMPLATE-CSS", $this->name . "_css", $this->config['folder_navigation'] . "$navigationFolder/$navigationFile.css");
-        } else if ($this->tpl->loadTemplateFile($this->config['folder_template'] . "$this->name/template.xml") === SIGMA_OK) {
-            $this->tpl->addBlockfile("TEMPLATE-CONTENT", $this->name, $this->config['folder_navigation'] . "$navigationFolder/$navigationFile.xml");
-        } else if ($this->tpl->loadTemplateFile($this->config['folder_template'] . "$this->name/template.json") === SIGMA_OK) {
-            $this->tpl->addBlockfile("TEMPLATE-CONTENT", $this->name, $this->config['folder_navigation'] . "$navigationFolder/$navigationFile.json");
+        } else if ($this->tpl->loadTemplateFile($this->config('folder_template') . "$this->name/template.html") === SIGMA_OK) {
+            $this->tpl->addBlockfile("TEMPLATE-CONTENT", $this->name, $this->config('folder_navigation') . "$navigationFolder/$navigationFile.html");
+            $this->tpl->addBlockfile("TEMPLATE-JAVASCRIPT", $this->name . "_javascript", $this->config('folder_navigation') . "$navigationFolder/$navigationFile.js");
+            $this->tpl->addBlockfile("TEMPLATE-CSS", $this->name . "_css", $this->config('folder_navigation') . "$navigationFolder/$navigationFile.css");
+        } else if ($this->tpl->loadTemplateFile($this->config('folder_template') . "$this->name/template.xml") === SIGMA_OK) {
+            $this->tpl->addBlockfile("TEMPLATE-CONTENT", $this->name, $this->config('folder_navigation') . "$navigationFolder/$navigationFile.xml");
+        } else if ($this->tpl->loadTemplateFile($this->config('folder_template') . "$this->name/template.json") === SIGMA_OK) {
+            $this->tpl->addBlockfile("TEMPLATE-CONTENT", $this->name, $this->config('folder_navigation') . "$navigationFolder/$navigationFile.json");
         }
 
         $this->setHTMLVariableTemplate("TEMPLATE-TITLE", $title);
+    }
+
+    public function setCustomTemplate($navigationFolder, $navigationFile) {
+        $file = $this->config('folder_navigation') . "$navigationFolder/$navigationFile." . "html";
+        $tpl = new HTML_Template_Sigma();
+        if ($tpl->loadTemplateFile($file) === SIGMA_OK) {
+            return $tpl;
+        }
+        return null;
+    }
+
+    public function setHTMLVariableCustomTemplate($tpl, $name, $value) {
+        $value = strval($value);
+        $var = $this->utf8tohtml($value, true);
+        $var = str_replace("\r\n", "<br />", $var);
+        $var = str_replace("\n", "<br />", $var);
+        $tpl->setVariable($name, $var);
+    }
+
+    public function setHTMLArrayCustomTemplate($tpl, $array) {
+        foreach ($array as &$value) {
+            $value = strval($value);
+            $value = $this->utf8tohtml($value, true);
+            $value = str_replace("\r\n", "<br />", $value);
+            $value = str_replace("\n", "<br />", $value);
+        }
+        $tpl->setVariable($array);
+    }
+
+    public function parseCustomTemplate($tpl, $name) {
+        $this->setArrayLangCustomItems($tpl, $name);
+        $tpl->parse($name);
+    }
+    
+    private function setArrayLangCustomItems($tpl, $blockName) {
+        $prefix = "TEXT";
+        $placeholders = $tpl->getPlaceholderList($blockName);
+        foreach ($placeholders as $placeholder) {
+            if (is_string($placeholder) && strpos($placeholder, "$prefix-") !== false) {
+                $var = substr($placeholder, 5);
+                $name = strtolower($var);
+                $this->setHTMLVariableCustomTemplate($tpl, "$prefix-$var", $this->lang("lang_$name"));
+            }
+        }
+    }
+
+    public function renderCustomTemplate($tpl) {
+        $this->setLangCustomItems($tpl);
+        return $tpl->get();
+    }
+    
+    private function setLangCustomItems($tpl) {
+        $prefix = "LANG";
+        $placeholders = $tpl->getPlaceholderList();
+        foreach ($placeholders as $placeholder) {
+            if (strpos($placeholder, "$prefix-") !== false) {
+                $var = substr($placeholder, 5);
+                $name = strtolower($var);
+                $this->setHTMLVariableCustomTemplate($tpl, "$prefix-$var", $this->lang("lang_$name"));
+            }
+        }
     }
 
     /**
@@ -768,23 +831,42 @@ class Application {
      * @return Nada
      */
     private function setLangItems($blockName) {
+        $prefix = "LANG";
         $placeholders = $this->tpl->getPlaceholderList();
 
         foreach ($placeholders as $placeholder) {
-            if (strpos($placeholder, "LANG-") !== false) {
+            if (strpos($placeholder, "$prefix-") !== false) {
                 $var = substr($placeholder, 5);
                 $name = strtolower($var);
-                $this->setVariableTemplate("LANG-$var", $this->lang("lang_$name"));
+                $this->setVariableTemplate("$prefix-$var", $this->lang("lang_$name"));
             }
         }
 
         $placeholders = $this->tpl->getPlaceholderList($blockName);
 
         foreach ($placeholders as $placeholder) {
-            if (is_string($placeholder) && strpos($placeholder, "LANG-") !== false) {
+            if (is_string($placeholder) && strpos($placeholder, "$prefix-") !== false) {
                 $var = substr($placeholder, 5);
                 $name = strtolower($var);
-                $this->setVariableTemplate("LANG-$var", $this->lang("lang_$name"));
+                $this->setVariableTemplate("$prefix-$var", $this->lang("lang_$name"));
+            }
+        }
+    }
+
+    /**
+     * Llena los elementos de idioma de los templates cargados
+     * @param string $navigationFolder <p>La carpeta de la vista</p>
+     * @param string $navigationFile <p>El nombre del archivo de vista (sin la extension)</p>
+     * @return Nada
+     */
+    private function setArrayLangItems($blockName) {
+        $prefix = "TEXT";
+        $placeholders = $this->tpl->getPlaceholderList($blockName);
+        foreach ($placeholders as $placeholder) {
+            if (is_string($placeholder) && strpos($placeholder, "$prefix-") !== false) {
+                $var = substr($placeholder, 5);
+                $name = strtolower($var);
+                $this->setVariableTemplate("$prefix-$var", $this->lang("lang_$name"));
             }
         }
     }
@@ -814,6 +896,8 @@ class Application {
         }
     }
 
+
+
     /**
      * Setea un objeto dentro de un formulario
      * @param DataObject $object el objeto del formulario
@@ -822,29 +906,54 @@ class Application {
     private function setFormObject(DataObject $object, $formName) {
         $objectName = get_class($object);
         $properties = $object->__getProperties();
-        $types = $object->__getTypes();
+        if ($object->__isChild()) {
+            $properties = array_merge($properties, $object->__getParentProperties());
+        }
         $objectFormName = strtoupper($objectName);
-        $i = 0;
         foreach ($properties as $property) {
-            $obj = strpos($property, "_object");
-            $arr = strpos($property, "_array");
-            if (!$arr) {
-                if ($obj <= 0) {
-                    $fieldname = $property;
-                    $paramName = strtoupper($fieldname);
-                    $cammelName = strtoupper(substr($fieldname, 0, 1)) . substr($fieldname, 1);
-                    $getter = "get$cammelName";
-                    $value = $object->$getter();
-                    $this->setVariableTemplate("$formName-NAME-$objectFormName-$paramName", "$objectName" . "_" . "$fieldname");
-                    if ($types[$i] == "date") {
-                        $value = $this->formatWiredDate($value);
-                    } else {
-                        $value = $this->utf8tohtml(strval($value), true);
-                    }
-                    $this->setVariableTemplate("$formName-VALUE-$objectFormName-$paramName", $value);
+            $fieldname = $property["name"];
+            $paramName = strtoupper($fieldname);
+            $cammelName = strtoupper(substr($fieldname, 0, 1)) . substr($fieldname, 1);
+            $getter = "get$cammelName";
+            if (array_key_exists("category", $property)) {
+                $propertyName = $property["name"];
+                $paramName = strtoupper($propertyName);
+                $values = $property["category"];
+                $selected = $object->$getter();
+                foreach ($values as $value => $text) {
+                    $this->setHTMLArrayTemplate(array(
+                        "$formName-LISTNAME-$objectFormName-$paramName" => "$objectName" . "_" . "$propertyName",
+                        "$formName-LISTVALUE-$objectFormName-$paramName" => $value,
+                        "$formName-LISTTEXT-$objectFormName-$paramName" => $this->lang($text),
+                        "$formName-LISTSELECTED-$objectFormName-$paramName" => ($value == $selected) ? "selected" : ""
+                    ));
+                    $this->parseTemplate($paramName);
+                }
+            } else if (array_key_exists("option", $property)) {
+                $propertyName = $property["name"];
+                $paramName = strtoupper($propertyName);
+                $values = $property["category"];
+                $selected = $object->$getter();
+                foreach ($values as $value => $text) {
+                    $this->setHTMLArrayTemplate(array(
+                        "$formName-LISTNAME-$objectFormName-$paramName" => "$objectName" . "_" . "$propertyName",
+                        "$formName-LISTVALUE-$objectFormName-$paramName" => $value,
+                        "$formName-LISTTEXT-$objectFormName-$paramName" => $this->lang($text),
+                        "$formName-LISTSELECTED-$objectFormName-$paramName" => ($value == $selected) ? "checked" : ""
+                    ));
+                    $this->parseTemplate($paramName);
                 }
             }
-            $i++;
+            else {
+                $value = $object->$getter();
+                $this->setVariableTemplate("$formName-NAME-$objectFormName-$paramName", "$objectName" . "_" . "$fieldname");
+                if ($property["type"] == "date") {
+                    $value = $this->formatWiredDate($value);
+                } else {
+                    $value = $this->utf8tohtml(strval($value), true);
+                }
+                $this->setVariableTemplate("$formName-VALUE-$objectFormName-$paramName", $value);
+            }
         }
     }
 
@@ -929,6 +1038,7 @@ class Application {
      * @return Nada
      */
     public function parseTemplate($name) {
+        $this->setArrayLangItems($name);
         $this->tpl->parse($name);
     }
 
@@ -948,6 +1058,7 @@ class Application {
      * @return NADA
      */
     public function render() {
+        $this->setLangItems($this->name);
         $this->tpl->touchBlock($this->name);
         $this->tpl->touchBlock($this->name . "_onload");
         $this->tpl->touchBlock($this->name . "_javascript");
@@ -955,12 +1066,11 @@ class Application {
         $this->tpl->touchBlock($this->navigation . "_onload");
         $this->tpl->touchBlock($this->navigation . "_javascript");
         $this->tpl->show();
-        $this->log();
         $this->endApp();
     }
 
     public function renderToJson($jsonObject) {
-         //unsescape vars
+        //unsescape vars
         $jsonObject = $this->unescapeJsonObject($jsonObject);
 
         header('Content-type: application/json;charset=UTF8;');
@@ -976,7 +1086,6 @@ class Application {
             }
         }
         echo $str;
-        $this->log();
         $this->endApp();
     }
 
@@ -1014,7 +1123,6 @@ class Application {
         $this->tpl->touchBlock($this->navigation . "_javascript");
         header('Content-type: text/css');
         $this->tpl->show();
-        $this->log();
         $this->endApp();
     }
 
@@ -1031,7 +1139,6 @@ class Application {
         $this->tpl->touchBlock($this->navigation . "_javascript");
         header('Content-type: text/javascript');
         $this->tpl->show();
-        $this->log();
         $this->endApp();
     }
 
@@ -1046,24 +1153,23 @@ class Application {
         $this->tpl->touchBlock($this->navigation . "_onload");
         $this->tpl->touchBlock($this->navigation . "_javascript");
         $html = $this->tpl->get();
-        $pdf = new TCPDF($this->config['pdf_page_orientation'], $this->config['pdf_unite'], $this->config['pdf_page_format'], true, 'UTF-8', false);
-        $pdf->SetCreator($this->config['pdf_creator']);
-        $pdf->SetAuthor($this->config['pdf_author']);
-        $pdf->SetHeaderData(/* logo */ '', /* ancho logo */ '', /* título */ $this->lang['text_header'], /* $this->config['pdf_header_string'] */ '');
-        $pdf->setHeaderFont(Array($this->config['pdf_font_name_main'], '', $this->config['pdf_font_size_main']));
-        $pdf->setFooterFont(Array($this->config['pdf_font_name_data'], '', $this->config['pdf_font_size_data']));
-        $pdf->SetDefaultMonospacedFont($this->config['pdf_font_monospace']);
-        $pdf->SetMargins($this->config['pdf_margin_left'], $this->config['pdf_margin_top'], $this->config['pdf_margin_right']);
-        $pdf->SetHeaderMargin($this->config['pdf_margin_header']);
-        $pdf->SetFooterMargin($this->config['pdf_margin_footer']);
-        $pdf->SetAutoPageBreak(TRUE, $this->config['pdf_margin_bottom']);
-        $pdf->setImageScale($this->config['pdf_image_scale_ratio']);
+        $pdf = new TCPDF($this->config('pdf_page_orientation'), $this->config('pdf_unite'), $this->config('pdf_page_format'), true, 'UTF-8', false);
+        $pdf->SetCreator($this->config('pdf_creator'));
+        $pdf->SetAuthor($this->config('pdf_author'));
+        $pdf->SetHeaderData(/* logo */ '', /* ancho logo */ '', /* título */ $this->lang('lang_title'), '');
+        $pdf->setHeaderFont(Array($this->config('pdf_font_name_main'), '', $this->config('pdf_font_size_main')));
+        $pdf->setFooterFont(Array($this->config('pdf_font_name_data'), '', $this->config('pdf_font_size_data')));
+        $pdf->SetDefaultMonospacedFont($this->config('pdf_font_monospace'));
+        $pdf->SetMargins($this->config('pdf_margin_left'), $this->config('pdf_margin_top'), $this->config('pdf_margin_right'));
+        $pdf->SetHeaderMargin($this->config('pdf_margin_header'));
+        $pdf->SetFooterMargin($this->config('pdf_margin_footer'));
+        $pdf->SetAutoPageBreak(TRUE, $this->config('pdf_margin_bottom'));
+        $pdf->setImageScale($this->config('pdf_image_scale_ratio'));
         $pdf->setFontSubsetting(true);
-        $pdf->SetFont($this->config['pdf_font_name_data'], '', $this->config['pdf_font_size_data'], '', true);
+        $pdf->SetFont($this->config('pdf_font_name_data'), '', $this->config('pdf_font_size_data'), '', true);
         $pdf->AddPage();
         $pdf->writeHTMLCell($w = 0, $h = 0, $x = '', $y = '', $html, $border = 0, $ln = 1, $fill = 0, $reseth = true, $align = '', $autopadding = true);
-        $pdf->Output($this->lang['pdf_filename'], 'I');
-        $this->log();
+        $pdf->Output($this->lang('lang_file'), 'I');
         $this->endApp();
     }
 
@@ -1096,7 +1202,6 @@ class Application {
      * @return Nada
      */
     public function redirect($app, $navigation, $params = null) {
-        $this->log();
         //Try redirect
         header(sprintf("Location: %s", $this->getAppUrl($app, $navigation, $params)));
         $this->endApp();
@@ -1108,7 +1213,6 @@ class Application {
      * @return Nada
      */
     public function redirectToUrl($url) {
-        $this->log();
         //Try redirect
         header(sprintf("Location: %s", $url));
         $this->endApp();
@@ -1121,45 +1225,9 @@ class Application {
      * @return Nada
      */
     public function secureRedirect($app, $navigation, $params = null) {
-        $this->log();
         //Try redirect
         header(sprintf("Location: %s", $this->getSecureAppUrl($app, $navigation, $params)));
         $this->endApp();
-    }
-
-    /**
-     * Crea una entrada de log en el archivo de log de la aplicacion
-     * @param array $elements <p>Un array de pares (llave, valor) para agregar en el log en formatio XML</p>
-     * @return Nada
-     */
-    protected function log($elements = array()) {
-        //adds user information to the log
-        if (isset($this->user) && $this->user !== false) {
-            $elements["user"] = $this->user->getEmail();
-        }
-
-        $doc = new DOMDocument();
-        $logentry = $doc->createElement("entry");
-        foreach ($elements as $key => $value) {
-            $element = $doc->createElement($key, $value);
-            $logentry->appendChild($element);
-        }
-        $element = $doc->createElement("application", $this->name);
-        $logentry->appendChild($element);
-        $element = $doc->createElement("navigation", $this->navigation);
-        $logentry->appendChild($element);
-        $element = $doc->createElement("time", date('d-m-Y G:i:s'));
-        $logentry->appendChild($element);
-        $element = $doc->createElement("ip", isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : "localdaemon");
-        $logentry->appendChild($element);
-        $element = $doc->createElement("host", array_key_exists('SERVER_NAME', $_SERVER) ? $_SERVER['SERVER_NAME'] : "");
-        $logentry->appendChild($element);
-        $element = $doc->createElement("file", array_key_exists('PHP_SELF', $_SERVER) ? $_SERVER['PHP_SELF'] : "");
-        $logentry->appendChild($element);
-        $doc->appendChild($logentry);
-        $log = $doc->saveXML($logentry) . "\n";
-        $data = new LogData($this->config['server_logg_file']);
-        $data->insertLog($log);
     }
 
     /**
@@ -1171,49 +1239,24 @@ class Application {
      */
     public function download($fileName = null, $filepath = null) {
         if (!isset($fileName)) {
-            $fileName = $this->getUrlParam($this->config['param_file_name'], "string");
+            $fileName = $this->getUrlParam($this->config('param_file_name'), "string");
             if (!isset($fileName)) {
-                $this->error($this->lang['error_filenotfound']);
+                $this->error($this->lang('lang_filenotfound'));
             }
-            $filepath = $this->config['server_down_folder'] . $fileName;
+            $filepath = $this->config('server_down_folder') . $fileName;
         }
         if (!file_exists($filepath)) {
-            $this->error($this->lang['error_filenotfound']);
+            $this->error($this->lang('lang_filenotfound'));
         }
         $fsize = filesize($filepath);
-        if ($this->config['system'] == "windows") {
-            header("Content-Type: application/octet-stream");
-            header("Content-Disposition: attachment; filename=$fileName");
-            header("Content-Type: application/force-download");
-            header("Content-Type: application/vnd.ms-excel");
-            header("Content-Transfer-Encoding: binary");
-            ob_clean();
-            flush();
-            readfile($filepath);
-        } elseif ($this->config['system'] == "linux") {
-//            header("Content-Disposition: attachment; filename=$fileName");
-//            header("Content-Location: $filepath");
-//            header("Content-Type: application/force-download");
-//            header("Content-Type: application/octet-stream");
-//            header("Content-Type: application/download");
-//            header("Content-Length: $fsize");
-//            header("Expires: 0");
-//            $fp = fopen("$filepath", "r");
-//            while (!feof($fp)) {
-//                echo fread($fp, 1024 * 1024);
-//                flush();
-//            }
-//            fclose($fp);
-            header("Content-Type: application/octet-stream");
-            header("Content-Disposition: attachment; filename=$fileName");
-            header("Content-Type: application/force-download");
-            header("Content-Type: application/vnd.ms-excel");
-            header("Content-Transfer-Encoding: binary");
-            ob_clean();
-            flush();
-            readfile($filepath);
-        }
-        $this->log();
+        header("Content-Type: application/octet-stream");
+        header("Content-Disposition: attachment; filename=$fileName");
+        header("Content-Type: application/force-download");
+        header("Content-Type: application/vnd.ms-excel");
+        header("Content-Transfer-Encoding: binary");
+        ob_clean();
+        flush();
+        readfile($filepath);
         $this->endApp();
     }
 
@@ -1232,31 +1275,31 @@ class Application {
 
         if (!isset($_FILES[$fileParam])) {
             if (!$optional) {
-                $this->error($this->lang['error_filenotfound']);
+                $this->error($this->lang('lang_filenotfound'));
             } else {
                 return;
             }
         }
         if ($_FILES[$fileParam]['error'] == UPLOAD_ERR_INI_SIZE) {
             if (!$optional) {
-                $this->error($this->lang['error_filesize']);
+                $this->error($this->lang('lang_filesize'));
             } else {
                 return;
             }
         }
         if (!is_uploaded_file($_FILES[$fileParam]['tmp_name'])) {
             if (!$optional) {
-                $this->error($this->lang['error_filenotuploaded']);
+                $this->error($this->lang('lang_filenotuploaded'));
             } else {
                 return;
             }
         }
         //TODO calidate extensions
         if (!$override && file_exists($destFolder . $destname)) {
-            $this->error($this->lang['error_fileexist']);
+            $this->error($this->lang('lang_fileexist'));
         }
         if (!move_uploaded_file($_FILES[$fileParam]['tmp_name'], $destFolder . $destname)) {
-            $this->error($this->lang['error_filenotmoved']);
+            $this->error($this->lang('lang_filenotmoved'));
         }
 
         return $destFolder . $destname;
@@ -1276,34 +1319,34 @@ class Application {
 
         if (!isset($_FILES[$fileParam])) {
             if ($mandatory) {
-                $this->error($this->lang['error_filenotfound']);
+                $this->error($this->lang('lang_filenotfound'));
             } else {
                 return null;
             }
         }
         if ($_FILES[$fileParam]['error'] == UPLOAD_ERR_INI_SIZE) {
             if ($mandatory) {
-                $this->error($this->lang['error_filesize']);
+                $this->error($this->lang('lang_filesize'));
             } else {
                 return null;
             }
         }
         if (!is_uploaded_file($_FILES[$fileParam]['tmp_name'])) {
             if ($mandatory) {
-                $this->error($this->lang['error_filenotuploaded'] . " " . $_FILES[$fileParam]['error']);
+                $this->error($this->lang('lang_filenotuploaded') . " " . $_FILES[$fileParam]['error']);
             } else {
                 return null;
             }
         }
-        
-        
+
+
         //validate extensions
         if ($image) {
             $localPath = $_FILES[$fileParam]['tmp_name'];
             if (exif_imagetype($localPath) != IMAGETYPE_PNG) {
                 if (exif_imagetype($localPath) != IMAGETYPE_JPEG) {
                     if ($mandatory) {
-                        $this->error($this->lang['error_filenotjpg']);
+                        $this->error($this->lang('lang_filenotjpg'));
                     } else {
                         return null;
                     }
@@ -1317,10 +1360,10 @@ class Application {
                 if ($origin_w != $width || $origin_h != $height) {
                     $image_p = imagecreatetruecolor($width, $height);
                     if (!imagealphablending($image_p, false)) {
-                        $this->error($this->lang['error_imageblend']);
+                        $this->error($this->lang('lang_imageblend'));
                     }
                     if (!imagesavealpha($image_p, true)) {
-                        $this->error($this->lang['error_imagealpha']);
+                        $this->error($this->lang('lang_imagealpha'));
                     }
                     $originalimage = FALSE;
                     if (exif_imagetype($localPath) == IMAGETYPE_PNG) {
@@ -1329,14 +1372,14 @@ class Application {
                         $originalimage = imagecreatefromjpeg($localPath);
                     }
                     if ($originalimage === FALSE) {
-                        $this->error($this->lang['error_imagecreate']);
+                        $this->error($this->lang('lang_imagecreate'));
                     }
                     $bg = imagecolorallocate($image_p, 255, 255, 255);
                     if ($bg === FALSE) {
-                        $this->error($this->lang['error_imagecolor']);
+                        $this->error($this->lang('lang_imagecolor'));
                     }
                     if (!imagefill($image_p, 0, 0, $bg)) {
-                        $this->error($this->lang['error_imagefill']);
+                        $this->error($this->lang('lang_imagefill'));
                     }
 
                     $x = 0;
@@ -1383,15 +1426,15 @@ class Application {
                     }
 
                     if (!imagecopyresampled($image_p, $originalimage, $x, $y, 0, 0, $w, $h, $origin_w, $origin_h)) {
-                        $this->error($this->lang['error_resample']);
+                        $this->error($this->lang('lang_resample'));
                     }
                     if (!imagepng($image_p, $localPath, 9)) {
-                        $this->error($this->lang['error_save']);
+                        $this->error($this->lang('lang_save'));
                     }
                 }
             }
         }
-        
+
         //save object to GS account
         $localPath = $_FILES[$fileParam]['tmp_name'];
         $permission = "";
@@ -1399,15 +1442,15 @@ class Application {
             $permission = "-a public-read";
         }
 
-        $gspath = $this->config["gsutil"] . " cp $permission $localPath " . $this->config['gsbucket'] . $destFolder . $destname;
+        $gspath = $this->config("gsutil") . " cp $permission $localPath " . $this->config('gsbucket') . $destFolder . $destname;
         $ouput;
         $result;
         exec($gspath, $ouput, $result);
-        foreach ($ouput as $logoutput) {
-            $arraylog = array();
-            $arraylog["gs"] = $logoutput;
-            $this->log($logoutput);
-        }
+//        foreach ($ouput as $logoutput) {
+//            $arraylog = array();
+//            $arraylog["gs"] = $logoutput;
+//            $this->log($logoutput);
+//        }
         if ($result === 0) {
             return $destFolder . $destname;
         } else {
@@ -1423,15 +1466,15 @@ class Application {
             $permission = "-a public-read";
         }
 
-        $gspath = $this->config["gsutil"] . " cp $permission $localPath " . $this->config['gsbucketprivate'] . $destFolder . $destname;
+        $gspath = $this->config("gsutil") . " cp $permission $localPath " . $this->config('gsbucketprivate') . $destFolder . $destname;
         $ouput;
         $result;
         exec($gspath, $ouput, $result);
-        foreach ($ouput as $logoutput) {
-            $arraylog = array();
-            $arraylog["gs"] = $logoutput;
-            $this->log($logoutput);
-        }
+//        foreach ($ouput as $logoutput) {
+//            $arraylog = array();
+//            $arraylog["gs"] = $logoutput;
+//            $this->log($logoutput);
+//        }
         if ($result === 0) {
             return $destFolder . $destname;
         } else {
@@ -1441,15 +1484,15 @@ class Application {
 
     public function downloadLocalGS($gspathPath, $destFolder, $destname) {
 
-        $gspath = $this->config["gsutil"] . " cp gs://" . $gspathPath . " " . $destFolder . $destname;
+        $gspath = $this->config("gsutil") . " cp gs://" . $gspathPath . " " . $destFolder . $destname;
         $ouput;
         $result;
         exec($gspath, $ouput, $result);
-        foreach ($ouput as $logoutput) {
-            $arraylog = array();
-            $arraylog["gs"] = $logoutput;
-            $this->log($logoutput);
-        }
+//        foreach ($ouput as $logoutput) {
+//            $arraylog = array();
+//            $arraylog["gs"] = $logoutput;
+//            $this->log($logoutput);
+//        }
         if ($result === 0) {
             return $destFolder . $destname;
         } else {
@@ -1476,7 +1519,7 @@ class Application {
 
         return $pass;
     }
-    
+
     /**
      * Crea un string aleatoreo
      * @param int $lenght <p>El largo del string a crear</p>
@@ -1495,7 +1538,7 @@ class Application {
      * @return el numero total de paginas
      */
     public function getTotalPages($totalItems) {
-        $totalPages = ceil($totalItems / $this->config['web_page_items']);
+        $totalPages = ceil($totalItems / $this->config('web_page_items'));
         if ($totalPages <= 0) {
             $totalPages = 1;
         }
@@ -1508,12 +1551,12 @@ class Application {
      * @return El numero de la pagina actual
      */
     public function getCurrentPage() {
-        $page = $this->getUrlParam($this->config['param_page'], "int", false);
+        $page = $this->getUrlParam($this->config('param_page'), "int", false);
         if (!isset($page)) {
             $page = 0;
         }
         if ($page < 0) {
-            $this->error($this->lang['error_pagnotfound']);
+            $this->error($this->lang('lang_pagnotfound'));
         }
         return $page;
     }
@@ -1530,15 +1573,15 @@ class Application {
         $totalPages = $this->getTotalPages($totalItems);
         $this->setHTMLVariableTemplate("PAGE-NUMBER", $currentPage + 1);
         $this->setHTMLVariableTemplate("PAGE-TOTAL", $totalPages);
-        $linkback = $this->getSecureAppUrl($app, $nav, array(new Param($this->config['param_page'], $currentPage - 1)));
-        $linkfordware = $this->getSecureAppUrl($app, $nav, array(new Param($this->config['param_page'], $currentPage + 1)));
+        $linkback = $this->getSecureAppUrl($app, $nav, array(new Param($this->config('param_page'), $currentPage - 1)));
+        $linkfordware = $this->getSecureAppUrl($app, $nav, array(new Param($this->config('param_page'), $currentPage + 1)));
         if ($currentPage + 1 > 1) {
             $this->setHTMLVariableTemplate("PAGE-LINK-BACK", $linkback);
-            $this->setHTMLVariableTemplate("PAGE-TEXT-BACK", array_key_exists('lang_back', $this->lang) ? $this->lang['lang_back'] : 'lang_back');
+            $this->setHTMLVariableTemplate("PAGE-TEXT-BACK", array_key_exists('lang_back', $this->lang) ? $this->lang('lang_back') : 'lang_back');
         }
         if ($currentPage + 1 < $totalPages) {
             $this->setHTMLVariableTemplate("PAGE-LINK-NEXT", $linkfordware);
-            $this->setHTMLVariableTemplate("PAGE-TEXT-NEXT", array_key_exists('lang_next', $this->lang) ? $this->lang['lang_next'] : 'lang_next');
+            $this->setHTMLVariableTemplate("PAGE-TEXT-NEXT", array_key_exists('lang_next', $this->lang) ? $this->lang('lang_next') : 'lang_next');
         }
     }
 
@@ -1548,7 +1591,7 @@ class Application {
      * @return string si si el booleano es true, no si el booleano es false
      */
     public function formatBoolean($boolean) {
-        return $boolean ? $this->lang['text_yes'] : $this->lang['text_no'];
+        return $boolean ? $this->lang('text_yes') : $this->lang('text_no');
     }
 
     /**
@@ -1690,11 +1733,11 @@ class Application {
             return $baseUrl;
         }
     }
-    
+
     public function normalize($string) {
         return ucwords(strtolower(trim($string)));
     }
-    
+
     public function item($array, $key, $default = null, $langstr = null) {
         if (array_key_exists($key, $array)) {
             $string = $array[$key];
