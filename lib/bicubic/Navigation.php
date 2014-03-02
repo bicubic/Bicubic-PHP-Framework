@@ -116,7 +116,7 @@ class Navigation {
         return ucwords(strtolower(trim($string)));
     }
 
-    public function objectForm(DataObject $object, $secure = true) {
+    public function objectForm(DataObject $object, $callback) {
         $id = $this->application->getUrlParam($this->config("param_id"), "int");
         if ($id) {
             $data = new TransactionManager($this->application->data);
@@ -129,11 +129,7 @@ class Navigation {
         $this->application->setMainTemplate("bicubic", "form");
         $name = get_class($object);
         $this->application->setVariableTemplate("FORM-ID", $this->application->navigation . "$name");
-        if ($secure) {
-            $this->application->setVariableTemplate("FORM-ACTION", $this->application->getSecureAppUrl($this->application->name, $this->application->navigation . "Submit"));
-        } else {
-            $this->application->setVariableTemplate("FORM-ACTION", $this->application->getAppUrl($this->application->name, $this->application->navigation . "Submit"));
-        }
+        $this->application->setVariableTemplate("FORM-ACTION", $this->application->getSecureAppUrl($this->application->name, $callback));
         $properties = $object->__getProperties();
         if ($object->__isChild()) {
             $properties = array_merge($properties, $object->__getParentProperties());
@@ -142,20 +138,21 @@ class Navigation {
         foreach ($properties as $property) {
             $cammelName = strtoupper(substr($property["name"], 0, 1)) . substr($property["name"], 1);
             $getter = "get$cammelName";
-            if (array_key_exists("private", $property) && $object->$getter()) {
+            if ($this->item($property, "private", false)) {
                 continue;
-            }
-            else if (array_key_exists("hidden", $property) && $object->$getter()) {
+            } else if ($this->item($property, "hidden", false)) {
                 $result = $this->application->setCustomTemplate("bicubic", "hidden");
                 $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-NAME", $name . "_" . $property["name"]);
                 $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-VALUE", $object->$getter());
                 $formContent .= $this->application->renderCustomTemplate($result);
-            } else if (array_key_exists("category", $property)) {
+            } else if ($this->item($property, "list", false)) {
                 $result = $this->application->setCustomTemplate("bicubic", "category");
                 $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LABEL", $this->lang("lang_" . $property["name"]));
                 $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-NAME", $name . "_" . $property["name"]);
                 $selected = $object->$getter();
-                foreach ($property["category"] as $value => $text) {
+                $listgetter = "get" . $cammelName . "List";
+                $values = $object->$listgetter();
+                foreach ($values as $value => $text) {
                     $this->application->setHTMLArrayCustomTemplate($result, array(
                         "CATEGORY-VALUE" => $value,
                         "CATEGORY-NAME" => $this->lang($text),
@@ -164,11 +161,13 @@ class Navigation {
                     $this->application->parseCustomTemplate($result, "CATEGORIES");
                 }
                 $formContent .= $this->application->renderCustomTemplate($result);
-            } else if (array_key_exists("option", $property)) {
+            } else if ($this->item($property, "shortlist", false)) {
                 $result = $this->application->setCustomTemplate("bicubic", "option");
                 $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LABEL", $this->lang("lang_" . $property["name"]));
                 $selected = $object->$getter();
-                foreach ($property["option"] as $value => $text) {
+                $listgetter = "get" . $cammelName . "List";
+                $values = $object->$listgetter();
+                foreach ($values as $value => $text) {
                     $this->application->setHTMLArrayCustomTemplate($result, array(
                         "OBJECT-NAME-PROPERTY-NAME" => $name . "_" . $property["name"],
                         "OPTION-VALUE" => $value,
@@ -178,8 +177,7 @@ class Navigation {
                     $this->application->parseCustomTemplate($result, "CATEGORIES");
                 }
                 $formContent .= $this->application->renderCustomTemplate($result);
-            }
-            else {
+            } else {
                 switch ($property["type"]) {
                     case "alpha32" :
                     case "alphanumeric" :
@@ -232,20 +230,33 @@ class Navigation {
         $this->application->render();
     }
 
-    public function objectFormSubmit(DataObject $object, $callbackUrl) {
+    public function objectFormSubmit(DataObject $object, $callback) {
         $object = $this->application->getFormObject($object);
         $data = new TransactionManager($this->application->data);
-        if(!$object->getId()) {
-            if(!$data->insertRecord($object)) {
+        if (!$object->getId()) {
+            if ($object->__isChild()) {
+                $parent = $object->__getParentObject();
+                $id = $data->insertRecord($parent);
+                if (!$id) {
+                    $this->error("lang_errordatabase");
+                }
+                $object->setId($data->insertRecord($parent));
+            }
+            if (!$data->insertRecord($object)) {
+                $this->error("lang_errordatabase");
+            }
+        } else {
+            if ($object->__isChild()) {
+                $parent = $object->__getParentObject();
+                if (!$data->updateRecord($parent)) {
+                    $this->error("lang_errordatabase");
+                }
+            }
+            if (!$data->updateRecord($object)) {
                 $this->error("lang_errordatabase");
             }
         }
-        else {
-            if(!$data->updateRecord($object)) {
-                $this->error("lang_errordatabase");
-            }
-        }
-        $this->application->redirectToUrl($callbackUrl);
+        $this->application->redirectToUrl($this->application->getSecureAppUrl($this->application->name, $callback));
     }
 
 }

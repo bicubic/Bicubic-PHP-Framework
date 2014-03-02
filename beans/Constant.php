@@ -102,15 +102,12 @@ class ObjectBoolean {
 
 }
 
-class Usernames {
+class ExampleList {
 
-    public static $_USERNAME1 = 1;
-    public static $_USERNAME2 = 2;
-    public static $_USERNAME3 = 3;
     public static $_ENUM = array(
-        1 => "lang_username1",
-        2 => "lang_username2",
-        3 => "lang_username3",
+        1 => "lang_item1",
+        2 => "lang_item2",
+        3 => "lang_item3",
     );
 
 }

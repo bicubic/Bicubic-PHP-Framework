@@ -16,9 +16,10 @@ class SystemUser extends DataObject {
     private $password;
     private $email;
     private $token;
+    private $category;
+    private $option;
 
     function __construct() {
-        
     }
 
     /**
@@ -27,26 +28,17 @@ class SystemUser extends DataObject {
      */
     public function __getProperties() {
         return array(
-            "id"        => array("name" => "id",        "type" => "long",       "hidden" => true),
-            "name"      => array("name" => "name",      "type" => "string256",  ),
-            "username"  => array("name" => "username",  "type" => "string256",  "option" => Usernames::$_ENUM),
-            "password"  => array("name" => "password",  "type" => "string1024", ),
-            "email"     => array("name" => "email",     "type" => "string256",  "category" => Usernames::$_ENUM),
-            "token"     => array("name" => "token",     "type" => "string1024", "private" => true),
+            "id"        => array("name" => "id",        "type" => "long",       "required" => false, "serializable" => true,  "updatenull" => true,  "hidden"    => true),
+            "name"      => array("name" => "name",      "type" => "string256",  "required" => true,  "serializable" => true,  "updatenull" => true                      ),
+            "username"  => array("name" => "username",  "type" => "string256",  "required" => true,  "serializable" => true,  "updatenull" => true                      ),
+            "password"  => array("name" => "password",  "type" => "string1024", "required" => true,  "serializable" => true,  "updatenull" => true                      ),
+            "email"     => array("name" => "email",     "type" => "string256",  "required" => true,  "serializable" => true,  "updatenull" => true                      ),
+            "token"     => array("name" => "token",     "type" => "string1024", "required" => false, "serializable" => true,  "updatenull" => false, "private"   => true),
+            "category"  => array("name" => "category",  "type" => "int",        "required" => false, "serializable" => false, "updatenull" => true,  "list"      => true),
+            "option"    => array("name" => "option",    "type" => "int",        "required" => false, "serializable" => false, "updatenull" => true,  "shortlist" => true),
         );
     }
     
-    
-    public function __isComplete() {
-        if(!isset($this->email)) {
-            return false;
-        }
-        return true;
-    }
-    
-    public function __isChild() {
-        return false;
-    }
 
     /**
      * Setea el valor de una propiedad
@@ -95,6 +87,7 @@ class SystemUser extends DataObject {
     function getUsername() {
         return $this->username;
     }
+    
 
     /**
      * Setea el valor de una propiedad
@@ -127,6 +120,7 @@ class SystemUser extends DataObject {
     function getEmail() {
         return $this->email;
     }
+   
 
     /**
      * Setea el valor de una propiedad
@@ -142,6 +136,30 @@ class SystemUser extends DataObject {
      */
     function getToken() {
         return $this->token;
+    }
+    
+    public function getCategory() {
+        return $this->category;
+    }
+    
+    public function getCategoryList() {
+        return ExampleList::$_ENUM;
+    }
+
+    public function setCategory($category) {
+        $this->category = $category;
+    }
+
+    public function getOption() {
+        return $this->option;
+    }
+
+    public function setOption($option) {
+        $this->option = $option;
+    }
+
+    public function getOptionList() {
+        return ExampleList::$_ENUM;
     }
 
 }
