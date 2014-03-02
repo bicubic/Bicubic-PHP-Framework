@@ -32,6 +32,9 @@ abstract class SQLData extends Data {
         $j = 0;
         $properties = $object->__getProperties();
         foreach ($properties as $property) {
+            if (!$property["serializable"]) {
+                continue;
+            }
             $key = $property["name"];
             $obj = strpos($key, "_object");
             $cammel = strtoupper(substr($key, 0, 1)) . substr($key, 1);
@@ -85,6 +88,9 @@ abstract class SQLData extends Data {
         $i = 0;
         $properties = $object->__getProperties();
         foreach ($properties as $property) {
+            if (!$property["serializable"]) {
+                continue;
+            }
             $key = $property["name"];
             $cammel = strtoupper(substr($key, 0, 1)) . substr($key, 1);
             $getter = "get$cammel";
@@ -150,6 +156,9 @@ abstract class SQLData extends Data {
         $i = 0;
         $properties = $object->__getProperties();
         foreach ($properties as $property) {
+            if (!$property["serializable"]) {
+                continue;
+            }
             $key = $property["name"];
             $cammel = strtoupper(substr($key, 0, 1)) . substr($key, 1);
             $getter = "get$cammel";
@@ -192,6 +201,9 @@ abstract class SQLData extends Data {
         $i = 0;
         $properties = $object->__getProperties();
         foreach ($properties as $property) {
+            if (!$property["serializable"]) {
+                continue;
+            }
             $key = $property["name"];
             $cammel = strtoupper(substr($key, 0, 1)) . substr($key, 1);
             $getter = "get$cammel";
@@ -207,46 +219,13 @@ abstract class SQLData extends Data {
                         $query .= ", $key='$value' ";
                     }
                 } else {
-                    if ($i == 0) {
-                        $query .= "SET $key=NULL ";
-                        $i++;
-                    } else {
-                        $query .= ", $key=NULL ";
-                    }
-                }
-            }
-        }
-        $idoftheobject = $this->escapeChars($object->getId());
-        $query .= "WHERE $idname = '" . $idoftheobject . "'";
-        if (!$this->performWrite($query)) {
-            return false;
-        }
-        return true;
-    }
-
-    public function updateNotNulls(DataObject $object, $idname = "id") {
-        if ($object->getId() == null) {
-            return false;
-        }
-        $class = strtolower(get_class($object));
-        $table = ($class);
-        $query = "UPDATE " . $table . " ";
-        $i = 0;
-        $properties = $object->__getProperties();
-        foreach ($properties as $property) {
-            $key = $property["name"];
-            $cammel = strtoupper(substr($key, 0, 1)) . substr($key, 1);
-            $getter = "get$cammel";
-            $setter = "set$cammel";
-            $value = $object->$getter();
-            if ($key != $idname) {
-                if (isset($value)) {
-                    $value = $this->escapeChars($value);
-                    if ($i == 0) {
-                        $query .= "SET $key='$value' ";
-                        $i++;
-                    } else {
-                        $query .= ", $key='$value' ";
+                    if ($property["updatenull"]) {
+                        if ($i == 0) {
+                            $query .= "SET $key=NULL ";
+                            $i++;
+                        } else {
+                            $query .= ", $key=NULL ";
+                        }
                     }
                 }
             }

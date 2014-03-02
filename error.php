@@ -3,7 +3,7 @@
 /**
  * Bicubic PHP Framework
  *
- * @author     Juan Rodr’guez-Covili <juan@bicubic.cl>
+ * @author     Juan Rodrï¿½guez-Covili <juan@bicubic.cl>
  * @copyright  2011 Bicubic Technology - http://www.bicubic.cl
  * @license    MIT
  * @framework  2.2
