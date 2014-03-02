@@ -20,6 +20,7 @@ class SystemUser extends DataObject {
     private $option;
 
     function __construct() {
+        
     }
 
     /**
@@ -28,25 +29,35 @@ class SystemUser extends DataObject {
      */
     public function __getProperties() {
         return array(
-            "id"        => ["name" => "id",        "type" => "long",       "required" => false, "serializable" => true,  "updatenull" => true,   "hidden" => true,  "private" => false],
-            "name"      => ["name" => "name",      "type" => "string256",  "required" => true,  "serializable" => true,  "updatenull" => true,   "hidden" => false, "private" => false],
-            "username"  => ["name" => "username",  "type" => "string256",  "required" => true,  "serializable" => true,  "updatenull" => true,   "hidden" => false, "private" => false],
-            "password"  => ["name" => "password",  "type" => "password",   "required" => true,  "serializable" => true,  "updatenull" => true,   "hidden" => false, "private" => false],
-            "email"     => ["name" => "email",     "type" => "email",      "required" => true,  "serializable" => true,  "updatenull" => true,   "hidden" => false, "private" => false],
-            "token"     => ["name" => "token",     "type" => "string1024", "required" => false, "serializable" => true,  "updatenull" => false,  "hidden" => false, "private" => true ],
-            "category"  => ["name" => "category",  "type" => "list",       "required" => true,  "serializable" => false, "updatenull" => true,   "hidden" => false, "private" => false],
-            "option"    => ["name" => "option",    "type" => "shortlist",  "required" => true,  "serializable" => false, "updatenull" => true,   "hidden" => false, "private" => false],
+            "id" => ["name" => "id", "type" => "long", "required" => false, "serializable" => true, "updatenull" => true, "hidden" => true, "private" => false],
+            "name" => ["name" => "name", "type" => "string256", "required" => true, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
+            "username" => ["name" => "username", "type" => "string256", "required" => true, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
+            "password" => ["name" => "password", "type" => "password", "required" => true, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
+            "email" => ["name" => "email", "type" => "email", "required" => true, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
+            "token" => ["name" => "token", "type" => "string1024", "required" => false, "serializable" => true, "updatenull" => false, "hidden" => false, "private" => true],
+            "category" => ["name" => "category", "type" => "list", "required" => true, "serializable" => false, "updatenull" => true, "hidden" => false, "private" => false],
+            "option" => ["name" => "option", "type" => "shortlist", "required" => true, "serializable" => false, "updatenull" => true, "hidden" => false, "private" => false],
         );
     }
-    
+
     public function __isComplete() {
-        if(!$this->token) {
+        if (!$this->token) {
             $this->token = "";
         }
-        
         return parent::__isComplete();
     }
-    
+
+    public function __getList(TransactionManager $data, $paramname) {
+        switch ($paramname) {
+            case "category" : {
+                    return ExampleList::$_ENUM;
+                }
+            case "option" : {
+                    return ExampleList::$_ENUM;
+                }
+        }
+        return [];
+    }
 
     /**
      * Setea el valor de una propiedad
@@ -63,7 +74,7 @@ class SystemUser extends DataObject {
     function getId() {
         return $this->id;
     }
-    
+
     /**
      * Setea el valor de una propiedad
      * @param long $value <p>EL valor de la propiedad</p>
@@ -95,7 +106,6 @@ class SystemUser extends DataObject {
     function getUsername() {
         return $this->username;
     }
-    
 
     /**
      * Setea el valor de una propiedad
@@ -128,7 +138,6 @@ class SystemUser extends DataObject {
     function getEmail() {
         return $this->email;
     }
-   
 
     /**
      * Setea el valor de una propiedad
@@ -145,13 +154,9 @@ class SystemUser extends DataObject {
     function getToken() {
         return $this->token;
     }
-    
+
     public function getCategory() {
         return $this->category;
-    }
-    
-    public function getCategoryList() {
-        return ExampleList::$_ENUM;
     }
 
     public function setCategory($category) {
@@ -164,10 +169,6 @@ class SystemUser extends DataObject {
 
     public function setOption($option) {
         $this->option = $option;
-    }
-
-    public function getOptionList() {
-        return ExampleList::$_ENUM;
     }
 
 }
