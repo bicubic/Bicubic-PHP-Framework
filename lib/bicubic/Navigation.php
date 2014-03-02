@@ -116,6 +116,109 @@ class Navigation {
         return ucwords(strtolower(trim($string)));
     }
 
+    public function objectFormElement(DataObject $object, $property) {
+        $name = get_class($object);
+        $cammelName = strtoupper(substr($property["name"], 0, 1)) . substr($property["name"], 1);
+        $getter = "get$cammelName";
+        if ($this->item($property, "private", false)) {
+            return "";
+        } else if ($this->item($property, "hidden", false)) {
+            $result = $this->application->setCustomTemplate("bicubic", "hidden");
+            $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-NAME", $name . "_" . $property["name"]);
+            $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-VALUE", $object->$getter());
+            return $this->application->renderCustomTemplate($result);
+        } else {
+            switch ($property["type"]) {
+                case "alpha32" :
+                case "alphanumeric" :
+                case "date" :
+                case "double" :
+                case "email" :
+                case "int" :
+                case "letters" :
+                case "long" :
+                case "numeric" :
+                case "percentage" :
+                case "password" :
+                case "string" :
+                case "string" :
+                case "string1" :
+                case "string2" :
+                case "string4" :
+                case "string8" :
+                case "string16" :
+                case "string24" :
+                case "string32" :
+                case "string64" :
+                case "string128" :
+                case "string256" :
+                case "string512" :
+                case "string1024" :
+                case "string2048": {
+                        $result = $this->application->setCustomTemplate("bicubic", $property["type"]);
+                        $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LABEL", $this->lang("lang_" . $property["name"]));
+                        $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-PLACEHOLDER", $this->lang("lang_" . $property["name"] . "placeholder"));
+                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-NAME", $name . "_" . $property["name"]);
+                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-VALUE", $object->$getter());
+                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-REQUIRED", $property["required"] ? "required" : "");
+                        return $this->application->renderCustomTemplate($result);
+                        break;
+                    }
+                case "boolean" : {
+                        $result = $this->application->setCustomTemplate("bicubic", $property["type"]);
+                        $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LABEL", $this->lang("lang_" . $property["name"]));
+                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-NAME", $name . "_" . $property["name"]);
+                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-REQUIRED", $property["required"] ? "required" : "");
+                        if ($object->$getter()) {
+                            $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-SELECTED-YES", "selected");
+                        } else {
+                            $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-SELECTED-NO", "selected");
+                        }
+                        return $this->application->renderCustomTemplate($result);
+                        break;
+                    }
+                case "list" : {
+                        $result = $this->application->setCustomTemplate("bicubic", "category");
+                        $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LABEL", $this->lang("lang_" . $property["name"]));
+                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-NAME", $name . "_" . $property["name"]);
+                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-REQUIRED", $property["required"] ? "required" : "");
+                        $selected = $object->$getter();
+                        $listgetter = "get" . $cammelName . "List";
+                        $values = $object->$listgetter();
+                        foreach ($values as $value => $text) {
+                            $this->application->setHTMLArrayCustomTemplate($result, array(
+                                "CATEGORY-VALUE" => $value,
+                                "CATEGORY-NAME" => $this->lang($text),
+                                "CATEGORY-SELECTED" => ($value == $selected) ? "selected" : "",
+                            ));
+                            $this->application->parseCustomTemplate($result, "CATEGORIES");
+                        }
+                        return $this->application->renderCustomTemplate($result);
+                    }
+                case "shortlist" : {
+                        $result = $this->application->setCustomTemplate("bicubic", "option");
+                        $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LABEL", $this->lang("lang_" . $property["name"]));
+                        $selected = $object->$getter();
+                        $listgetter = "get" . $cammelName . "List";
+                        $values = $object->$listgetter();
+                        foreach ($values as $value => $text) {
+                            $this->application->setHTMLArrayCustomTemplate($result, array(
+                                "OBJECT-NAME-PROPERTY-NAME" => $name . "_" . $property["name"],
+                                "OPTION-VALUE" => $value,
+                                "OPTION-NAME" => $this->lang($text),
+                                "OPTION-SELECTED" => ($value == $selected) ? "checked" : "",
+                                "OBJECT-NAME-PROPERTY-REQUIRED" => $property["required"] ? "required" : "",
+                            ));
+                            $this->application->parseCustomTemplate($result, "CATEGORIES");
+                        }
+                        return $this->application->renderCustomTemplate($result);
+                    }
+            }
+        }
+
+        return "";
+    }
+
     public function objectForm(DataObject $object, $callback) {
         $id = $this->application->getUrlParam($this->config("param_id"), "int");
         if ($id) {
@@ -136,95 +239,7 @@ class Navigation {
         }
         $formContent = "";
         foreach ($properties as $property) {
-            $cammelName = strtoupper(substr($property["name"], 0, 1)) . substr($property["name"], 1);
-            $getter = "get$cammelName";
-            if ($this->item($property, "private", false)) {
-                continue;
-            } else if ($this->item($property, "hidden", false)) {
-                $result = $this->application->setCustomTemplate("bicubic", "hidden");
-                $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-NAME", $name . "_" . $property["name"]);
-                $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-VALUE", $object->$getter());
-                $formContent .= $this->application->renderCustomTemplate($result);
-            } else if ($this->item($property, "list", false)) {
-                $result = $this->application->setCustomTemplate("bicubic", "category");
-                $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LABEL", $this->lang("lang_" . $property["name"]));
-                $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-NAME", $name . "_" . $property["name"]);
-                $selected = $object->$getter();
-                $listgetter = "get" . $cammelName . "List";
-                $values = $object->$listgetter();
-                foreach ($values as $value => $text) {
-                    $this->application->setHTMLArrayCustomTemplate($result, array(
-                        "CATEGORY-VALUE" => $value,
-                        "CATEGORY-NAME" => $this->lang($text),
-                        "CATEGORY-SELECTED" => ($value == $selected) ? "selected" : ""
-                    ));
-                    $this->application->parseCustomTemplate($result, "CATEGORIES");
-                }
-                $formContent .= $this->application->renderCustomTemplate($result);
-            } else if ($this->item($property, "shortlist", false)) {
-                $result = $this->application->setCustomTemplate("bicubic", "option");
-                $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LABEL", $this->lang("lang_" . $property["name"]));
-                $selected = $object->$getter();
-                $listgetter = "get" . $cammelName . "List";
-                $values = $object->$listgetter();
-                foreach ($values as $value => $text) {
-                    $this->application->setHTMLArrayCustomTemplate($result, array(
-                        "OBJECT-NAME-PROPERTY-NAME" => $name . "_" . $property["name"],
-                        "OPTION-VALUE" => $value,
-                        "OPTION-NAME" => $this->lang($text),
-                        "OPTION-SELECTED" => ($value == $selected) ? "checked" : ""
-                    ));
-                    $this->application->parseCustomTemplate($result, "CATEGORIES");
-                }
-                $formContent .= $this->application->renderCustomTemplate($result);
-            } else {
-                switch ($property["type"]) {
-                    case "alpha32" :
-                    case "alphanumeric" :
-                    case "date" :
-                    case "double" :
-                    case "int" :
-                    case "letters" :
-                    case "long" :
-                    case "numeric" :
-                    case "percentage" :
-                    case "string" :
-                    case "string" :
-                    case "string1" :
-                    case "string2" :
-                    case "string4" :
-                    case "string8" :
-                    case "string16" :
-                    case "string24" :
-                    case "string32" :
-                    case "string64" :
-                    case "string128" :
-                    case "string256" :
-                    case "string512" :
-                    case "string1024" :
-                    case "string2048": {
-                            $result = $this->application->setCustomTemplate("bicubic", $property["type"]);
-                            $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LABEL", $this->lang("lang_" . $property["name"]));
-                            $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-PLACEHOLDER", $this->lang("lang_" . $property["name"] . "placeholder"));
-                            $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-NAME", $name . "_" . $property["name"]);
-                            $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-VALUE", $object->$getter());
-                            $formContent .= $this->application->renderCustomTemplate($result);
-                            break;
-                        }
-                    case "boolean" : {
-                            $result = $this->application->setCustomTemplate("bicubic", $property["type"]);
-                            $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LABEL", $this->lang("lang_" . $property["name"]));
-                            $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-NAME", $name . "_" . $property["name"]);
-                            if ($object->$getter()) {
-                                $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-SELECTED-YES", "selected");
-                            } else {
-                                $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-SELECTED-NO", "selected");
-                            }
-                            $formContent .= $this->application->renderCustomTemplate($result);
-                            break;
-                        }
-                }
-            }
+            $formContent .= $this->objectFormElement($object, $property);
         }
         $this->application->setVariableTemplate("FORM-CONTENT", $formContent);
         $this->application->render();
