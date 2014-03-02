@@ -53,12 +53,12 @@ abstract class Data {
     //Performs a data selection process
     //@param $object the target object that filters the data
     //@returns an array containing objects of the type of $object
-    public abstract function select(DataObject $object);
+    public abstract function select(DataObject $object, $orderIndex = null, $orderDirection = null, $limit=null, $lastIndex=null, $keyword = null, $keywordfield = null);
 
     //Performs a data unique selection process
     //@param $object the target object to copy the data
     //@returns a new object of the type of $object
-    public abstract function selectOne(DataObject $object);
+    public abstract function selectOne(DataObject $object, $orderIndex = null, $orderDirection = null);
 
     //Perform a data insert process
     //@param $object the object data to insert
@@ -75,6 +75,5 @@ abstract class Data {
     //@returns true if the operation was succesfully, false if not
     public abstract function delete(DataObject $object);
 
-    public abstract function getTotalRows();
 }
 ?>

@@ -10,13 +10,15 @@
  */
 abstract class SQLData extends Data {
 
-    public $totalRows;
     public $localError;
+    protected $idname = "id";
+    protected $connection;
+    protected $debug = false;
 
     //Perform a data insert process
     //@param $object the object data to insert
     //@returns the id inserted if the operation was succesfully, false if not
-    public function insert(DataObject $object, $idname = "id") {
+    public function insert(DataObject $object) {
         if (!@$object->__isComplete()) {
             $this->localError = "incomplete object";
             return false;
@@ -41,7 +43,7 @@ abstract class SQLData extends Data {
             $getter = "get$cammel";
             $setter = "set$cammel";
             $value = $object->$getter();
-            if (isset($value) && ($object->__isChild() || $key != $idname)) {
+            if (isset($value) && ($object->__isChild() || $key != $this->idname)) {
                 if ($i == 0) {
                     $query .= "$key";
                     $i++;
@@ -71,7 +73,7 @@ abstract class SQLData extends Data {
         if (!$object->__isChild()) {
             $id = $this->lastInsertId($table);
         } else {
-            $getter = "get$idname";
+            $getter = "get$this->idname";
             $id = $object->$getter();
         }
         return $id;
@@ -80,11 +82,10 @@ abstract class SQLData extends Data {
     //Performs a data selection process
     //@param $object the target object that filters the data
     //@returns an array containing objects of the type of $object
-    public function select(DataObject $object, $orderIndex = null, $orderDirection = null, $limit=null, $indexStart=null, $keyword = null, $keywordfield = null) {
+    public function select(DataObject $object, $orderIndex = null, $orderDirection = null, $limit=null, $lastIndex=null, $keyword = null, $keywordfield = null) {
         $class = strtolower(get_class($object));
         $data = array();
         $query = "SELECT * FROM  " . ($class) . " ";
-        $countQuery = "SELECT count(id) as total FROM " . ($class) . " ";
         $i = 0;
         $properties = $object->__getProperties();
         foreach ($properties as $property) {
@@ -100,10 +101,8 @@ abstract class SQLData extends Data {
                 $value = $this->escapeChars($value);
                 if ($i == 0) {
                     $query .= "WHERE $key = '$value' ";
-                    $countQuery .= "WHERE $key = '$value' ";
                 } else {
                     $query .= "AND $key = '$value' ";
-                    $countQuery .= "AND $key = '$value' ";
                 }
                 $i++;
             }
@@ -112,11 +111,18 @@ abstract class SQLData extends Data {
             if ($i == 0) {
                 $keyword = $this->escapeChars($keyword);
                 $query .= "WHERE $keywordfield ~* '.*$keyword.*' ";
-                $countQuery .= "WHERE $keywordfield ~* '.*$keyword.*%' ";
             } else {
                 $keyword = $this->escapeChars($keyword);
                 $query .= "AND $keywordfield ~* '.*$keyword.*' ";
-                $countQuery .= "AND $keywordfield ~* '.*$keyword.*' ";
+            }
+        }
+        if (isset($lastIndex)) {
+            if ($i == 0) {
+                $lastIndex = $this->escapeChars($lastIndex);
+                $query .= "WHERE $this->idname > $lastIndex";
+            } else {
+                $lastIndex = $this->escapeChars($lastIndex);
+                $query .= "AND $this->idname > $lastIndex ";
             }
         }
         if (isset($orderIndex) && isset($orderDirection)) {
@@ -124,18 +130,12 @@ abstract class SQLData extends Data {
         } else {
             $query .= "ORDER BY id ASC ";
         }
-        if (isset($limit) && isset($indexStart)) {
+        if (isset($limit)) {
             if ($limit < 0) {
                 $limit = 0;
             }
-            if ($indexStart < 0) {
-                $indexStart = 0;
-            }
-            $query .= "LIMIT $limit OFFSET $indexStart";
+            $query .= "LIMIT $limit ";
         }
-        $countresult = $this->performRead($countQuery);
-        $countrow = $this->readNext($countresult);
-        $this->totalRows = $countrow['total'];
         $result = $this->performRead($query);
         while ($row = $this->readNext($result)) {
             $object = new $class();
@@ -191,7 +191,7 @@ abstract class SQLData extends Data {
         return $object;
     }
 
-    public function update(DataObject $object, $idname = "id") {
+    public function update(DataObject $object) {
         if ($object->getId() == null) {
             return false;
         }
@@ -209,7 +209,7 @@ abstract class SQLData extends Data {
             $getter = "get$cammel";
             $setter = "set$cammel";
             $value = $object->$getter();
-            if ($key != $idname) {
+            if ($key != $this->idname) {
                 if (isset($value)) {
                     $value = $this->escapeChars($value);
                     if ($i == 0) {
@@ -231,7 +231,7 @@ abstract class SQLData extends Data {
             }
         }
         $idoftheobject = $this->escapeChars($object->getId());
-        $query .= "WHERE $idname = '" . $idoftheobject . "'";
+        $query .= "WHERE $this->idname = '" . $idoftheobject . "'";
         if (!$this->performWrite($query)) {
             return false;
         }
@@ -241,13 +241,13 @@ abstract class SQLData extends Data {
     //Perform a data delete process
     //@param $object the object data to delete
     //@returns true if the operation was succesfully, false if not
-    public function delete(DataObject $object, $idname = "id") {
+    public function delete(DataObject $object) {
         if ($object->getId() == null) {
             return false;
         }
         $class = strtolower(get_class($object));
         $idoftheobject = $this->escapeChars($object->getId());
-        $query = "DELETE FROM $class WHERE $idname = '" . $idoftheobject . "'";
+        $query = "DELETE FROM $class WHERE $this->idname = '" . $idoftheobject . "'";
         if (!$this->performWrite($query)) {
             return false;
         }
