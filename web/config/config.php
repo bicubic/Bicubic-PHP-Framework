@@ -13,6 +13,8 @@ $config = array();
 $config['maintenance'] = false;
 $config['sslavailable'] = false;
 //Web  
+$config['web_name'] = "Bicubic PHP Framework";
+$config['web_copyright'] = "©2014 Bicubic Technology - All rights reserved";
 $config['web_contact_email'] = "";
 $config['web_contact_name'] = "";
 $config['web_time_out'] = 360000;
@@ -27,6 +29,9 @@ $config['email_port'] = 465;
 $config['email_auth'] = true;
 $config['email_user'] = "";
 $config['email_password'] = "";
+//Email with Mandrill
+$config['email_key'] = "";
+$config['email_template'] = "";
 //Facebook
 $config['appId'] = "";
 $config['secret'] = "";

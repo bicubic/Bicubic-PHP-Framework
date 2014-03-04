@@ -210,6 +210,18 @@ class Navigation {
 
         return "";
     }
+    
+    public function getFormObectFormContent(DataObject $object) {
+        $properties = $object->__getProperties();
+        if ($object->__isChild()) {
+            $properties = array_merge($properties, $object->__getParentProperties());
+        }
+        $formContent = "";
+        foreach ($properties as $property) {
+            $formContent .= $this->objectFormElement($object, $property);
+        }
+        return $formContent;
+    }
 
     public function objectForm(DataObject $object, $callback) {
         $id = $this->application->getUrlParam($this->config("param_id"), "int");
@@ -225,15 +237,7 @@ class Navigation {
         $objectName = get_class($object);
         $this->application->setVariableTemplate("FORM-ID", $this->application->navigation . "$objectName");
         $this->application->setVariableTemplate("FORM-ACTION", $this->application->getSecureAppUrl($this->application->name, $callback));
-        $properties = $object->__getProperties();
-        if ($object->__isChild()) {
-            $properties = array_merge($properties, $object->__getParentProperties());
-        }
-        $formContent = "";
-        foreach ($properties as $property) {
-            $formContent .= $this->objectFormElement($object, $property);
-        }
-        $this->application->setVariableTemplate("FORM-CONTENT", $formContent);
+        $this->application->setVariableTemplate("FORM-CONTENT", $this->getFormObectFormContent($object));
         $this->application->render();
     }
 

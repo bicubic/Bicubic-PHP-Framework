@@ -31,7 +31,7 @@ class Application {
      * @param string $name <p>name of the application</p>
      * @return Application a new application
      */
-    function __construct($config, $lang, Data $data, $name) {
+    function __construct($config, $lang, Data $data = null, $name = null) {
         $this->config = $config;
         $this->lang = $lang;
         $this->name = $name;
@@ -655,27 +655,21 @@ class Application {
         $this->render();
     }
 
-    public function setMainTemplate($navigationFolder, $navigationFile, $title = "", $priority = "html") {
-        if ($priority != "html") {
-            if ($this->tpl->loadTemplateFile($this->config('folder_template') . "$this->name/template." . $priority) === SIGMA_OK) {
-                $this->tpl->addBlockfile("TEMPLATE-CONTENT", $this->name, $this->config('folder_navigation') . "$navigationFolder/$navigationFile." . $priority);
-            }
-        } else if ($this->tpl->loadTemplateFile($this->config('folder_template') . "$this->name/template.html") === SIGMA_OK) {
+    public function setMainTemplate($navigationFolder, $navigationFile, $title = "") {
+        if ($this->tpl->loadTemplateFile($this->config('folder_template') . "$this->name/template.html") === SIGMA_OK) {
             $this->tpl->addBlockfile("TEMPLATE-CONTENT", $this->name, $this->config('folder_navigation') . "$navigationFolder/$navigationFile.html");
-            $this->tpl->addBlockfile("TEMPLATE-JAVASCRIPT", $this->name . "_javascript", $this->config('folder_navigation') . "$navigationFolder/$navigationFile.js");
-            $this->tpl->addBlockfile("TEMPLATE-CSS", $this->name . "_css", $this->config('folder_navigation') . "$navigationFolder/$navigationFile.css");
-        } else if ($this->tpl->loadTemplateFile($this->config('folder_template') . "$this->name/template.xml") === SIGMA_OK) {
-            $this->tpl->addBlockfile("TEMPLATE-CONTENT", $this->name, $this->config('folder_navigation') . "$navigationFolder/$navigationFile.xml");
-        } else if ($this->tpl->loadTemplateFile($this->config('folder_template') . "$this->name/template.json") === SIGMA_OK) {
-            $this->tpl->addBlockfile("TEMPLATE-CONTENT", $this->name, $this->config('folder_navigation') . "$navigationFolder/$navigationFile.json");
-        }
-        $this->setHTMLVariableTemplate("TEMPLATE-TITLE", $title);
-        foreach (Lang::$_ENUM as $lang => $langname) {
-            $this->setHtmlArrayTemplate(array(
-                'LANG-LINK' => $this->getSecureAppUrl($this->name, $this->navigation, array(new Param($this->config('param_lang'), $lang))),
-                'LANG-TEXT' => $langname,
-            ));
-            $this->parseTemplate('LANGS');
+            if (!$title) {
+                $title = $this->config("web_name");
+            }
+            $this->setHTMLVariableTemplate("TEMPLATE-TITLE", $title);
+            $this->setHTMLVariableTemplate("TEMPLATE-COPY", $this->config("web_copyright"));
+            foreach (Lang::$_ENUM as $lang => $langname) {
+                $this->setHtmlArrayTemplate(array(
+                    'LANG-LINK' => $this->getSecureAppUrl($this->name, $this->navigation, array(new Param($this->config('param_lang'), $lang))),
+                    'LANG-TEXT' => $langname,
+                ));
+                $this->parseTemplate('LANGS');
+            }
         }
     }
 
@@ -744,7 +738,7 @@ class Application {
         }
     }
 
-    public function setFormTemplate($name, array $params, $application, $navigation, $secure = false, $urlparams = null) {
+    public function setFormTemplate($name, array $params, $application, $navigation, $secure = true, $urlparams = null) {
         $name = strtoupper($name);
         $this->setVariableTemplate("$name-ID", $this->navigation . "$name");
         if ($secure) {
@@ -885,11 +879,6 @@ class Application {
     public function render() {
         $this->setLangItems($this->name);
         $this->tpl->touchBlock($this->name);
-        $this->tpl->touchBlock($this->name . "_onload");
-        $this->tpl->touchBlock($this->name . "_javascript");
-        $this->tpl->touchBlock($this->name . "_css");
-        $this->tpl->touchBlock($this->navigation . "_onload");
-        $this->tpl->touchBlock($this->navigation . "_javascript");
         $this->tpl->show();
         $this->endApp();
     }
@@ -936,11 +925,6 @@ class Application {
 
     public function renderToCss() {
         $this->tpl->touchBlock($this->name);
-        $this->tpl->touchBlock($this->name . "_onload");
-        $this->tpl->touchBlock($this->name . "_javascript");
-        $this->tpl->touchBlock($this->name . "_css");
-        $this->tpl->touchBlock($this->navigation . "_onload");
-        $this->tpl->touchBlock($this->navigation . "_javascript");
         header('Content-type: text/css');
         $this->tpl->show();
         $this->endApp();
@@ -948,11 +932,6 @@ class Application {
 
     public function renderToJavascript() {
         $this->tpl->touchBlock($this->name);
-        $this->tpl->touchBlock($this->name . "_onload");
-        $this->tpl->touchBlock($this->name . "_javascript");
-        $this->tpl->touchBlock($this->name . "_css");
-        $this->tpl->touchBlock($this->navigation . "_onload");
-        $this->tpl->touchBlock($this->navigation . "_javascript");
         header('Content-type: text/javascript');
         $this->tpl->show();
         $this->endApp();
@@ -960,10 +939,6 @@ class Application {
 
     public function renderToPdf() {
         $this->tpl->touchBlock($this->name);
-        $this->tpl->touchBlock($this->name . "_onload");
-        $this->tpl->touchBlock($this->name . "_javascript");
-        $this->tpl->touchBlock($this->navigation . "_onload");
-        $this->tpl->touchBlock($this->navigation . "_javascript");
         $html = $this->tpl->get();
         $pdf = new TCPDF($this->config('pdf_page_orientation'), $this->config('pdf_unite'), $this->config('pdf_page_format'), true, 'UTF-8', false);
         $pdf->SetCreator($this->config('pdf_creator'));

@@ -25,12 +25,6 @@ class ScriptApplication extends Application {
                     $this->generatePassword();
                     break;
                 }
-            case "message" : {
-                    require_once("nav/MessageNavigation.php");
-                    $messageNavigation = new MessageNavigation($this);
-                    $messageNavigation->message();
-                    break;
-                }
             default : {
                     echo "no nav";
                     break;
@@ -38,18 +32,14 @@ class ScriptApplication extends Application {
         }
     }
 
-    public function setMainTemplate($navigationFolder, $navigationFile, $title = "") {
-        parent::setMainTemplate($navigationFolder, $navigationFile, $title);
-    }
-
     public function error($message) {
         echo $message;
-        parent::error($message);
+        $this->endApp();
     }
 
     private function generatePassword() {
         $clave = 'admin';
-        echo $this->blowfishCrypt($clave, 10);
+        echo $clave . " converted to " . $this->blowfishCrypt($clave, 10);
         echo "\n";
     }
 

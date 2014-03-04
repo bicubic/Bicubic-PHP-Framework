@@ -8,15 +8,18 @@
  * @license    MIT
  * @version 3.0.0
  */
-class HelloNavigation extends Navigation {
+class HomeNavigation extends Navigation {
+    
+    
 
     function __construct(Application $application) {
         parent::__construct($application);
     }
 
-    public function hello() {
-        $this->application->setMainTemplate("hello", "hello", $this->lang('text_helloworld'));
-        $this->application->setHtmlVariableTemplate("HELLO", $this->lang('text_helloworld'));
+    public function home() {
+        $this->application->setMainTemplate("home", "home");
+        $signupSystemUser = new SystemUser();
+        $this->application->setFormTemplate("signup", [$signupSystemUser], "login" , "signUpSubmit");
         $this->application->render();
     }
 
