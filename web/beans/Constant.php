@@ -1,5 +1,13 @@
-<?php 
+<?php
 
+/**
+ * Bicubic PHP Framework
+ *
+ * @author     Juan Rodríguez-Covili <juan@bicubic.cl>
+ * @copyright  2011-2014 Bicubic Technology - http://www.bicubic.cl
+ * @license    MIT
+ * @version 3.0.0
+ */
 class PropertyTypes {
 
     public static $_INT = "int";
@@ -32,7 +40,6 @@ class PropertyTypes {
     public static $_DOUBLEARRAY = "double-array";
     public static $_STRINGARRAY = "string-array";
     public static $_JSON = "json";
-
     public static $_ENUM = array(
         1 => "lang_item1",
         2 => "lang_item2",
@@ -54,6 +61,7 @@ class CurrencyKeys {
         8 => "COP",
         9 => "PEN",
     );
+
 }
 
 class CurrencyCountry {
@@ -85,6 +93,7 @@ class CurrencySimbols {
         "COP" => "$",
         "PEN" => "$",
     );
+
 }
 
 class CurrencyLang {
@@ -109,12 +118,9 @@ class Lang {
         "es" => "Español",
         "en" => "English",
     );
-    
     public static $_DEFAULT = "en";
 
 }
-
-
 
 class Gender {
 
@@ -128,7 +134,6 @@ class Gender {
     );
 
 }
-
 
 class ObjectBoolean {
 
@@ -150,7 +155,5 @@ class ExampleList {
     );
 
 }
-
-
 
 ?>

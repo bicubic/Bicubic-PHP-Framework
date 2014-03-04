@@ -4,11 +4,11 @@
  * Bicubic PHP Framework
  *
  * @author     Juan Rodríguez-Covili <juan@bicubic.cl>
- * @copyright  2011 Bicubic Technology - http://www.bicubic.cl
+ * @copyright  2011-2014 Bicubic Technology - http://www.bicubic.cl
  * @license    MIT
- * @framework  2.2
+ * @version 3.0.0
  */
-abstract class BicubicEmail {
+abstract class SMTPEmail {
 
     public $to;
     public $from;
@@ -65,41 +65,6 @@ abstract class BicubicEmail {
             return false;
         }
         return true;
-    }
-
-    public function utf8tohtml($utf8, $encodeTags) {
-        $result = '';
-        for ($i = 0; $i < strlen($utf8); $i++) {
-            $char = $utf8[$i];
-            $ascii = ord($char);
-            if ($ascii < 128) {
-                $result .= ( $encodeTags) ? htmlentities($char) : $char;
-            } else if ($ascii < 192) {
-
-            } else if ($ascii < 224) {
-                $result .= htmlentities(substr($utf8, $i, 2), ENT_QUOTES, 'UTF-8');
-                $i++;
-            } else if ($ascii < 240) {
-                $ascii1 = ord($utf8[$i + 1]);
-                $ascii2 = ord($utf8[$i + 2]);
-                $unicode = (15 & $ascii) * 4096 +
-                        (63 & $ascii1) * 64 +
-                        (63 & $ascii2);
-                $result .= "&#$unicode;";
-                $i += 2;
-            } else if ($ascii < 248) {
-                $ascii1 = ord($utf8[$i + 1]);
-                $ascii2 = ord($utf8[$i + 2]);
-                $ascii3 = ord($utf8[$i + 3]);
-                $unicode = (15 & $ascii) * 262144 +
-                        (63 & $ascii1) * 4096 +
-                        (63 & $ascii2) * 64 +
-                        (63 & $ascii3);
-                $result .= "&#$unicode;";
-                $i += 3;
-            }
-        }
-        return $result;
     }
 
 }

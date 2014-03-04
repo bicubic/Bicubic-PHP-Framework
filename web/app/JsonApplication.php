@@ -4,27 +4,21 @@
  * Bicubic PHP Framework
  *
  * @author     Juan Rodríguez-Covili <juan@bicubic.cl>
- * @copyright  2011 Bicubic Technology - http://www.bicubic.cl
+ * @copyright  2011-2014 Bicubic Technology - http://www.bicubic.cl
  * @license    MIT
- * @framework  2.2
+ * @version 3.0.0
  */
 class JsonApplication extends Application {
 
-    /**
-     * Constructor
-     * @param array $config el array de configuracion
-     * @param array $lang el array de lenguaje
-     */
-    function __construct($config, $lang) {
-        parent::__construct($config, $lang, null, "json");
+    function __construct($config, $lang, Data $data = null, $name = "json") {
+        if (!$data) {
+            $data = new PostgreSQLData($config);
+        }
+        parent::__construct($config, $lang, $data, $name);
     }
 
-    /**
-     * Ejecuta la aplicación
-     */
     public function execute() {
         parent::execute();
-        //Navigation
         $this->navigation = $this->getUrlParam($this->config('param_navigation'), "letters");
         switch ($this->navigation) {
             case "hello" : {
@@ -40,10 +34,6 @@ class JsonApplication extends Application {
         }
     }
 
-    /**
-     * Gatilla un error
-     * @param string $message  el mensaje del error
-     */
     public function error($message) {
         $this->setMainTemplate("message", "error");
         $this->setJsonVariableTemplate('MESSAGE-TEXT', $message);
