@@ -2,16 +2,13 @@
 
 /**
  * Bicubic PHP Framework
- * WineClrEmail Class
  *
- * @author     Juan Rodríguez-Covili <jrodriguez@bicubic.cl>
- * @copyright  2010 Bicubic Technology - http://www.bicubic.cl
- * @license    Bicubic Comercial Licence
- * @license
- * @framework    1.2
+ * @author     Juan Rodríguez-Covili <juan@bicubic.cl>
+ * @copyright  2011-2014 Bicubic Technology - http://www.bicubic.cl
+ * @license    MIT
+ * @version 3.0.0
  */
-class CustomEmail extends BicubicEmail {
-
+class CustomSMTPEmail extends SMTPEmail {
 
     private $text;
     
@@ -27,7 +24,6 @@ class CustomEmail extends BicubicEmail {
     }
 
     public function getPlainBody() {
-        
         return $this->text;
     }
 

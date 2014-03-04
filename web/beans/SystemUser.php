@@ -4,9 +4,9 @@
  * Bicubic PHP Framework
  *
  * @author     Juan Rodríguez-Covili <juan@bicubic.cl>
- * @copyright  2011 Bicubic Technology - http://www.bicubic.cl
+ * @copyright  2011-2014 Bicubic Technology - http://www.bicubic.cl
  * @license    MIT
- * @framework  2.2
+ * @version 3.0.0
  */
 class SystemUser extends DataObject {
 
@@ -23,10 +23,6 @@ class SystemUser extends DataObject {
         
     }
 
-    /**
-     * Propiedades de BD
-     * @return array las propiedades a serializar en la BD
-     */
     public function __getProperties() {
         return array(
             "id" => ["name" => "id", "type" => PropertyTypes::$_LONG, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => true, "private" => false],
@@ -59,99 +55,27 @@ class SystemUser extends DataObject {
         return [];
     }
 
-    /**
-     * Setea el valor de una propiedad
-     * @param long $value <p>EL valor de la propiedad</p>
-     */
-    function setId($value) {
-        $this->id = $value;
-    }
-
-    /**
-     * Obtiene el valor de una propiedad
-     * @return el valor de la propiedad o null si la propiedad no existe
-     */
-    function getId() {
+    public function getId() {
         return $this->id;
     }
 
-    /**
-     * Setea el valor de una propiedad
-     * @param long $value <p>EL valor de la propiedad</p>
-     */
-    function setName($value) {
-        $this->name = $value;
-    }
-
-    /**
-     * Obtiene el valor de una propiedad
-     * @return el valor de la propiedad o null si la propiedad no existe
-     */
-    function getName() {
+    public function getName() {
         return $this->name;
     }
 
-    /**
-     * Setea el valor de una propiedad
-     * @param long $value <p>EL valor de la propiedad</p>
-     */
-    function setUsername($value) {
-        $this->username = $value;
-    }
-
-    /**
-     * Obtiene el valor de una propiedad
-     * @return el valor de la propiedad o null si la propiedad no existe
-     */
-    function getUsername() {
+    public function getUsername() {
         return $this->username;
     }
 
-    /**
-     * Setea el valor de una propiedad
-     * @param long $value <p>EL valor de la propiedad</p>
-     */
-    function setPassword($value) {
-        $this->password = $value;
-    }
-
-    /**
-     * Obtiene el valor de una propiedad
-     * @return el valor de la propiedad o null si la propiedad no existe
-     */
-    function getPassword() {
+    public function getPassword() {
         return $this->password;
     }
 
-    /**
-     * Setea el valor de una propiedad
-     * @param long $value <p>EL valor de la propiedad</p>
-     */
-    function setEmail($value) {
-        $this->email = $value;
-    }
-
-    /**
-     * Obtiene el valor de una propiedad
-     * @return el valor de la propiedad o null si la propiedad no existe
-     */
-    function getEmail() {
+    public function getEmail() {
         return $this->email;
     }
 
-    /**
-     * Setea el valor de una propiedad
-     * @param long $value <p>EL valor de la propiedad</p>
-     */
-    function setToken($value) {
-        $this->token = $value;
-    }
-
-    /**
-     * Obtiene el valor de una propiedad
-     * @return el valor de la propiedad o null si la propiedad no existe
-     */
-    function getToken() {
+    public function getToken() {
         return $this->token;
     }
 
@@ -159,12 +83,36 @@ class SystemUser extends DataObject {
         return $this->category;
     }
 
-    public function setCategory($category) {
-        $this->category = $category;
-    }
-
     public function getOption() {
         return $this->option;
+    }
+
+    public function setId($id) {
+        $this->id = $id;
+    }
+
+    public function setName($name) {
+        $this->name = $name;
+    }
+
+    public function setUsername($username) {
+        $this->username = $username;
+    }
+
+    public function setPassword($password) {
+        $this->password = $password;
+    }
+
+    public function setEmail($email) {
+        $this->email = $email;
+    }
+
+    public function setToken($token) {
+        $this->token = $token;
+    }
+
+    public function setCategory($category) {
+        $this->category = $category;
     }
 
     public function setOption($option) {

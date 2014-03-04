@@ -4,9 +4,9 @@
  * Bicubic PHP Framework
  *
  * @author     Juan Rodríguez-Covili <juan@bicubic.cl>
- * @copyright  2011 Bicubic Technology - http://www.bicubic.cl
+ * @copyright  2011-2014 Bicubic Technology - http://www.bicubic.cl
  * @license    MIT
- * @framework  2.2
+ * @version 3.0.0
  */
 abstract class SQLData extends Data {
 
@@ -15,11 +15,8 @@ abstract class SQLData extends Data {
     protected $connection;
     protected $debug = false;
 
-    //Perform a data insert process
-    //@param $object the object data to insert
-    //@returns the id inserted if the operation was succesfully, false if not
     public function insert(DataObject $object) {
-        if (!@$object->__isComplete()) {
+        if (!$object->__isComplete()) {
             $this->localError = "incomplete object";
             return false;
         }
@@ -38,10 +35,8 @@ abstract class SQLData extends Data {
                 continue;
             }
             $key = $property["name"];
-            $obj = strpos($key, "_object");
             $cammel = strtoupper(substr($key, 0, 1)) . substr($key, 1);
             $getter = "get$cammel";
-            $setter = "set$cammel";
             $value = $object->$getter();
             if (isset($value) && ($object->__isChild() || $key != $this->idname)) {
                 if ($i == 0) {
@@ -79,10 +74,7 @@ abstract class SQLData extends Data {
         return $id;
     }
 
-    //Performs a data selection process
-    //@param $object the target object that filters the data
-    //@returns an array containing objects of the type of $object
-    public function select(DataObject $object, $orderIndex = null, $orderDirection = null, $limit=null, $lastIndex=null, $keyword = null, $keywordfield = null) {
+    public function select(DataObject $object, $orderIndex = null, $orderDirection = null, $limit = null, $lastIndex = null, $keyword = null, $keywordfield = null) {
         $class = strtolower(get_class($object));
         $data = array();
         $query = "SELECT * FROM  " . ($class) . " ";
@@ -95,7 +87,6 @@ abstract class SQLData extends Data {
             $key = $property["name"];
             $cammel = strtoupper(substr($key, 0, 1)) . substr($key, 1);
             $getter = "get$cammel";
-            $setter = "set$cammel";
             $value = $object->$getter();
             if (isset($value)) {
                 $value = $this->escapeChars($value);
@@ -146,12 +137,8 @@ abstract class SQLData extends Data {
         return $data;
     }
 
-    //Performs a data unique selection process
-    //@param $object the target object to copy the data
-    //@returns a new object of the type of $object
     public function selectOne(DataObject $object, $orderIndex = null, $orderDirection = null) {
         $class = strtolower(get_class($object));
-        $data = array();
         $query = "SELECT * FROM  " . ($class) . " ";
         $i = 0;
         $properties = $object->__getProperties();
@@ -162,7 +149,6 @@ abstract class SQLData extends Data {
             $key = $property["name"];
             $cammel = strtoupper(substr($key, 0, 1)) . substr($key, 1);
             $getter = "get$cammel";
-            $setter = "set$cammel";
             $value = $object->$getter();
             if (isset($value)) {
                 $value = $this->escapeChars($value);
@@ -207,7 +193,6 @@ abstract class SQLData extends Data {
             $key = $property["name"];
             $cammel = strtoupper(substr($key, 0, 1)) . substr($key, 1);
             $getter = "get$cammel";
-            $setter = "set$cammel";
             $value = $object->$getter();
             if ($key != $this->idname) {
                 if (isset($value)) {
@@ -238,9 +223,6 @@ abstract class SQLData extends Data {
         return true;
     }
 
-    //Perform a data delete process
-    //@param $object the object data to delete
-    //@returns true if the operation was succesfully, false if not
     public function delete(DataObject $object) {
         if ($object->getId() == null) {
             return false;
