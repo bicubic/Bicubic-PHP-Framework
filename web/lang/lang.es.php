@@ -4,9 +4,9 @@
  * Bicubic PHP Framework
  *
  * @author     Juan Rodríguez-Covili <juan@bicubic.cl>
- * @copyright  2011 Bicubic Technology - http://www.bicubic.cl
+ * @copyright  2011-2014 Bicubic Technology - http://www.bicubic.cl
  * @license    MIT
- * @framework  2.2
+ * @version 3.0.0
  */
 $lang = array();
 
