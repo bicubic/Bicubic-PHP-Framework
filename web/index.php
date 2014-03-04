@@ -1,17 +1,18 @@
 <?php
-
 /**
  * Bicubic PHP Framework
- * 
+ *
  * @author     Juan Rodríguez-Covili <juan@bicubic.cl>
- * @copyright  2011 Bicubic Technology - http://www.bicubic.cl
+ * @copyright  2011-2014 Bicubic Technology - http://www.bicubic.cl
  * @license    MIT
- * @framework  2.2
+ * @version 3.0.0
  */
 //base
 require_once("config/config.php");
-require_once("error.php");
+//default php config
 date_default_timezone_set("America/Santiago");
+error_reporting(E_ERROR | E_PARSE | E_NOTICE | E_USER_ERROR | E_USER_WARNING | E_USER_NOTICE);
+set_time_limit(300); //5 mins
 //lib
 require_once("lib/ext/pear/Sigma.php");
 require_once("lib/ext/simple_html_dom.php");
@@ -42,35 +43,40 @@ require_once("json/ErrorJson.php");
 require_once("json/LoginErrorJson.php");
 require_once("json/ObjectJson.php");
 require_once("json/SuccessJson.php");
-//URL params value
+//Params
 $config['param_app'] = "app";
 $config['param_navigation'] = "nav";
 $config['param_id'] = "id";
 $config['param_compress'] = "cp";
 $config['param_lang'] = "lang";
+//Folders
+$config['folder_template'] = "templates/";
+$config['folder_navigation'] = "views/";
+$config['folder_uploads'] = "uploads/";
+$config['folder_images'] = "images/";
 //set languaje
 $langfile = Lang::$_DEFAULT;
 require_once("lang/lang.$langfile.php");
 $application = new Application($config, $lang, null, null);
-//sacamos el lang del browser
+//Lang from browser
 if (array_key_exists('HTTP_ACCEPT_LANGUAGE', $_SERVER)) {
     $langfile = substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2);
 }
-//sacamos el lang de la url
+//Lang from URL
 $urllocale = $application->getUrlParam($config['param_lang'], "string256", false);
 if (isset($urllocale)) {
     $langfile = $urllocale;
 }
-//sacamos el lang de facebook Crowl
+//Lang from Facebook
 $fblocale = $application->getUrlParam("fb_locale", "string", false);
 if (isset($fblocale)) {
     $langfile = substr($fblocale, 0, 2);
 }
-//vemos si existe en lang
+//Check Lang
 if (!array_key_exists($langfile, Lang::$_ENUM)) {
     $langfile = Lang::$_DEFAULT;
 }
-//cargamos denuevo el lang por si es distinto al default
+//Lang reload
 require_once("lang/lang.$langfile.php");
 $config["lang"] = $langfile;
 //set temp folder
@@ -92,7 +98,6 @@ if($config['sslavailable']) {
 else {
     $config['web_secure_url'] = "http://$dir/index.php";
 }
-
 //Set Input Data into GET
 if (isset($argv)) {
     for ($i = 1; $i < count($argv); $i++) {
