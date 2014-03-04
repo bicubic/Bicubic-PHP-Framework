@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Bicubic PHP Framework
  *
@@ -17,7 +18,7 @@ $config['web_contact_name'] = "";
 $config['web_time_out'] = 360000;
 //Data Base values
 $config['database_host'] = "localhost";
-$config['database_database'] = "bicubic"; 
+$config['database_database'] = "bicubic";
 $config['database_user'] = "root";
 $config['database_password'] = "root";
 //Email with SMTP
@@ -45,8 +46,9 @@ $config['bitlyapikey'] = "";
 $config['gsutil'] = "gsutil";
 $config['gsbucket'] = "gs://storage/";
 $config['gsbucketprivate'] = "gs://storageprivate/";
-$config['storage_folder'] = "http://storage/"; 
+$config['storage_folder'] = "http://storage/";
 //Certificates for ios push notification
 $config['certificate_private'] = "/.../server_certificates_bundle_sandbox.pem";
 $config['certificate_auth'] = "/.../entrust_root_certification_authority.pem";
+
 ?>

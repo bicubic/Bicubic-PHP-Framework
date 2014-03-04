@@ -1,9 +1,12 @@
 <?php
 
 /**
- * Description of TransactionManager
+ * Bicubic PHP Framework
  *
- * @author zenilt
+ * @author     Juan Rodríguez-Covili <juan@bicubic.cl>
+ * @copyright  2011-2014 Bicubic Technology - http://www.bicubic.cl
+ * @license    MIT
+ * @version 3.0.0
  */
 class TransactionManager {
 
@@ -11,39 +14,20 @@ class TransactionManager {
     public $error;
     public $totalrows;
 
-    /**
-     * Constructor
-     * @param Data $data <p>El valor de la propiedad</p>
-     */
     function __construct(Data $data) {
         $this->data = $data;
     }
 
-    /**
-     * Realiza un select con los datos enviados. Retorna una lista de DataObject
-     * @param DataObject $dataObject
-     * @return array
-     */
     public function getAll(DataObject $dataObject, $orderIndex = 'id', $orderDirection = 'DESC') {
         $data = $this->data->select($dataObject, $orderIndex, $orderDirection);
         return $data;
     }
 
-    /**
-     * Realiza un select con los datos enviados. Retorna una lista de DataObject
-     * @param DataObject $dataObject
-     * @return array
-     */
     public function getAllPaged(DataObject $dataObject, $orderIndex = 'id', $orderDirection = 'DESC', $itemsPerPage = 10, $lastIndex = 0, $keyword = null, $keywordfield = null) {
         $data = $this->data->select($dataObject, $orderIndex, $orderDirection, $itemsPerPage, $lastIndex, $keyword, $keywordfield);
         return $data;
     }
 
-    /**
-     * Realiza un select con los datos enviados sobre la tabla DataObject 
-     * @param DataObject $dataObject 
-     * @return DataObject
-     */
     public function getRecord(DataObject $dataObject) {
         $properties = $dataObject->__getProperties();
         $empty = true;
@@ -59,12 +43,10 @@ class TransactionManager {
         if ($empty) {
             return null;
         }
-
         $dataObject = $this->data->selectOne($dataObject);
         if (!$dataObject->getId()) {
             return null;
         }
-
         if ($dataObject->__isChild()) {
             $parent = $this->data->selectOne($dataObject->__getParentObject());
             if (!$parent->getId()) {
@@ -79,16 +61,9 @@ class TransactionManager {
                 $dataObject->$setter($parent->$getter());
             }
         }
-
         return $dataObject;
     }
 
-    /**
-     * Realiza un insert con los datos enviados. 
-     * Retorna true si tubo éxito y false si no.
-     * @param DataObject $dataObject
-     * @return Boolean
-     */
     public function insertRecord(DataObject $dataObject) {
         if (!$dataObject->__isChild() && $dataObject->getId()) {
             $this->error = "id not null";
@@ -111,12 +86,6 @@ class TransactionManager {
         return $id;
     }
 
-    /**
-     * Realiza un  update con los datos enviados. 
-     * Retorna true si tubo éxito y false si no.
-     * @param DataObject $dataObject
-     * @return Boolean 
-     */
     public function updateRecord(DataObject $dataObject) {
         if (!$dataObject->getId()) {
             $this->error = "null id";
@@ -136,12 +105,6 @@ class TransactionManager {
         return true;
     }
 
-    /**
-     * Realiza un delete con los datos enviados.
-     * Retorna true si tubo éxito y false si no 
-     * @param DataObject $dataObject
-     * @return Boolean 
-     */
     function deleteRecord(DataObject $dataObject) {
         if (!$dataObject->getId()) {
             $this->error = "null id";
