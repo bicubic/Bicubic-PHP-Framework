@@ -4,9 +4,9 @@
  * Bicubic PHP Framework
  *
  * @author     Juan Rodríguez-Covili <juan@bicubic.cl>
- * @copyright  2011 Bicubic Technology - http://www.bicubic.cl
+ * @copyright  2011-2014 Bicubic Technology - http://www.bicubic.cl
  * @license    MIT
- * @framework  2.2
+ * @version 3.0.0
  */
 class Navigation {
 
@@ -150,7 +150,7 @@ class Navigation {
                 case PropertyTypes::$_STRING256 :
                 case PropertyTypes::$_STRING512 :
                 case PropertyTypes::$_STRING1024 :
-                case PropertyTypes::$_STRING2048 :  {
+                case PropertyTypes::$_STRING2048 : {
                         $result = $this->application->setCustomTemplate("bicubic", $property["type"]);
                         $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LABEL", $this->lang("lang_" . $property["name"]));
                         $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-PLACEHOLDER", $this->lang("lang_" . $property["name"] . "placeholder"));
