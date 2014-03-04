@@ -10,15 +10,30 @@
 CREATE SEQUENCE "systemuser_id_seq";
 
 CREATE TABLE "systemuser" (
-    "id" BIGINT NOT NULL DEFAULT nextval('systemuser_id_seq'),
-    "name" VARCHAR(256) NOT NULL,
-    "username" VARCHAR(256) NOT NULL,
-    "password" VARCHAR(1024) NOT NULL,
-    "email" VARCHAR(256) NOT NULL,
-    "token" VARCHAR(1024) NOT NULL,
+    "id" BIGINT NOT NULL DEFAULT nextval('systemuser_id_seq'), 
+    "name" VARCHAR(256) NOT NULL, 
+    "email" VARCHAR(256) NOT NULL, 
+    "password" VARCHAR(1024) NOT NULL, 
+    "sessiontoken" VARCHAR(1024), 
+    "confirmemailtoken" VARCHAR(1024), 
+    "forgottoken" VARCHAR(1024), 
+    "changeemailtoken" VARCHAR(1024), 
+    "changepasswordtoken" VARCHAR(1024), 
+    "usercountry" INT,
+    "userlang" VARCHAR(2), 
     CONSTRAINT "systemuser_pk" PRIMARY KEY ("id")
 );
 
-INSERT INTO "systemuser"(
-            "name", "username", "password", "email", "token")
-    VALUES ('administrator', 'admin@localhost', '$2a$10$s2/s7.yPO2WZWy0fSqWiH.YfEao1o1BC47hcyoiKK6m5Ph8V/zLWu', 'admin@localhost', '');
+CREATE SEQUENCE "systememail_id_seq";
+
+CREATE TABLE "systememail" (
+    "id" BIGINT NOT NULL DEFAULT nextval('systemuser_id_seq'), 
+    "broadcast" INT, 
+    "broadcastlang" INT, 
+    "broadcastcountry" VARCHAR(2), 
+    "to" VARCHAR(256), 
+    "from" VARCHAR(256), 
+    "subject" VARCHAR(1024), 
+    "body" TEXT, 
+    CONSTRAINT "systememail_pk" PRIMARY KEY ("id")
+);

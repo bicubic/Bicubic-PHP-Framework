@@ -21,24 +21,24 @@ class HomeApplication extends Application {
         parent::execute();
         $this->navigation = $this->getUrlParam($this->config('param_navigation'), "letters");
         switch ($this->navigation) {
-            case "hello" : {
-                    require_once('nav/HelloNavigation.php');
-                    $navigation = new HelloNavigation($this);
-                    $navigation->hello();
+            case "home" : {
+                    require_once('nav/HomeNavigation.php');
+                    $navigation = new HomeNavigation($this);
+                    $navigation->home();
                     break;
                 }
-            case "object" : {
-                    $navigation = new Navigation($this);
-                    $navigation->objectForm(new SystemUser(), "objectSubmit");
-                    break;
-                }
-            case "objectSubmit" : {
-                    $navigation = new Navigation($this);
-                    $navigation->objectFormSubmit(new SystemUser(), "object");
-                    break;
-                }
+//            case "object" : {
+//                    $navigation = new Navigation($this);
+//                    $navigation->objectForm(new SystemUser(), "objectSubmit");
+//                    break;
+//                }
+//            case "objectSubmit" : {
+//                    $navigation = new Navigation($this);
+//                    $navigation->objectFormSubmit(new SystemUser(), "object");
+//                    break;
+//                }
             default : {
-                    $this->redirect("home", "hello");
+                    $this->redirect("home", "home");
                     break;
                 }
         }
@@ -46,8 +46,6 @@ class HomeApplication extends Application {
 
     public function setMainTemplate($navigationFolder, $navigationFile, $title = "") {
         parent::setMainTemplate($navigationFolder, $navigationFile, $title);
-        $this->setHTMLVariableTemplate('HELLO-TEMPLATE', $this->lang('text_helloworld'));
-        $this->setHTMLVariableTemplate('LINK-LOGIN', $this->getSecureAppUrl("login", "login"));
     }
 
 }
