@@ -29,14 +29,14 @@ class SystemUser extends DataObject {
      */
     public function __getProperties() {
         return array(
-            "id" => ["name" => "id", "type" => "long", "required" => false, "serializable" => true, "updatenull" => true, "hidden" => true, "private" => false],
-            "name" => ["name" => "name", "type" => "string256", "required" => true, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
-            "username" => ["name" => "username", "type" => "string256", "required" => true, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
-            "password" => ["name" => "password", "type" => "password", "required" => true, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
-            "email" => ["name" => "email", "type" => "email", "required" => true, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
-            "token" => ["name" => "token", "type" => "string1024", "required" => false, "serializable" => true, "updatenull" => false, "hidden" => false, "private" => true],
-            "category" => ["name" => "category", "type" => "list", "required" => true, "serializable" => false, "updatenull" => true, "hidden" => false, "private" => false],
-            "option" => ["name" => "option", "type" => "shortlist", "required" => true, "serializable" => false, "updatenull" => true, "hidden" => false, "private" => false],
+            "id" => ["name" => "id", "type" => PropertyTypes::$_LONG, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => true, "private" => false],
+            "name" => ["name" => "name", "type" => PropertyTypes::$_STRING256, "required" => true, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
+            "username" => ["name" => "username", "type" => PropertyTypes::$_STRING256, "required" => true, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
+            "password" => ["name" => "password", "type" => PropertyTypes::$_PASSWORD, "required" => true, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
+            "email" => ["name" => "email", "type" => PropertyTypes::$_EMAIL, "required" => true, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
+            "token" => ["name" => "token", "type" => PropertyTypes::$_STRING1024, "required" => false, "serializable" => true, "updatenull" => false, "hidden" => false, "private" => true],
+            "category" => ["name" => "category", "type" => PropertyTypes::$_LIST, "required" => true, "serializable" => false, "updatenull" => true, "hidden" => false, "private" => false],
+            "option" => ["name" => "option", "type" => PropertyTypes::$_SHORTLIST, "required" => true, "serializable" => false, "updatenull" => true, "hidden" => false, "private" => false],
         );
     }
 
