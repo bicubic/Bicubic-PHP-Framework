@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Bicubic PHP Framework
  *
@@ -8,22 +9,16 @@
  * @version 3.0.0
  */
 class HomeApplication extends Application {
-    /**
-     * El panel principal
-     * @param array $config el array de la configuracion
-     * @param array $lang el array del lenguaje
-     */
-    function __construct($config, $lang) {
-        $data = new PostgreSQLData($config['database_host'], $config['database_user'], $config['database_password'], $config['database_database'], $lang);
-        parent::__construct($config, $lang, $data, "home");
+
+    function __construct($config, $lang, Data $data = null, $name = "home") {
+        if (!$data) {
+            $data = new PostgreSQLData($config);
+        }
+        parent::__construct($config, $lang, $data, $name);
     }
 
-    /**
-     * Ejecuta la aplicación
-     */
     public function execute() {
         parent::execute();
-        //Navigation
         $this->navigation = $this->getUrlParam($this->config('param_navigation'), "letters");
         switch ($this->navigation) {
             case "hello" : {
@@ -49,15 +44,8 @@ class HomeApplication extends Application {
         }
     }
 
-    /**
-     * Setea la vista dentro del template
-     * @param string $navigationFolder la carpeta de la vista
-     * @param string $navigationFile el nombre de los archivos de la vista
-     * @param string $title el titulo de la vista
-     */
-    public function setMainTemplate($navigationFolder, $navigationFile, $title="") {
+    public function setMainTemplate($navigationFolder, $navigationFile, $title = "") {
         parent::setMainTemplate($navigationFolder, $navigationFile, $title);
-
         $this->setHTMLVariableTemplate('HELLO-TEMPLATE', $this->lang('text_helloworld'));
         $this->setHTMLVariableTemplate('LINK-LOGIN', $this->getSecureAppUrl("login", "login"));
     }

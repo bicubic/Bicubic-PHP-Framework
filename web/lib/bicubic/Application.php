@@ -31,7 +31,7 @@ class Application {
      * @param string $name <p>name of the application</p>
      * @return Application a new application
      */
-    function __construct($config, $lang, $data, $name) {
+    function __construct($config, $lang, Data $data, $name) {
         $this->config = $config;
         $this->lang = $lang;
         $this->name = $name;
@@ -1391,3 +1391,5 @@ class Application {
     }
 
 }
+
+?>

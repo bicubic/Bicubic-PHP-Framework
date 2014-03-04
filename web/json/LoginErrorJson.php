@@ -1,20 +1,18 @@
 <?php
 
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 /**
- * Description of ErrorJson
+ * Bicubic PHP Framework
  *
- * @author zenilt
+ * @author     Juan Rodríguez-Covili <juan@bicubic.cl>
+ * @copyright  2011-2014 Bicubic Technology - http://www.bicubic.cl
+ * @license    MIT
+ * @version 3.0.0
  */
 class LoginErrorJson {
-    
+
     public $status = "errorlogin";
     public $error;
-    
+
 }
 
 ?>
