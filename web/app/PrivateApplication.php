@@ -11,7 +11,7 @@
 
 require_once("data/SystemUserData.php");
 
-class PrivateApplication extends Application {
+class PrivateApplication extends LoginApplication {
 
     /**
      * Constructor
