@@ -11,7 +11,8 @@
 require_once("config/config.php");
 //default php config
 date_default_timezone_set("America/Santiago");
-error_reporting(E_ERROR | E_PARSE | E_NOTICE | E_USER_ERROR | E_USER_WARNING | E_USER_NOTICE);
+error_reporting(E_ALL);
+//error_reporting(E_ERROR | E_PARSE | E_NOTICE | E_USER_ERROR | E_USER_WARNING | E_USER_NOTICE);
 set_time_limit(300); //5 mins
 //lib
 require_once("lib/ext/pear/Sigma.php");
@@ -23,17 +24,12 @@ require_once("lib/ext/thread/singleton.class.php");
 require_once("lib/bicubic/Application.php");
 require_once("lib/bicubic/Data.php");
 require_once("lib/bicubic/DataObject.php");
+require_once("lib/bicubic/Navigation.php");
+require_once("lib/bicubic/ObjectParamList.php");
+require_once("lib/bicubic/Param.php");
 require_once("lib/bicubic/SQLData.php");
 require_once("lib/bicubic/PostgreSQLData.php");
-require_once("lib/bicubic/Navigation.php");
-require_once("lib/bicubic/Parser.php");
-require_once("lib/bicubic/HTMLParser.php");
-require_once("lib/bicubic/XMLParser.php");
-require_once("lib/bicubic/Param.php");
-require_once("lib/bicubic/Publication.php");
-require_once("lib/bicubic/Email.php");
-require_once("lib/bicubic/LogData.php");
-require_once("lib/bicubic/SearchParam.php");
+require_once("lib/bicubic/SMTPEmail.php");
 require_once("lib/bicubic/TransactionManager.php");
 //beans
 require_once("beans/SystemUser.php");
@@ -123,11 +119,6 @@ if (isset($argv)) {
                 $application = new HomeApplication($config, $lang);
                 break;
             }
-        case "json": {
-                require_once("app/JsonApplication.php");
-                $application = new JsonApplication($config, $lang);
-                break;
-            }
         case "login": {
                 require_once("app/LoginApplication.php");
                 $application = new LoginApplication($config, $lang);
@@ -138,8 +129,13 @@ if (isset($argv)) {
                 $application = new PrivateApplication($config, $lang);
                 break;
             }
+        case "json": {
+                require_once("app/JsonApplication.php");
+                $application = new JsonApplication($config, $lang);
+                break;
+            }
         default: {
-                $application->secureRedirect("home", "home");
+                $application->secureRedirect("login", "logout");
                 break;
             }
     }

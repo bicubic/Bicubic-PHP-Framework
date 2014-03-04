@@ -4,22 +4,26 @@
         <meta charset="utf-8">
         <title>{TEMPLATE-TITLE}</title>
         <link rel="stylesheet" href="templates/common/styles.css">
-        <style>
-            {TEMPLATE-CSS}
-        </style>
     </head>
     <body>
-        <p><a href="{LINK-LOGOUT}">{LANG-LOGOUT}</a></p>
+        <header>
+            <ul>
+                <li>
+                    <a href="{LINK-LOGOUT}">{LANG-LOGOUT}</a>
+                </li>
+            </ul>
+        </header>
+    <main>
         {TEMPLATE-CONTENT}
-        
-        <footer>
+    </main>
+    <footer>
+        <p>{TEMPLATE-COPY}</p>
+        <p>
             <!-- BEGIN LANGS -->
             <a href="{LANG-LINK}">{LANG-TEXT}</a>
             <!-- END LANGS -->
-        </footer>
-    </body>
-    <script src="templates/common/scripts.js"></script>
-    <script>
-        {TEMPLATE-JAVASCRIPT}
-    </script>
+        </p>
+    </footer>
+</body>
+<script src="templates/common/scripts.js"></script>
 </html>
