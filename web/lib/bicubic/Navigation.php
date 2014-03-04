@@ -129,32 +129,28 @@ class Navigation {
             return $this->application->renderCustomTemplate($result);
         } else {
             switch ($property["type"]) {
-                case "alpha32" :
-                case "alphanumeric" :
-                case "date" :
-                case "double" :
-                case "email" :
-                case "int" :
-                case "letters" :
-                case "long" :
-                case "numeric" :
-                case "percentage" :
-                case "password" :
-                case "string" :
-                case "string" :
-                case "string1" :
-                case "string2" :
-                case "string4" :
-                case "string8" :
-                case "string16" :
-                case "string24" :
-                case "string32" :
-                case "string64" :
-                case "string128" :
-                case "string256" :
-                case "string512" :
-                case "string1024" :
-                case "string2048": {
+                case PropertyTypes::$_ALPHANUMERIC :
+                case PropertyTypes::$_DATE :
+                case PropertyTypes::$_DOUBLE :
+                case PropertyTypes::$_EMAIL :
+                case PropertyTypes::$_INT :
+                case PropertyTypes::$_LETTERS :
+                case PropertyTypes::$_LONG :
+                case PropertyTypes::$_PASSWORD :
+                case PropertyTypes::$_STRING :
+                case PropertyTypes::$_STRING1 :
+                case PropertyTypes::$_STRING2 :
+                case PropertyTypes::$_STRING4 :
+                case PropertyTypes::$_STRING8 :
+                case PropertyTypes::$_STRING16 :
+                case PropertyTypes::$_STRING24 :
+                case PropertyTypes::$_STRING32 :
+                case PropertyTypes::$_STRING64 :
+                case PropertyTypes::$_STRING128 :
+                case PropertyTypes::$_STRING256 :
+                case PropertyTypes::$_STRING512 :
+                case PropertyTypes::$_STRING1024 :
+                case PropertyTypes::$_STRING2048 :  {
                         $result = $this->application->setCustomTemplate("bicubic", $property["type"]);
                         $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LABEL", $this->lang("lang_" . $property["name"]));
                         $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-PLACEHOLDER", $this->lang("lang_" . $property["name"] . "placeholder"));
@@ -164,7 +160,7 @@ class Navigation {
                         return $this->application->renderCustomTemplate($result);
                         break;
                     }
-                case "boolean" : {
+                case PropertyTypes::$_BOOLEAN : {
                         $result = $this->application->setCustomTemplate("bicubic", $property["type"]);
                         $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LABEL", $this->lang("lang_" . $property["name"]));
                         $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-NAME", $objectName . "_" . $property["name"]);
@@ -177,8 +173,8 @@ class Navigation {
                         return $this->application->renderCustomTemplate($result);
                         break;
                     }
-                case "list" : {
-                        $result = $this->application->setCustomTemplate("bicubic", "category");
+                case PropertyTypes::$_LIST : {
+                        $result = $this->application->setCustomTemplate("bicubic", "list");
                         $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LABEL", $this->lang("lang_" . $property["name"]));
                         $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-NAME", $objectName . "_" . $property["name"]);
                         $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-REQUIRED", $property["required"] ? "required" : "");
@@ -193,8 +189,8 @@ class Navigation {
                         }
                         return $this->application->renderCustomTemplate($result);
                     }
-                case "shortlist" : {
-                        $result = $this->application->setCustomTemplate("bicubic", "option");
+                case PropertyTypes::$_SHORTLIST : {
+                        $result = $this->application->setCustomTemplate("bicubic", "shortlist");
                         $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LABEL", $this->lang("lang_" . $property["name"]));
                         $items = $object->__getList(new TransactionManager($this->application->data), $property["name"]);
                         foreach ($items as $item => $text) {

@@ -1,6 +1,45 @@
 <?php 
 
+class PropertyTypes {
 
+    public static $_INT = "int";
+    public static $_LIST = "list";
+    public static $_SHORTLIST = "shortlist";
+    public static $_LONG = "long";
+    public static $_DOUBLE = "double";
+    public static $_EMAIL = "email";
+    public static $_PASSWORD = "password";
+    public static $_STRING = "string";
+    public static $_STRING2048 = "string2048";
+    public static $_STRING1024 = "string1024";
+    public static $_STRING512 = "string512";
+    public static $_STRING256 = "string256";
+    public static $_STRING128 = "string128";
+    public static $_STRING64 = "string64";
+    public static $_STRING32 = "string32";
+    public static $_STRING24 = "string24";
+    public static $_STRING16 = "string16";
+    public static $_STRING8 = "string8";
+    public static $_STRING4 = "string4";
+    public static $_STRING2 = "string2";
+    public static $_STRING1 = "string1";
+    public static $_FLAT = "flat";
+    public static $_LETTERS = "letters";
+    public static $_ALPHANUMERIC = "alphanumeric";
+    public static $_DATE = "date";
+    public static $_BOOLEAN = "boolean";
+    public static $_INTARRAY = "int-array";
+    public static $_DOUBLEARRAY = "double-array";
+    public static $_STRINGARRAY = "string-array";
+    public static $_JSON = "json";
+
+    public static $_ENUM = array(
+        1 => "lang_item1",
+        2 => "lang_item2",
+        3 => "lang_item3",
+    );
+
+}
 
 class CurrencyKeys {
 
