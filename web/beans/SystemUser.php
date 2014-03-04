@@ -12,27 +12,35 @@ class SystemUser extends DataObject {
 
     private $id;
     private $name;
-    private $username;
-    private $password;
     private $email;
-    private $token;
-    private $category;
-    private $option;
+    private $password;
+    private $sessiontoken;
+    private $confirmemailtoken;
+    private $forgottoken;
+    private $changeemailtoken;
+    private $changepasswordtoken;
+    private $usercountry;
+    private $userlang;
 
-    function __construct() {
-        
+    function __construct($id = null, $email = null, $password = null) {
+        $this->id = $id;
+        $this->email = $email;
+        $this->password = $password;
     }
 
     public function __getProperties() {
         return array(
             "id" => ["name" => "id", "type" => PropertyTypes::$_LONG, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => true, "private" => false],
             "name" => ["name" => "name", "type" => PropertyTypes::$_STRING256, "required" => true, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
-            "username" => ["name" => "username", "type" => PropertyTypes::$_STRING256, "required" => true, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
-            "password" => ["name" => "password", "type" => PropertyTypes::$_PASSWORD, "required" => true, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
             "email" => ["name" => "email", "type" => PropertyTypes::$_EMAIL, "required" => true, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
-            "token" => ["name" => "token", "type" => PropertyTypes::$_STRING1024, "required" => false, "serializable" => true, "updatenull" => false, "hidden" => false, "private" => true],
-            "category" => ["name" => "category", "type" => PropertyTypes::$_LIST, "required" => true, "serializable" => false, "updatenull" => true, "hidden" => false, "private" => false],
-            "option" => ["name" => "option", "type" => PropertyTypes::$_SHORTLIST, "required" => true, "serializable" => false, "updatenull" => true, "hidden" => false, "private" => false],
+            "password" => ["name" => "password", "type" => PropertyTypes::$_PASSWORD, "required" => true, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
+            "sessiontoken" => ["name" => "sessiontoken", "type" => PropertyTypes::$_STRING1024, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
+            "confirmemailtoken" => ["name" => "confirmemailtoken", "type" => PropertyTypes::$_STRING1024, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
+            "forgottoken" => ["name" => "forgottoken", "type" => PropertyTypes::$_STRING1024, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
+            "changeemailtoken" => ["name" => "changeemailtoken", "type" => PropertyTypes::$_STRING1024, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
+            "changepasswordtoken" => ["name" => "changepasswordtoken", "type" => PropertyTypes::$_STRING1024, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
+            "usercountry" => ["name" => "usercountry", "type" => PropertyTypes::$_LIST, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
+            "userlang" => ["name" => "userlang", "type" => PropertyTypes::$_STRING2, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
         );
     }
 
@@ -63,28 +71,40 @@ class SystemUser extends DataObject {
         return $this->name;
     }
 
-    public function getUsername() {
-        return $this->username;
+    public function getEmail() {
+        return $this->email;
     }
 
     public function getPassword() {
         return $this->password;
     }
 
-    public function getEmail() {
-        return $this->email;
+    public function getSessiontoken() {
+        return $this->sessiontoken;
     }
 
-    public function getToken() {
-        return $this->token;
+    public function getConfirmemailtoken() {
+        return $this->confirmemailtoken;
     }
 
-    public function getCategory() {
-        return $this->category;
+    public function getForgottoken() {
+        return $this->forgottoken;
     }
 
-    public function getOption() {
-        return $this->option;
+    public function getChangeemailtoken() {
+        return $this->changeemailtoken;
+    }
+
+    public function getChangepasswordtoken() {
+        return $this->changepasswordtoken;
+    }
+
+    public function getUsercountry() {
+        return $this->usercountry;
+    }
+
+    public function getUserlang() {
+        return $this->userlang;
     }
 
     public function setId($id) {
@@ -95,28 +115,40 @@ class SystemUser extends DataObject {
         $this->name = $name;
     }
 
-    public function setUsername($username) {
-        $this->username = $username;
+    public function setEmail($email) {
+        $this->email = $email;
     }
 
     public function setPassword($password) {
         $this->password = $password;
     }
 
-    public function setEmail($email) {
-        $this->email = $email;
+    public function setSessiontoken($sessiontoken) {
+        $this->sessiontoken = $sessiontoken;
     }
 
-    public function setToken($token) {
-        $this->token = $token;
+    public function setConfirmemailtoken($confirmemailtoken) {
+        $this->confirmemailtoken = $confirmemailtoken;
     }
 
-    public function setCategory($category) {
-        $this->category = $category;
+    public function setForgottoken($forgottoken) {
+        $this->forgottoken = $forgottoken;
     }
 
-    public function setOption($option) {
-        $this->option = $option;
+    public function setChangeemailtoken($changeemailtoken) {
+        $this->changeemailtoken = $changeemailtoken;
+    }
+
+    public function setChangepasswordtoken($changepasswordtoken) {
+        $this->changepasswordtoken = $changepasswordtoken;
+    }
+
+    public function setUsercountry($usercountry) {
+        $this->usercountry = $usercountry;
+    }
+
+    public function setUserlang($userlang) {
+        $this->userlang = $userlang;
     }
 
 }

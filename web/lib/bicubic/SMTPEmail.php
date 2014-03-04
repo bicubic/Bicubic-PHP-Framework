@@ -27,7 +27,7 @@ abstract class SMTPEmail {
 
     abstract function getPlainBody();
 
-    function send($host, $port, $auth, $username, $password) {
+    function send($host, $port, $auth, $username, $password, $body) {
         $headers["From"] = "$this->fromName<$this->from>";
         $headers["Reply-To"] = "$this->fromName<$this->from>";
         $headers["To"] = $this->to;
@@ -46,25 +46,6 @@ abstract class SMTPEmail {
         }
         $this->error = $result;
         return false;
-    }
-
-    function sendPlain($host, $port, $auth, $username, $password) {
-        $headers["From"] = "$this->fromName<$this->from>";
-        $headers["Reply-To"] = "$this->fromName<$this->from>";
-        $headers["To"] = $this->to;
-        $headers["Subject"] = $this->subject;
-        $headers["Content-type"] = "text/html; charset=utf8";
-        $body = $this->getPlainBody();
-        $params["host"] = $host;
-        $params["port"] = $port;
-        $params["auth"] = $auth;
-        $params["username"] = $username;
-        $params["password"] = $password;
-        $mail_object = & Mail::factory("smtp", $params);
-        if (!$mail_object->send($this->to, $headers, $body)) {
-            return false;
-        }
-        return true;
     }
 
 }
