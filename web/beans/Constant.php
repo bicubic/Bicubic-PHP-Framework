@@ -40,6 +40,7 @@ class PropertyTypes {
     public static $_DOUBLEARRAY = "double-array";
     public static $_STRINGARRAY = "string-array";
     public static $_JSON = "json";
+    public static $_RUT = "rut";
     public static $_ENUM = array(
         1 => "lang_item1",
         2 => "lang_item2",
@@ -146,14 +147,5 @@ class ObjectBoolean {
 
 }
 
-class ExampleList {
-
-    public static $_ENUM = array(
-        1 => "lang_item1",
-        2 => "lang_item2",
-        3 => "lang_item3",
-    );
-
-}
 
 ?>
