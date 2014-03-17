@@ -23,17 +23,12 @@ abstract class SMTPEmail {
         $this->subject = $subject;
     }
 
-    abstract function getBody();
-
-    abstract function getPlainBody();
-
     function send($host, $port, $auth, $username, $password, $body) {
         $headers["From"] = "$this->fromName<$this->from>";
         $headers["Reply-To"] = "$this->fromName<$this->from>";
         $headers["To"] = $this->to;
         $headers["Subject"] = $this->subject;
         $headers["Content-type"] = "text/html; charset=utf8";
-        $body = $this->getBody();
         $params["host"] = $host;
         $params["port"] = $port;
         $params["auth"] = $auth;
