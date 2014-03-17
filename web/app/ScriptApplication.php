@@ -21,6 +21,10 @@ class ScriptApplication extends Application {
         parent::execute();
         $this->navigation = $this->getUrlParam($this->config('param_navigation'), "letters");
         switch ($this->navigation) {
+            case "beans" : {
+                    $this->generateBeans();
+                    break;
+                }
             case "password" : {
                     $this->generatePassword();
                     break;
@@ -35,6 +39,36 @@ class ScriptApplication extends Application {
     public function error($message) {
         echo $message;
         $this->endApp();
+    }
+
+    private function generateBeans() {
+        $data = new PostgreSQLData($this->config);
+        $query = "SELECT table_name FROM information_schema.tables WHERE table_schema='public'";
+        $result = $data->performRead($query);
+        while ($row = $data->readNext($result)) {
+            $string = "";
+            $class = $cammelName = strtoupper(substr($row['table_name'], 0, 1)) . substr($row['table_name'], 1);
+            $string .= "<?php\n";
+            $string .= "class $class extends DataObject {\n";
+            $string .= "\n";
+            $string .= "}\n";
+            $string .= "?>\n";
+            $string .= "\n";
+            $string .= "\n";
+            $string .= "\n";
+            $string .= "\n";
+            $string .= "\n";
+            $string .= "\n";
+            $string .= "function $setter(\$value) { \n";
+            $string .= "function $setter(\$value) { \n";
+            $string .= "    \$this->$item = \$value; \n";
+            $string .= "} \n";
+            $string .= " \n";
+            $string .= "function $getter() { \n";
+            $string .= "    return \$this->$item; \n";
+            $string .= "} \n";
+            $string .= " \n";
+        }
     }
 
     private function generatePassword() {
