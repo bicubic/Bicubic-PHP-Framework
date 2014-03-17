@@ -279,12 +279,15 @@ class Application {
                     break;
                 }
             case PropertyTypes::$_EMAIL : {
-                    if ($value) {
-                        $value = trim($value);
-                        $value = (substr($value, 0, 256));
-                        if ($value) {
-                            return $value;
-                        }
+                    if (filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                        return $value;
+                    }
+                    break;
+                }
+            case PropertyTypes::$_RUT : {
+                    $rut = $this->valida_rut($value);
+                    if ($rut) {
+                        return $rut;
                     }
                     break;
                 }
@@ -1363,6 +1366,33 @@ class Application {
             }
         }
         return $default;
+    }
+
+    private function valida_rut($r) {
+        $r = strtoupper(ereg_replace('\.|,|-', '', $r));
+        $sub_rut = substr($r, 0, strlen($r) - 1);
+        $sub_dv = substr($r, -1);
+        $x = 2;
+        $s = 0;
+        for ($i = strlen($sub_rut) - 1; $i >= 0; $i--) {
+            if ($x > 7) {
+                $x = 2;
+            }
+            $s += $sub_rut[$i] * $x;
+            $x++;
+        }
+        $dv = 11 - ($s % 11);
+        if ($dv == 10) {
+            $dv = 'K';
+        }
+        if ($dv == 11) {
+            $dv = '0';
+        }
+        if ($dv == $sub_dv) {
+            return $sub_rut . $sub_dv;
+        } else {
+            return false;
+        }
     }
 
 }
