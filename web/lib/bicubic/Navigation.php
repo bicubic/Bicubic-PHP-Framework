@@ -132,7 +132,8 @@ class Navigation {
                 case PropertyTypes::$_ALPHANUMERIC :
                 case PropertyTypes::$_DATE :
                 case PropertyTypes::$_DOUBLE :
-                case PropertyTypes::$_EMAIL :
+                case PropertyTypes::$_EMAIL : 
+                case PropertyTypes::$_RUT :
                 case PropertyTypes::$_INT :
                 case PropertyTypes::$_LETTERS :
                 case PropertyTypes::$_LONG :
