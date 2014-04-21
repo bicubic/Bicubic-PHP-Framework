@@ -41,11 +41,22 @@ class LoginApplication extends Application {
                     $navigation->logout();
                     break;
                 }
+            case "signUpSubmit" : {
+                    require_once('nav/LoginNavigation.php');
+                    $navigation = new LoginNavigation($this);
+                    $navigation->signUpSubmit();
+                    break;
+                }
+            default : {
+                $this->secureRedirect("login", "logout");
+                break;
+            }
         }
     }
 
     public function setMainTemplate($navigationFolder, $navigationFile, $title = "") {
         parent::setMainTemplate($navigationFolder, $navigationFile, $title);
+        $this->setHTMLVariableTemplate('LINK-HOME', $this->getSecureAppUrl("home", "home"));
     }
 
     public function loginCheck() {

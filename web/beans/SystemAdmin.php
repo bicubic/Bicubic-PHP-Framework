@@ -31,6 +31,7 @@ class SystemAdmin extends DataObject {
             "sessiontoken" => ["name" => "sessiontoken", "type" => PropertyTypes::$_STRING1024, "required" => false, "serializable" => true, "updatenull" => false, "hidden" => true, "private" => true],
         );
     }
+   
 
     public function getId() {
         return $this->id;

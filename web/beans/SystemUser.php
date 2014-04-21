@@ -53,11 +53,8 @@ class SystemUser extends DataObject {
 
     public function __getList(TransactionManager $data, $paramname) {
         switch ($paramname) {
-            case "category" : {
-                    return ExampleList::$_ENUM;
-                }
-            case "option" : {
-                    return ExampleList::$_ENUM;
+            case "usercountry" : {
+                    return CurrencyCountry::$_ENUM;
                 }
         }
         return [];
