@@ -49,9 +49,9 @@ $config['bitlylogin'] = "";
 $config['bitlyapikey'] = "";
 //Google Cloud Storage
 $config['gsutil'] = "gsutil";
-$config['gsbucket'] = "gs://storage/";
-$config['gsbucketprivate'] = "gs://storageprivate/";
-$config['storage_folder'] = "http://storage/";
+$config['gsbucket'] = "gs://mystorage/";
+$config['gsbucketprivate'] = "gs://mystorageprivate/";
+$config['storage_folder'] = "http://storage.bicubic.cl/";
 //Certificates for ios push notification
 $config['certificate_private'] = "/.../server_certificates_bundle_sandbox.pem";
 $config['certificate_auth'] = "/.../entrust_root_certification_authority.pem";

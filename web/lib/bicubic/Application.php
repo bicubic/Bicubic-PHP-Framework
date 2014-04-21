@@ -87,30 +87,6 @@ class Application {
         return $link;
     }
 
-    /**
-     * Builds a non-secure app URL
-     * @param string $app <p>The application to send</p>
-     * @param string $navigation <p>The application to send</p>
-     * @param string $params <p>extra Param objects for the URL</p>
-     * @return String the corresponding URL
-     */
-    public function getAppUrl($app, $navigation, $params = null) {
-        $link = $this->config('web_url') . "?" . $this->config('param_app') . "=" . $app;
-        $link .= "&" . $this->config('param_navigation') . "=" . $navigation;
-        $hasLang = false;
-        if ($params) {
-            foreach ($params as $param) {
-                $link .= "&" . $param->name . "=" . $param->value;
-            }
-            if ($param->name == $this->config('param_lang')) {
-                $hasLang = true;
-            }
-        }
-        if (!$hasLang) {
-            $link .= "&" . $this->config('param_lang') . "=" . $this->config("lang");
-        }
-        return $link;
-    }
 
     /**
      * Gets a variable from the GET array, filtered by type, escapes for prevent SQL injection
@@ -741,14 +717,10 @@ class Application {
         }
     }
 
-    public function setFormTemplate($name, array $params, $application, $navigation, $secure = true, $urlparams = null) {
+    public function setFormTemplate($name, array $params, $application, $navigation, $urlparams = null) {
         $name = strtoupper($name);
         $this->setVariableTemplate("$name-ID", $this->navigation . "$name");
-        if ($secure) {
-            $this->setVariableTemplate("$name-ACTION", $this->getSecureAppUrl($application, $navigation, $urlparams));
-        } else {
-            $this->setVariableTemplate("$name-ACTION", $this->getAppUrl($application, $navigation, $urlparams));
-        }
+        $this->setVariableTemplate("$name-ACTION", $this->getSecureAppUrl($application, $navigation, $urlparams));
         foreach ($params as $param) {
             if (get_class($param) == "Param") {
                 $this->setFormParam($param, $name);
@@ -982,12 +954,6 @@ class Application {
     public function hideBlockTemplate($name) {
         $this->tpl->parse($name);
         $this->tpl->hideBlock($name);
-    }
-
-    public function redirect($app, $navigation, $params = null) {
-        //Try redirect
-        header(sprintf("Location: %s", $this->getAppUrl($app, $navigation, $params)));
-        $this->endApp();
     }
 
     public function redirectToUrl($url) {

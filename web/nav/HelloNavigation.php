@@ -8,7 +8,7 @@
  * @license    MIT
  * @version 3.0.0
  */
-class HomeNavigation extends Navigation {
+class HelloNavigation extends Navigation {
     
     
 
@@ -16,10 +16,11 @@ class HomeNavigation extends Navigation {
         parent::__construct($application);
     }
 
-    public function home() {
-        $this->application->setMainTemplate("home", "home");
+    public function hello() {
+        $this->application->setMainTemplate("hello", "hello");
         $signupSystemUser = new SystemUser();
-        $this->application->setFormTemplate("signup", [$signupSystemUser], "login" , "signUpSubmit");
+        $confirmPassword = new Param("confirmpassword");
+        $this->application->setFormTemplate("signup", [$signupSystemUser, $confirmPassword], "login" , "signUpSubmit");
         $this->application->render();
     }
 
