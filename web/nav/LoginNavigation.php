@@ -24,7 +24,7 @@ class LoginNavigation extends Navigation {
             new SystemUser(),
             new Param("loginToken", $loginToken)
         );
-        $this->application->setFormTemplate("login", $params, "login", "loginSubmit", true);
+        $this->application->setFormTemplate("login", $params, "login", "loginSubmit");
         $this->application->render();
     }
 
@@ -35,32 +35,32 @@ class LoginNavigation extends Navigation {
         $loginToken = $this->application->getSessionParam("loginToken", "string64");
         if ($formToken != $loginToken) {
             $data->data->rollback();
-            $this->application->error($this->lang('error_token_notvalid'));
+            $this->application->error($this->lang('lang_token_notvalid'));
         }
         $systemUser = $this->application->getFormObject(new SystemUser());
         if ($systemUser->getEmail() === null) {
             $data->data->rollback();
-            $this->application->error($this->lang('error_usernamenotvalid'));
+            $this->application->error($this->lang('lang_usernamenotvalid'));
         }
         if ($systemUser->getPassword() === null) {
             $data->data->rollback();
-            $this->application->error($this->lang('error_passwordnotvalid'));
+            $this->application->error($this->lang('lang_passwordnotvalid'));
         }
         $dbSystemUser = new SystemUser();
         $dbSystemUser->setEmail($systemUser->getEmail());
         $dbSystemUser = $data->getRecord($dbSystemUser);
         if (!isset($dbSystemUser)) {
             $data->data->rollback();
-            $this->application->error($this->lang('error_login'));
+            $this->application->error($this->lang('lang_loginerror'));
         }
         if (crypt($systemUser->getPassword(), $dbSystemUser->getPassword()) != $dbSystemUser->getPassword()) {
             $data->data->rollback();
-            $this->application->error($this->lang('error_login'));
+            $this->application->error($this->lang('lang_loginerror'));
         }
         $dbSystemUser->setToken($this->application->createRandomString(64));
         if (!$data->updateRecord($dbSystemUser)) {
             $data->data->rollback();
-            $this->application->error($this->lang('error_server_error') . " " . $data->error);
+            $this->application->error($this->lang('lang_servererror') . " " . $data->error);
         }
         $this->application->loginSet($dbSystemUser);
         $data->data->commit();
@@ -69,7 +69,49 @@ class LoginNavigation extends Navigation {
 
     public function logout() {
         $this->application->loginUnset();
-        $this->application->secureRedirect("login", "login");
+        $this->application->secureRedirect("home", "home");
+    }
+    
+    public function signUpSubmit() {
+        $data = new AtomManager($this->application->data);
+        $data->data->begin();
+        $systemUser = $this->application->getFormObject(new SystemUser());
+        $confirmPassword = $this->application->getFormParam("confirmpassword", PropertyTypes::$_STRING32, true);
+        if ($systemUser->getName() === null) {
+            $data->data->rollback();
+            $this->application->error($this->lang('lang_namenotvalid'));
+        }
+        if ($systemUser->getEmail() === null) {
+            $data->data->rollback();
+            $this->application->error($this->lang('lang_usernamenotvalid'));
+        }
+        if ($systemUser->getPassword() === null) {
+            $data->data->rollback();
+            $this->application->error($this->lang('lang_passwordnotvalid'));
+        }
+        if ($systemUser->getPassword() !== $confirmPassword) {
+            $data->data->rollback();
+            $this->application->error($this->lang('lang_confirmpasswordnotvalid'));
+        }
+        $dbSystemUser = new SystemUser();
+        $dbSystemUser->setEmail($systemUser->getEmail());
+        $dbSystemUser = $data->getRecord($dbSystemUser);
+        if ($dbSystemUser) {
+            $data->data->rollback();
+            $this->application->error($this->lang('lang_emailexist'));
+        }
+        $newSystemUser = new SystemUser();
+        $newSystemUser->setName($systemUser->getName());
+        $newSystemUser->setEmail($systemUser->getEmail());
+        $newSystemUser->setPassword($this->application->blowfishCrypt($systemUser->getPassword(), 10));
+        $newSystemUser->setSessiontoken($this->application->createRandomString(64));
+        if (!$data->insertRecord($newSystemUser)) {
+            $data->data->rollback();
+            $this->application->error($this->lang('lang_servererror'));
+        }
+        $this->application->loginSet($dbSystemUser);
+        $data->data->commit();
+        $this->application->secureRedirect("private", "hello");
     }
 
 }

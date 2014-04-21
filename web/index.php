@@ -11,7 +11,7 @@
 require_once("config/config.php");
 //default php config
 date_default_timezone_set("America/Santiago");
-error_reporting(E_ALL);
+error_reporting(E_ALL & ~E_STRICT );
 //error_reporting(E_ERROR | E_PARSE | E_NOTICE | E_USER_ERROR | E_USER_WARNING | E_USER_NOTICE);
 set_time_limit(300); //5 mins
 //lib
@@ -78,16 +78,15 @@ $config["lang"] = $langfile;
 //set temp folder
 $config['server_temp_folder'] = sys_get_temp_dir() . "/";
 //set working foler
-$url = $_SERVER['REQUEST_URI']; //returns the current URL
+$url = array_key_exists('REQUEST_URI', $_SERVER) ? $_SERVER['REQUEST_URI'] : ""; //returns the current URL
 $parts = explode('/',$url);
-$dir = $_SERVER['SERVER_NAME'];
+$dir =  array_key_exists('SERVER_NAME', $_SERVER) ? $_SERVER['SERVER_NAME'] : "";
 for ($i = 0; $i < count($parts) - 1; $i++) {
  $dir .= $parts[$i] . "/";
 }
 $dir = rtrim($dir, "/");
-$protocol = ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') || $_SERVER['SERVER_PORT'] == 443) ? "https" : "http";
+$protocol = ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') || (array_key_exists('SERVER_PORT', $_SERVER) ? $_SERVER['SERVER_PORT'] == 443 : false)) ? "https" : "http";
 $config['web_folder'] = "$protocol://$dir/";
-$config['web_url'] = "$protocol://$dir/index.php";
 if($config['sslavailable']) {
     $config['web_secure_url'] = "https://$dir/index.php";
 }
@@ -135,7 +134,7 @@ if (isset($argv)) {
                 break;
             }
         default: {
-                $application->secureRedirect("login", "logout");
+                $application->secureRedirect("home", "home");
                 break;
             }
     }

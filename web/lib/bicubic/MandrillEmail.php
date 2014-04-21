@@ -8,7 +8,7 @@
  * @license    MIT
  * @version 3.0.0
  */
-abstract class MandrillEmail {
+class MandrillEmail {
 
     public $to;
     public $from;
@@ -49,20 +49,9 @@ abstract class MandrillEmail {
         }
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($jsonObject));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $result = curl_exec($ch);
+        curl_exec($ch);
         curl_close($ch);
-        if ($result !== FALSE) {
-            echo $result . "\n";
-            $json = json_decode($result);
-            if ($json && property_exists($json, "status") && $json->status == "sent") {
-                return true;
-            }
-            if ($json && property_exists($json, "status") && $json->status == "queued") {
-                return true;
-            }
-        }
-        return false;
+        return true;
     }
-
 }
 ?>
