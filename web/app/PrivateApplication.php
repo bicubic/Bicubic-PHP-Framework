@@ -32,7 +32,7 @@ class PrivateApplication extends LoginApplication {
                     break;
                 }
             default : {
-                    $this->error($this->lang('error_navnotfound'));
+                    $this->error($this->lang('lang_navnotfound'));
                     break;
                 }
         }

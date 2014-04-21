@@ -22,23 +22,13 @@ class HomeApplication extends Application {
         $this->navigation = $this->getUrlParam($this->config('param_navigation'), "letters");
         switch ($this->navigation) {
             case "home" : {
-                    require_once('nav/HomeNavigation.php');
-                    $navigation = new HomeNavigation($this);
-                    $navigation->home();
+                    require_once('nav/HelloNavigation.php');
+                    $navigation = new HelloNavigation($this);
+                    $navigation->hello();
                     break;
                 }
-//            case "object" : {
-//                    $navigation = new Navigation($this);
-//                    $navigation->objectForm(new SystemUser(), "objectSubmit");
-//                    break;
-//                }
-//            case "objectSubmit" : {
-//                    $navigation = new Navigation($this);
-//                    $navigation->objectFormSubmit(new SystemUser(), "object");
-//                    break;
-//                }
             default : {
-                    $this->redirect("home", "home");
+                    $this->secureRedirect("home", "home");
                     break;
                 }
         }
@@ -46,6 +36,7 @@ class HomeApplication extends Application {
 
     public function setMainTemplate($navigationFolder, $navigationFile, $title = "") {
         parent::setMainTemplate($navigationFolder, $navigationFile, $title);
+        $this->setHTMLVariableTemplate('LINK-LOGIN', $this->getSecureAppUrl("login", "login"));
     }
 
 }

@@ -19,11 +19,11 @@ class SystemEmail extends DataObject {
     private $subject;
     private $body;
     private $sent;
+    
+    
 
-    function __construct($id = null, $email = null, $password = null) {
+    function __construct($id = null) {
         $this->id = $id;
-        $this->email = $email;
-        $this->password = $password;
     }
 
     public function __getProperties() {
@@ -68,6 +68,79 @@ class SystemEmail extends DataObject {
         }
         return [];
     }
+
+    public function getId() {
+        return $this->id;
+    }
+
+    public function getBroadcast() {
+        return $this->broadcast;
+    }
+
+    public function getBroadcastcountry() {
+        return $this->broadcastcountry;
+    }
+
+    public function getBroadcastlang() {
+        return $this->broadcastlang;
+    }
+
+    public function getTo() {
+        return $this->to;
+    }
+
+    public function getFrom() {
+        return $this->from;
+    }
+
+    public function getSubject() {
+        return $this->subject;
+    }
+
+    public function getBody() {
+        return $this->body;
+    }
+
+    public function getSent() {
+        return $this->sent;
+    }
+
+    public function setId($id) {
+        $this->id = $id;
+    }
+
+    public function setBroadcast($broadcast) {
+        $this->broadcast = $broadcast;
+    }
+
+    public function setBroadcastcountry($broadcastcountry) {
+        $this->broadcastcountry = $broadcastcountry;
+    }
+
+    public function setBroadcastlang($broadcastlang) {
+        $this->broadcastlang = $broadcastlang;
+    }
+
+    public function setTo($to) {
+        $this->to = $to;
+    }
+
+    public function setFrom($from) {
+        $this->from = $from;
+    }
+
+    public function setSubject($subject) {
+        $this->subject = $subject;
+    }
+
+    public function setBody($body) {
+        $this->body = $body;
+    }
+
+    public function setSent($sent) {
+        $this->sent = $sent;
+    }
+
 
 
 }

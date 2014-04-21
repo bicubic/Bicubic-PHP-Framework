@@ -11,56 +11,57 @@
 class SystemUser extends DataObject {
 
     private $id;
-    private $name;
-    private $email;
-    private $password;
-    private $sessiontoken;
-    private $confirmemailtoken;
-    private $forgottoken;
-    private $changeemailtoken;
-    private $changepasswordtoken;
-    private $usercountry;
-    private $userlang;
+    private $systemuser;
+    private $servertime;
+    private $remoteaddress;
+    private $remotehost;
+    private $remoteport;
+    private $httpreferer;
+    private $httplang;
+    private $httpcharset;
+    private $httphost;
+    private $httpuseragent;
+    private $https;
+    private $querystring;
+    private $userlatitude;
+    private $uselongitude;
+    private $usedevicemodel;
+    private $usedeviceos;
+    private $usedeviceversion;
+    private $usecountry;
+    private $uselanguage;
+    private $usebatterylevel;
+    private $payload;
 
-    function __construct($id = null, $email = null, $password = null) {
+    function __construct($id = null) {
         $this->id = $id;
-        $this->email = $email;
-        $this->password = $password;
     }
 
     public function __getProperties() {
         return array(
-            "id" => ["name" => "id", "type" => PropertyTypes::$_LONG, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => true, "private" => false],
-            "name" => ["name" => "name", "type" => PropertyTypes::$_STRING256, "required" => true, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
-            "email" => ["name" => "email", "type" => PropertyTypes::$_EMAIL, "required" => true, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
-            "password" => ["name" => "password", "type" => PropertyTypes::$_PASSWORD, "required" => true, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
-            "sessiontoken" => ["name" => "sessiontoken", "type" => PropertyTypes::$_STRING1024, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
-            "confirmemailtoken" => ["name" => "confirmemailtoken", "type" => PropertyTypes::$_STRING1024, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
-            "forgottoken" => ["name" => "forgottoken", "type" => PropertyTypes::$_STRING1024, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
-            "changeemailtoken" => ["name" => "changeemailtoken", "type" => PropertyTypes::$_STRING1024, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
-            "changepasswordtoken" => ["name" => "changepasswordtoken", "type" => PropertyTypes::$_STRING1024, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
-            "usercountry" => ["name" => "usercountry", "type" => PropertyTypes::$_LIST, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
-            "userlang" => ["name" => "userlang", "type" => PropertyTypes::$_STRING2, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
+            "id" => ["name" => "id", "type" => PropertyTypes::$_LONG, "required" => true, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
+            "systemuser" => ["name" => "systemuser", "type" => PropertyTypes::$_LONG, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
+            "servertime" => ["name" => "servertime", "type" => PropertyTypes::$_LONG, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
+            "remoteaddress" => ["name" => "remoteaddress", "type" => PropertyTypes::$_STRING, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
+            "remotehost" => ["name" => "remotehost", "type" => PropertyTypes::$_STRING, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
+            "remoteport" => ["name" => "remoteport", "type" => PropertyTypes::$_STRING, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
+            "httpreferer" => ["name" => "httpreferer", "type" => PropertyTypes::$_STRING, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
+            "httplang" => ["name" => "httplang", "type" => PropertyTypes::$_STRING, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
+            "httpcharset" => ["name" => "httpcharset", "type" => PropertyTypes::$_STRING, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
+            "httphost" => ["name" => "httphost", "type" => PropertyTypes::$_STRING, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
+            "httpuseragent" => ["name" => "httpuseragent", "type" => PropertyTypes::$_STRING, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
+            "https" => ["name" => "https", "type" => PropertyTypes::$_STRING, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
+            "querystring" => ["name" => "querystring", "type" => PropertyTypes::$_STRING, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
+            "userlatitude" => ["name" => "userlatitude", "type" => PropertyTypes::$_STRING, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
+            "uselongitude" => ["name" => "uselongitude", "type" => PropertyTypes::$_STRING, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
+            "usedevicemodel" => ["name" => "usedevicemodel", "type" => PropertyTypes::$_STRING, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
+            "usedeviceos" => ["name" => "usedeviceos", "type" => PropertyTypes::$_STRING, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
+            "usedeviceversion" => ["name" => "usedeviceversion", "type" => PropertyTypes::$_STRING, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
+            "usecountry" => ["name" => "usecountry", "type" => PropertyTypes::$_STRING, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
+            "uselanguage" => ["name" => "uselanguage", "type" => PropertyTypes::$_STRING, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
+            "usebatterylevel" => ["name" => "usebatterylevel", "type" => PropertyTypes::$_STRING, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
+            "payload" => ["name" => "payload", "type" => PropertyTypes::$_STRING, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
         );
-    }
-
-    public function __isComplete() {
-        if (!$this->token) {
-            $this->token = "";
-        }
-        return parent::__isComplete();
-    }
-
-    public function __getList(TransactionManager $data, $paramname) {
-        switch ($paramname) {
-            case "category" : {
-                    return ExampleList::$_ENUM;
-                }
-            case "option" : {
-                    return ExampleList::$_ENUM;
-                }
-        }
-        return [];
     }
 
     public function getId() {
