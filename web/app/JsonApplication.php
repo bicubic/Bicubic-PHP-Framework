@@ -28,7 +28,7 @@ class JsonApplication extends Application {
                     break;
                 }
             default : {
-                    $this->error($this->lang('error_navnotfound'));
+                    $this->error($this->lang('lang_navnotfound'));
                     break;
                 }
         }
