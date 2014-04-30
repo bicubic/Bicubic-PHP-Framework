@@ -77,6 +77,60 @@ class LoginApplication extends Application {
                     $navigation->forgotValidate();
                     break;
                 }
+            case "forgotValidateSubmit" : {
+                    require_once('nav/LoginNavigation.php');
+                    $navigation = new LoginNavigation($this);
+                    $navigation->forgotValidateSubmit();
+                    break;
+                }
+            case "editaccount" : {
+                    require_once('nav/LoginNavigation.php');
+                    $navigation = new LoginNavigation($this);
+                    $navigation->editAccount();
+                    break;
+                }
+            case "editaccountSubmit" : {
+                    require_once('nav/LoginNavigation.php');
+                    $navigation = new LoginNavigation($this);
+                    $navigation->editAccountSubmit();
+                    break;
+                }
+            case "editpassword" : {
+                    require_once('nav/LoginNavigation.php');
+                    $navigation = new LoginNavigation($this);
+                    $navigation->editPassword();
+                    break;
+                }
+            case "editpasswordSubmit" : {
+                    require_once('nav/LoginNavigation.php');
+                    $navigation = new LoginNavigation($this);
+                    $navigation->editPasswordSubmit();
+                    break;
+                }
+            case "editEmail" : {
+                    require_once('nav/LoginNavigation.php');
+                    $navigation = new LoginNavigation($this);
+                    $navigation->editEmail();
+                    break;
+                }
+            case "editEmailSubmit" : {
+                    require_once('nav/LoginNavigation.php');
+                    $navigation = new LoginNavigation($this);
+                    $navigation->editEmailSubmit();
+                    break;
+                }
+            case "editEmailValidate" : {
+                    require_once('nav/LoginNavigation.php');
+                    $navigation = new LoginNavigation($this);
+                    $navigation->editEmailValidate();
+                    break;
+                }
+            case "editEmailValidateSubmit" : {
+                    require_once('nav/LoginNavigation.php');
+                    $navigation = new LoginNavigation($this);
+                    $navigation->editEmailValidateSubmit();
+                    break;
+                }
             default : {
                     $this->secureRedirect("login", "logout");
                     break;
