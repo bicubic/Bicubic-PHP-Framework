@@ -15,8 +15,8 @@ $config['sslavailable'] = false;
 //Web  
 $config['web_name'] = "Bicubic PHP Framework";
 $config['web_copyright'] = "©2014 Bicubic Technology - All rights reserved";
-$config['web_contact_email'] = "";
-$config['web_contact_name'] = "";
+$config['web_contact_email'] = "hello@bicubic.cl";
+$config['web_contact_name'] = "Bicubic Technology";
 $config['web_time_out'] = 360000;
 //Data Base values
 $config['database_host'] = "localhost";
@@ -30,28 +30,31 @@ $config['email_auth'] = true;
 $config['email_user'] = "";
 $config['email_password'] = "";
 //Email with Mandrill
-$config['email_key'] = "";
-$config['email_template'] = "";
+$config['mandrill_key'] = "jsxUFW9qpCdZPeMmntCgVw";
+$config['mandrill_template'] = "bicubic-template";
+//recaptcha
+$config['recaptcha_publickey'] = "6LcQvvISAAAAAOLuwWc7ZnyE6Uzbe2wZLLPWjGM7";
+$config['recaptcha_privatekey'] = "6LcQvvISAAAAABRhjEajksKtTzn7k7XRnENOGDUB";
 //Facebook
-$config['appId'] = "";
-$config['secret'] = "";
+$config['facebook_appid'] = "";
+$config['facebook_secret'] = "";
 //Twitter
-$config['twitterKey'] = "";
-$config['twitterSecret'] = "";
+$config['twitter_key'] = "";
+$config['twitter_secret'] = "";
 //Foursquare
-$config['foursquareKey'] = "";
-$config['foursquareSecret'] = "";
+$config['foursquare_key'] = "";
+$config['foursquare_secret'] = "";
 //Instagram
-$config['instagramKey'] = "";
-$config['instagramSecret'] = "";
+$config['instagram_key'] = "";
+$config['instagram_secret'] = "";
 //Bitly
-$config['bitlylogin'] = "";
-$config['bitlyapikey'] = "";
+$config['bitly_login'] = "";
+$config['bitly_apikey'] = "";
 //Google Cloud Storage
-$config['gsutil'] = "gsutil";
-$config['gsbucket'] = "gs://mystorage/";
-$config['gsbucketprivate'] = "gs://mystorageprivate/";
-$config['storage_folder'] = "http://storage.bicubic.cl/";
+$config['gs_util'] = "gsutil";
+$config['gs_bucket'] = "gs://mystorage/";
+$config['gs_bucketprivate'] = "gs://mystorageprivate/";
+$config['gs_storage'] = "http://storage.bicubic.cl/";
 //Certificates for ios push notification
 $config['certificate_private'] = "/.../server_certificates_bundle_sandbox.pem";
 $config['certificate_auth'] = "/.../entrust_root_certification_authority.pem";

@@ -19,7 +19,7 @@ class JsonApplication extends Application {
 
     public function execute() {
         parent::execute();
-        $this->navigation = $this->getUrlParam($this->config('param_navigation'), "letters");
+        $this->navigation = $this->getUrlParam($this->config('param_navigation'), PropertyTypes::$_LETTERS, false);
         switch ($this->navigation) {
             case "hello" : {
                     require_once('nav/HelloNavigation.php');
