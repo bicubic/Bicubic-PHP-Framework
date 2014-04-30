@@ -45,7 +45,7 @@ class Application {
      */
     public function execute() {
         session_start();
-        if ($this->config("maintenance")) {
+        if ($this->config('maintenance')) {
             $this->error($this->lang('lang_maintenance'));
         }
     }
@@ -70,7 +70,7 @@ class Application {
             }
         }
         if (!$hasLang) {
-            $link .= "&" . $this->config('param_lang') . "=" . $this->config("lang");
+            $link .= "&" . $this->config('param_lang') . "=" . $this->config('lang');
         }
         return $link;
     }
@@ -95,7 +95,7 @@ class Application {
      * @param string $force <p>If is forced trows an error on null value</p>
      * @return the value of the param, null if does not exist or does not fir the type
      */
-    public function getUrlParam($name, $type, $force = false) {
+    public function getUrlParam($name, $type, $force = true) {
         if (isset($_GET[$name])) {
             $value = $_GET[$name];
             $value = $this->filter($value, $type);
@@ -117,7 +117,7 @@ class Application {
      * @param string $force <p>If is forced trows an error on null value</p>
      * @return the value of the param, null if does not exist or does not fir the type
      */
-    public function getFormParam($name, $type, $force = false) {
+    public function getFormParam($name, $type, $force = true) {
         if (isset($_POST[$name])) {
             $value = $_POST[$name];
             $value = $this->filter($value, $type);
@@ -638,10 +638,10 @@ class Application {
         if ($this->tpl->loadTemplateFile($this->config('folder_template') . "$this->name/template.html") === SIGMA_OK) {
             $this->tpl->addBlockfile("TEMPLATE-CONTENT", $this->name, $this->config('folder_navigation') . "$navigationFolder/$navigationFile.html");
             if (!$title) {
-                $title = $this->config("web_name");
+                $title = $this->config('web_name');
             }
             $this->setHTMLVariableTemplate("TEMPLATE-TITLE", $title);
-            $this->setHTMLVariableTemplate("TEMPLATE-COPY", $this->config("web_copyright"));
+            $this->setHTMLVariableTemplate("TEMPLATE-COPY", $this->config('web_copyright'));
             foreach (Lang::$_ENUM as $lang => $langname) {
                 $this->setHtmlArrayTemplate(array(
                     'LANG-LINK' => $this->getSecureAppUrl($this->name, $this->navigation, array(new Param($this->config('param_lang'), $lang))),
@@ -970,7 +970,7 @@ class Application {
 
     public function download($fileName = null, $filepath = null) {
         if (!isset($fileName)) {
-            $fileName = $this->getUrlParam($this->config('param_file_name'), "string");
+            $fileName = $this->getUrlParam($this->config('param_file_name'), PropertyTypes::$_STRING);
             if (!isset($fileName)) {
                 $this->error($this->lang('lang_filenotfound'));
             }
@@ -1143,7 +1143,7 @@ class Application {
         if ($public) {
             $permission = "-a public-read";
         }
-        $gspath = $this->config("gsutil") . " cp $permission $localPath " . $this->config('gsbucket') . $destFolder . $destname;
+        $gspath = $this->config('gs_util') . " cp $permission $localPath " . $this->config('gs_bucket') . $destFolder . $destname;
         $ouput = 0;
         $result = 0;
         exec($gspath, $ouput, $result);
@@ -1160,7 +1160,7 @@ class Application {
         if ($public) {
             $permission = "-a public-read";
         }
-        $gspath = $this->config("gsutil") . " cp $permission $localPath " . $this->config('gsbucketprivate') . $destFolder . $destname;
+        $gspath = $this->config('gs_util') . " cp $permission $localPath " . $this->config('gs_bucketprivate') . $destFolder . $destname;
         $ouput = 0;
         $result = 0;
         exec($gspath, $ouput, $result);
@@ -1172,7 +1172,7 @@ class Application {
     }
 
     public function downloadLocalGS($gspathPath, $destFolder, $destname) {
-        $gspath = $this->config("gsutil") . " cp gs://" . $gspathPath . " " . $destFolder . $destname;
+        $gspath = $this->config('gs_util') . " cp gs://" . $gspathPath . " " . $destFolder . $destname;
         $ouput = 0;
         $result = 0;
         exec($gspath, $ouput, $result);
@@ -1276,7 +1276,7 @@ class Application {
         if ($langstr && !array_key_exists($langstr, Lang::$_ENUM)) {
             $langstr = Lang::$_DEFAULT;
         }
-        if ($langstr && $langstr != $this->config("lang")) {
+        if ($langstr && $langstr != $this->config('lang')) {
             $lang = null;
             if (@require("lang/lang.$langstr.php")) {
                 if (array_key_exists($string, $lang)) {
@@ -1310,7 +1310,7 @@ class Application {
             return null;
         }
         if (strstr($baseUrl, "http") === false) {
-            return $this->config("storage_folder") . $baseUrl;
+            return $this->config('gs_storage') . $baseUrl;
         } else {
             return $baseUrl;
         }

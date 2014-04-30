@@ -8,6 +8,9 @@
  * @license    MIT
  * @version 3.0.0
  */
+require_once("lib/google/recaptchalib.php");
+
+
 class HelloNavigation extends Navigation {
     
     
@@ -21,6 +24,7 @@ class HelloNavigation extends Navigation {
         $signupSystemUser = new SystemUser();
         $confirmPassword = new Param("confirmpassword");
         $this->application->setFormTemplate("signup", [$signupSystemUser, $confirmPassword], "login" , "signUpSubmit");
+        $this->application->setVariableTemplate("HTML-RECAPTCHA", recaptcha_get_html($this->config('recaptcha_publickey')), null, $this->config('sslavailable'));
         $this->application->render();
     }
 
@@ -31,9 +35,8 @@ class HelloNavigation extends Navigation {
     }
 
     public function helloPrivate() {
-        $this->application->setMainTemplate("hello", "helloprivate", "", "json");
+        $this->application->setMainTemplate("hello", "helloprivate");
         $this->application->setHtmlVariableTemplate("USER", $this->application->user->getName());
-        $this->application->setHtmlVariableTemplate("HELLO", $this->lang('text_helloworld'));
         $this->application->render();
     }
 

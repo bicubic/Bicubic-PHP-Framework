@@ -29,16 +29,20 @@ require_once("lib/bicubic/ObjectParamList.php");
 require_once("lib/bicubic/Param.php");
 require_once("lib/bicubic/SQLData.php");
 require_once("lib/bicubic/PostgreSQLData.php");
+require_once("lib/bicubic/MandrillEmail.php");
 require_once("lib/bicubic/SMTPEmail.php");
 require_once("lib/bicubic/TransactionManager.php");
 //beans
-require_once("beans/SystemUser.php");
 require_once("beans/Constant.php");
+require_once("beans/SystemUser.php");
+require_once("beans/SystemUserLog.php");
 //json
 require_once("json/ErrorJson.php");
 require_once("json/LoginErrorJson.php");
 require_once("json/ObjectJson.php");
 require_once("json/SuccessJson.php");
+//data
+require_once ("data/AtomManager.php");
 //Params
 $config['param_app'] = "app";
 $config['param_navigation'] = "nav";
@@ -59,12 +63,12 @@ if (array_key_exists('HTTP_ACCEPT_LANGUAGE', $_SERVER)) {
     $langfile = substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2);
 }
 //Lang from URL
-$urllocale = $application->getUrlParam($config['param_lang'], "string256", false);
+$urllocale = $application->getUrlParam($config['param_lang'], PropertyTypes::$_STRING256, false);
 if (isset($urllocale)) {
     $langfile = $urllocale;
 }
 //Lang from Facebook
-$fblocale = $application->getUrlParam("fb_locale", "string", false);
+$fblocale = $application->getUrlParam("fb_locale", PropertyTypes::$_STRING, false);
 if (isset($fblocale)) {
     $langfile = substr($fblocale, 0, 2);
 }
@@ -100,7 +104,7 @@ if (isset($argv)) {
         $_GET[$request[0]] = $request[1];
     }
     $application = new Application($config, $lang, null, null);
-    $app = $application->getUrlParam($config['param_app'], "letters");
+    $app = $application->getUrlParam($config['param_app'], PropertyTypes::$_LETTERS);
     switch ($app) {
         case "script": {
                 require_once("app/ScriptApplication.php");
@@ -111,7 +115,7 @@ if (isset($argv)) {
     $application->execute();
 } else {
     $application = new Application($config, $lang, null, null);
-    $app = $application->getUrlParam($config['param_app'], "letters");
+    $app = $application->getUrlParam($config['param_app'], PropertyTypes::$_LETTERS, false);
     switch ($app) {
         case "home": {
                 require_once("app/HomeApplication.php");
@@ -134,7 +138,7 @@ if (isset($argv)) {
                 break;
             }
         default: {
-                $application->secureRedirect("home", "home");
+                $application->secureRedirect("home", "hello");
                 break;
             }
     }
