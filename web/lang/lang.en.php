@@ -10,6 +10,7 @@
  */
 $lang = array();
 
+$lang['lang_emailnewpasswordtext'] = "new password %s";
 $lang['lang_no'] = "No";
 $lang['lang_yes'] = "Yes";
 

@@ -17,9 +17,13 @@
             {LANG-CONFIRMPASSWORD}:
         </label>
         <input type="password" title="{LANG-CONFIRMPASSWORD}" id="{SIGNUP-NAME-CONFIRMPASSWORD}" name="{SIGNUP-NAME-CONFIRMPASSWORD}" required="required" maxlength="32" data-langempty="{LANG-EMPTYCONFIRMPASSWORD}" data-langnotequal="{LANG-NOTEQUALPASSWORD}"/>
+        <label>
+            {LANG-HUMAN}:
+        </label>
+        {HTML-RECAPTCHA}
     </fieldset>
     <input type="hidden" name="{LOGIN-NAME-LOGINTOKEN}" value="{LOGIN-VALUE-LOGINTOKEN}" />
-    <button id="loginButton" type="submit">{LANG-LOGIN}</button> 
+    <button id="loginButton" type="submit">{LANG-SIGNUP}</button> 
 </form>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
