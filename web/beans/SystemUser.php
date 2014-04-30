@@ -1,4 +1,4 @@
-<?php
+ <?php
 
 /**
  * Bicubic PHP Framework
@@ -18,7 +18,7 @@ class SystemUser extends DataObject {
     private $confirmemailtoken;
     private $forgottoken;
     private $changeemailtoken;
-    private $changepasswordtoken;
+    private $newemail;
     private $usercountry;
     private $userlang;
 
@@ -38,7 +38,7 @@ class SystemUser extends DataObject {
             "confirmemailtoken" => ["name" => "confirmemailtoken", "type" => PropertyTypes::$_STRING1024, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
             "forgottoken" => ["name" => "forgottoken", "type" => PropertyTypes::$_STRING1024, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
             "changeemailtoken" => ["name" => "changeemailtoken", "type" => PropertyTypes::$_STRING1024, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
-            "changepasswordtoken" => ["name" => "changepasswordtoken", "type" => PropertyTypes::$_STRING1024, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
+            "newemail" => ["name" => "newemail", "type" => PropertyTypes::$_STRING256, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
             "usercountry" => ["name" => "usercountry", "type" => PropertyTypes::$_LIST, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
             "userlang" => ["name" => "userlang", "type" => PropertyTypes::$_STRING2, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
         );
@@ -92,8 +92,8 @@ class SystemUser extends DataObject {
         return $this->changeemailtoken;
     }
 
-    public function getChangepasswordtoken() {
-        return $this->changepasswordtoken;
+    public function getNewemail() {
+        return $this->newemail;
     }
 
     public function getUsercountry() {
@@ -136,8 +136,8 @@ class SystemUser extends DataObject {
         $this->changeemailtoken = $changeemailtoken;
     }
 
-    public function setChangepasswordtoken($changepasswordtoken) {
-        $this->changepasswordtoken = $changepasswordtoken;
+    public function setNewemail($newemail) {
+        $this->newemail = $newemail;
     }
 
     public function setUsercountry($usercountry) {
