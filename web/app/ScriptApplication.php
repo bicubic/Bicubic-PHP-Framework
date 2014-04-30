@@ -19,7 +19,7 @@ class ScriptApplication extends Application {
 
     public function execute() {
         parent::execute();
-        $this->navigation = $this->getUrlParam($this->config('param_navigation'), "letters");
+        $this->navigation = $this->getUrlParam($this->config('param_navigation'), PropertyTypes::$_LETTERS, false);
         switch ($this->navigation) {
             case "beans" : {
                     $this->generateBeans();
@@ -75,7 +75,7 @@ class ScriptApplication extends Application {
     }
 
     private function generatePassword() {
-        $clave = $this->navigation = $this->getUrlParam("password", "string");
+        $clave = $this->navigation = $this->getUrlParam("password", PropertyTypes::$_STRING);
         echo $clave . " converted to " . $this->blowfishCrypt($clave, 10);
         echo "\n";
     }

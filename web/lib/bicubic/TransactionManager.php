@@ -44,7 +44,7 @@ class TransactionManager {
             return null;
         }
         $dataObject = $this->data->selectOne($dataObject);
-        if (!$dataObject->getId()) {
+        if (!$dataObject || !$dataObject->getId()) {
             return null;
         }
         if ($dataObject->__isChild()) {

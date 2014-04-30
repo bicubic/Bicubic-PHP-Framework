@@ -8,7 +8,7 @@
  * @license    MIT
  * @version 3.0.0
  */
-class PrivateApplication extends LoginApplication {
+class PrivateApplication extends Application {
 
     function __construct($config, $lang, Data $data = null, $name = "private") {
         if (!$data) {
@@ -19,16 +19,20 @@ class PrivateApplication extends LoginApplication {
 
     public function execute() {
         parent::execute();
-        $this->user = $this->loginCheck();
-        if ($this->user === false) {
+
+        require_once("nav/LoginNavigation.php");
+        $navigation = new LoginNavigation($this);
+        $this->user = $navigation->loginCheck();
+
+        if (!$this->user) {
             $this->secureRedirect("login", "login");
         }
-        $this->navigation = $this->getUrlParam($this->config('param_navigation'), "letters");
+        $this->navigation = $this->getUrlParam($this->config('param_navigation'), PropertyTypes::$_LETTERS, false);
         switch ($this->navigation) {
             case "hello" : {
                     require_once("nav/HelloNavigation.php");
-                    $messageNavigation = new HelloNavigation($this);
-                    $messageNavigation->helloPrivate();
+                    $navigation = new HelloNavigation($this);
+                    $navigation->helloPrivate();
                     break;
                 }
             default : {
@@ -41,6 +45,13 @@ class PrivateApplication extends LoginApplication {
     public function setMainTemplate($navigationFolder, $navigationFile, $title = "") {
         parent::setMainTemplate($navigationFolder, $navigationFile, $title);
         $this->setHTMLVariableTemplate('LINK-LOGOUT', $this->getSecureAppUrl("login", "logout"));
+
+        if ($this->user) {
+            if ($this->user->getConfirmemailtoken()) {
+                $this->setHTMLVariableTemplate('LINK-REVALIDATE', $this->getSecureAppUrl("login", "revalidate", array(new Param("token", $this->user->getConfirmemailtoken()))));
+                $this->parseTemplate("REVALIDATE");
+            }
+        }
     }
 
 }
