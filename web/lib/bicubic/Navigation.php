@@ -225,7 +225,7 @@ class Navigation {
     }
 
     public function objectForm(DataObject $object, $callback) {
-        $id = $this->application->getUrlParam($this->config("param_id"), "int");
+        $id = $this->application->getUrlParam($this->config("param_id"), PropertyTypes::$_INT);
         if ($id) {
             $data = new TransactionManager($this->application->data);
             $object->setId($id);

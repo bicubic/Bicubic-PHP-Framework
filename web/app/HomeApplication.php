@@ -19,16 +19,16 @@ class HomeApplication extends Application {
 
     public function execute() {
         parent::execute();
-        $this->navigation = $this->getUrlParam($this->config('param_navigation'), "letters");
+        $this->navigation = $this->getUrlParam($this->config('param_navigation'), PropertyTypes::$_LETTERS, false);
         switch ($this->navigation) {
-            case "home" : {
+            case "hello" : {
                     require_once('nav/HelloNavigation.php');
                     $navigation = new HelloNavigation($this);
                     $navigation->hello();
                     break;
                 }
             default : {
-                    $this->secureRedirect("home", "home");
+                    $this->secureRedirect("home", "hello");
                     break;
                 }
         }
