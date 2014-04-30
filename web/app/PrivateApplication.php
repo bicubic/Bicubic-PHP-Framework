@@ -19,11 +19,9 @@ class PrivateApplication extends Application {
 
     public function execute() {
         parent::execute();
-
         require_once("nav/LoginNavigation.php");
         $navigation = new LoginNavigation($this);
         $this->user = $navigation->loginCheck();
-
         if (!$this->user) {
             $this->secureRedirect("login", "login");
         }
