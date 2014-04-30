@@ -31,9 +31,9 @@ class SystemUser extends DataObject {
     public function __getProperties() {
         return array(
             "id" => ["name" => "id", "type" => PropertyTypes::$_LONG, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => true, "private" => false],
-            "name" => ["name" => "name", "type" => PropertyTypes::$_STRING256, "required" => true, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
+            "name" => ["name" => "name", "type" => PropertyTypes::$_STRING256, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
             "email" => ["name" => "email", "type" => PropertyTypes::$_EMAIL, "required" => true, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
-            "password" => ["name" => "password", "type" => PropertyTypes::$_PASSWORD, "required" => true, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
+            "password" => ["name" => "password", "type" => PropertyTypes::$_PASSWORD, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
             "sessiontoken" => ["name" => "sessiontoken", "type" => PropertyTypes::$_STRING1024, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
             "confirmemailtoken" => ["name" => "confirmemailtoken", "type" => PropertyTypes::$_STRING1024, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
             "forgottoken" => ["name" => "forgottoken", "type" => PropertyTypes::$_STRING1024, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
@@ -54,7 +54,7 @@ class SystemUser extends DataObject {
     public function __getList(TransactionManager $data, $paramname) {
         switch ($paramname) {
             case "usercountry" : {
-                    return CurrencyCountry::$_ENUM;
+                    return Country::$_ENUM;
                 }
         }
         return [];

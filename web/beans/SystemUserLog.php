@@ -8,7 +8,7 @@
  * @license    MIT
  * @version 3.0.0
  */
-class SystemUser extends DataObject {
+class SystemUserLog extends DataObject {
 
     private $id;
     private $systemuser;
@@ -23,7 +23,7 @@ class SystemUser extends DataObject {
     private $httpuseragent;
     private $https;
     private $querystring;
-    private $userlatitude;
+    private $uselatitude;
     private $uselongitude;
     private $usedevicemodel;
     private $usedeviceos;
@@ -39,7 +39,7 @@ class SystemUser extends DataObject {
 
     public function __getProperties() {
         return array(
-            "id" => ["name" => "id", "type" => PropertyTypes::$_LONG, "required" => true, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
+            "id" => ["name" => "id", "type" => PropertyTypes::$_LONG, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
             "systemuser" => ["name" => "systemuser", "type" => PropertyTypes::$_LONG, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
             "servertime" => ["name" => "servertime", "type" => PropertyTypes::$_LONG, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
             "remoteaddress" => ["name" => "remoteaddress", "type" => PropertyTypes::$_STRING, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
@@ -52,7 +52,7 @@ class SystemUser extends DataObject {
             "httpuseragent" => ["name" => "httpuseragent", "type" => PropertyTypes::$_STRING, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
             "https" => ["name" => "https", "type" => PropertyTypes::$_STRING, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
             "querystring" => ["name" => "querystring", "type" => PropertyTypes::$_STRING, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
-            "userlatitude" => ["name" => "userlatitude", "type" => PropertyTypes::$_STRING, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
+            "uselatitude" => ["name" => "uselatitude", "type" => PropertyTypes::$_STRING, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
             "uselongitude" => ["name" => "uselongitude", "type" => PropertyTypes::$_STRING, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
             "usedevicemodel" => ["name" => "usedevicemodel", "type" => PropertyTypes::$_STRING, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
             "usedeviceos" => ["name" => "usedeviceos", "type" => PropertyTypes::$_STRING, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
@@ -68,89 +68,179 @@ class SystemUser extends DataObject {
         return $this->id;
     }
 
-    public function getName() {
-        return $this->name;
+    public function getSystemuser() {
+        return $this->systemuser;
     }
 
-    public function getEmail() {
-        return $this->email;
+    public function getServertime() {
+        return $this->servertime;
     }
 
-    public function getPassword() {
-        return $this->password;
+    public function getRemoteaddress() {
+        return $this->remoteaddress;
     }
 
-    public function getSessiontoken() {
-        return $this->sessiontoken;
+    public function getRemotehost() {
+        return $this->remotehost;
     }
 
-    public function getConfirmemailtoken() {
-        return $this->confirmemailtoken;
+    public function getRemoteport() {
+        return $this->remoteport;
     }
 
-    public function getForgottoken() {
-        return $this->forgottoken;
+    public function getHttpreferer() {
+        return $this->httpreferer;
     }
 
-    public function getChangeemailtoken() {
-        return $this->changeemailtoken;
+    public function getHttplang() {
+        return $this->httplang;
     }
 
-    public function getChangepasswordtoken() {
-        return $this->changepasswordtoken;
+    public function getHttpcharset() {
+        return $this->httpcharset;
     }
 
-    public function getUsercountry() {
-        return $this->usercountry;
+    public function getHttphost() {
+        return $this->httphost;
     }
 
-    public function getUserlang() {
-        return $this->userlang;
+    public function getHttpuseragent() {
+        return $this->httpuseragent;
+    }
+
+    public function getHttps() {
+        return $this->https;
+    }
+
+    public function getQuerystring() {
+        return $this->querystring;
+    }
+
+    public function getUselatitude() {
+        return $this->uselatitude;
+    }
+
+    public function getUselongitude() {
+        return $this->uselongitude;
+    }
+
+    public function getUsedevicemodel() {
+        return $this->usedevicemodel;
+    }
+
+    public function getUsedeviceos() {
+        return $this->usedeviceos;
+    }
+
+    public function getUsedeviceversion() {
+        return $this->usedeviceversion;
+    }
+
+    public function getUsecountry() {
+        return $this->usecountry;
+    }
+
+    public function getUselanguage() {
+        return $this->uselanguage;
+    }
+
+    public function getUsebatterylevel() {
+        return $this->usebatterylevel;
+    }
+
+    public function getPayload() {
+        return $this->payload;
     }
 
     public function setId($id) {
         $this->id = $id;
     }
 
-    public function setName($name) {
-        $this->name = $name;
+    public function setSystemuser($systemuser) {
+        $this->systemuser = $systemuser;
     }
 
-    public function setEmail($email) {
-        $this->email = $email;
+    public function setServertime($servertime) {
+        $this->servertime = $servertime;
     }
 
-    public function setPassword($password) {
-        $this->password = $password;
+    public function setRemoteaddress($remoteaddress) {
+        $this->remoteaddress = $remoteaddress;
     }
 
-    public function setSessiontoken($sessiontoken) {
-        $this->sessiontoken = $sessiontoken;
+    public function setRemotehost($remotehost) {
+        $this->remotehost = $remotehost;
     }
 
-    public function setConfirmemailtoken($confirmemailtoken) {
-        $this->confirmemailtoken = $confirmemailtoken;
+    public function setRemoteport($remoteport) {
+        $this->remoteport = $remoteport;
     }
 
-    public function setForgottoken($forgottoken) {
-        $this->forgottoken = $forgottoken;
+    public function setHttpreferer($httpreferer) {
+        $this->httpreferer = $httpreferer;
     }
 
-    public function setChangeemailtoken($changeemailtoken) {
-        $this->changeemailtoken = $changeemailtoken;
+    public function setHttplang($httplang) {
+        $this->httplang = $httplang;
     }
 
-    public function setChangepasswordtoken($changepasswordtoken) {
-        $this->changepasswordtoken = $changepasswordtoken;
+    public function setHttpcharset($httpcharset) {
+        $this->httpcharset = $httpcharset;
     }
 
-    public function setUsercountry($usercountry) {
-        $this->usercountry = $usercountry;
+    public function setHttphost($httphost) {
+        $this->httphost = $httphost;
     }
 
-    public function setUserlang($userlang) {
-        $this->userlang = $userlang;
+    public function setHttpuseragent($httpuseragent) {
+        $this->httpuseragent = $httpuseragent;
     }
+
+    public function setHttps($https) {
+        $this->https = $https;
+    }
+
+    public function setQuerystring($querystring) {
+        $this->querystring = $querystring;
+    }
+
+    public function setUselatitude($uselatitude) {
+        $this->uselatitude = $uselatitude;
+    }
+
+    public function setUselongitude($uselongitude) {
+        $this->uselongitude = $uselongitude;
+    }
+
+    public function setUsedevicemodel($usedevicemodel) {
+        $this->usedevicemodel = $usedevicemodel;
+    }
+
+    public function setUsedeviceos($usedeviceos) {
+        $this->usedeviceos = $usedeviceos;
+    }
+
+    public function setUsedeviceversion($usedeviceversion) {
+        $this->usedeviceversion = $usedeviceversion;
+    }
+
+    public function setUsecountry($usecountry) {
+        $this->usecountry = $usecountry;
+    }
+
+    public function setUselanguage($uselanguage) {
+        $this->uselanguage = $uselanguage;
+    }
+
+    public function setUsebatterylevel($usebatterylevel) {
+        $this->usebatterylevel = $usebatterylevel;
+    }
+
+    public function setPayload($payload) {
+        $this->payload = $payload;
+    }
+
+
 
 }
 

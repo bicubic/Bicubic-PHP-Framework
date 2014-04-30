@@ -41,31 +41,11 @@ class PropertyTypes {
     public static $_STRINGARRAY = "string-array";
     public static $_JSON = "json";
     public static $_RUT = "rut";
-    public static $_ENUM = array(
-        1 => "lang_item1",
-        2 => "lang_item2",
-        3 => "lang_item3",
-    );
 
 }
 
-class CurrencyKeys {
 
-    public static $_ENUM = array(
-        1 => "CLP",
-        2 => "NZD",
-        3 => "USD",
-        4 => "AUD",
-        5 => "BRL",
-        6 => "MXN",
-        7 => "ARS",
-        8 => "COP",
-        9 => "PEN",
-    );
-
-}
-
-class CurrencyCountry {
+class Country {
 
     public static $_ENUM = array(
         1 => "Chile",
@@ -78,37 +58,41 @@ class CurrencyCountry {
         8 => "Colombia",
         9 => "Perú",
     );
-
-}
-
-class CurrencySimbols {
-
-    public static $_ENUM = array(
-        "CLP" => "$",
-        "NZD" => "$",
-        "USD" => "$",
-        "AUD" => "$",
-        "BRL" => "R$",
-        "MXN" => "$",
-        "ARS" => "$",
-        "COP" => "$",
-        "PEN" => "$",
+    
+    public static $_CURRENCIES = array(
+        1 => "CLP",
+        2 => "NZD",
+        3 => "USD",
+        4 => "AUD",
+        5 => "BRL",
+        6 => "MXN",
+        7 => "ARS",
+        8 => "COP",
+        9 => "PEN",
     );
-
-}
-
-class CurrencyLang {
-
-    public static $_ENUM = array(
-        "CLP" => "es",
-        "NZD" => "en",
-        "USD" => "en",
-        "AUD" => "en",
-        "BRL" => "en",
-        "MXN" => "es",
-        "ARS" => "es",
-        "COP" => "es",
-        "PEN" => "es",
+    
+    public static $_CURRENCYSIMBOLS = array(
+        1 => "$",
+        2 => "$",
+        3 => "$",
+        4 => "$",
+        5 => "R$",
+        6 => "$",
+        7 => "$",
+        8 => "$",
+        9 => "$",
+    );
+    
+    public static $_LANGS = array(
+        1 => "es",
+        2 => "en",
+        3 => "en",
+        4 => "en",
+        5 => "en",
+        6 => "es",
+        7 => "es",
+        8 => "es",
+        9 => "es",
     );
 
 }
