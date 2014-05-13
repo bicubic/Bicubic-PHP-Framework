@@ -30,11 +30,11 @@ $config['email_auth'] = true;
 $config['email_user'] = "";
 $config['email_password'] = "";
 //Email with Mandrill
-$config['mandrill_key'] = "jsxUFW9qpCdZPeMmntCgVw";
-$config['mandrill_template'] = "bicubic-template";
+$config['mandrill_key'] = "";
+$config['mandrill_template'] = "";
 //recaptcha
-$config['recaptcha_publickey'] = "6LcQvvISAAAAAOLuwWc7ZnyE6Uzbe2wZLLPWjGM7";
-$config['recaptcha_privatekey'] = "6LcQvvISAAAAABRhjEajksKtTzn7k7XRnENOGDUB";
+$config['recaptcha_publickey'] = "";
+$config['recaptcha_privatekey'] = "";
 //Facebook
 $config['facebook_appid'] = "";
 $config['facebook_secret'] = "";
