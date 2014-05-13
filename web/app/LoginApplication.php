@@ -83,6 +83,7 @@ class LoginApplication extends Application {
                     $navigation->forgotValidateSubmit();
                     break;
                 }
+                //TODO REST
             case "editaccount" : {
                     require_once('nav/LoginNavigation.php');
                     $navigation = new LoginNavigation($this);
