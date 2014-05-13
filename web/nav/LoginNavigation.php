@@ -218,15 +218,47 @@ class LoginNavigation extends Navigation {
             $data->data->rollback();
             $this->application->error($this->lang('lang_tokenerror'));
         }
-        $newPassword = $this->application->createRandomString(8);
+        $this->application->setMainTemplate("login", "password", $this->lang('lang_newpassword'));
+        $this->application->setSessionParam("LoginNavigation_forgottoken", $forgotToken);
+        $params = array(
+            new SystemUser($dbSystemUser->getId(), $dbSystemUser->getEmail()),
+            new Param("token",$token),
+            new Param("confirmpassword"),
+        );
+        $this->application->setFormTemplate("newpassword", $params, "login", "forgotValidateSubmit");
+        $data->data->commit();
+        $this->application->render();
+    }
+    
+    public function forgotValidateSubmit() {
+        $data = new AtomManager($this->application->data);
+        $data->data->begin();
+        $token = $this->application->getFormParam("token", PropertyTypes::$_STRING64);
+        $systemUser = $this->application->getFormObject(new SystemUser());
+        $confirmPassword = $this->application->getFormParam("confirmpassword", PropertyTypes::$_STRING32);
+        if (!$systemUser->getPassword()) {
+            $data->data->rollback();
+            $this->application->error($this->lang('lang_passworderror'));
+        }
+        if ($systemUser->getPassword() !== $confirmPassword) {
+            $data->data->rollback();
+            $this->application->error($this->lang('lang_passworderror'));
+        }
+        $dbSystemUser = new SystemUser();
+        $dbSystemUser->setEmail($systemUser->getEmail());
+        $dbSystemUser->setForgottoken($token);
+        $dbSystemUser = $data->getRecord($dbSystemUser);
+        if (!$dbSystemUser) {
+            $data->data->rollback();
+            $this->application->error($this->lang('lang_tokenerror'));
+        }
+        
         $dbSystemUser->setForgottoken(null);
-        $dbSystemUser->setPassword($this->application->blowfishCrypt($newPassword, 10));
+        $dbSystemUser->setPassword($this->application->blowfishCrypt($systemUser->getPassword(), 10));
         if (!$data->updateRecord($dbSystemUser)) {
             $data->data->rollback();
             $this->application->error($this->lang('lang_servererror'));
         }
-        $email = new NewPasswordEmail($dbSystemUser, $newPassword, $this);
-        $email->send();
         $data->data->commit();
         $this->application->message($this->lang('lang_emailforgotsuccess'));
     }
