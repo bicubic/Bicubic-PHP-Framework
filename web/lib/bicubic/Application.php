@@ -640,11 +640,12 @@ class Application {
             if (!$title) {
                 $title = $this->config('web_name');
             }
+            $this->setHTMLVariableTemplate("TEMPLATE-LANG", $this->config('lang'));
             $this->setHTMLVariableTemplate("TEMPLATE-TITLE", $title);
             $this->setHTMLVariableTemplate("TEMPLATE-COPY", $this->config('web_copyright'));
             foreach (Lang::$_ENUM as $lang => $langname) {
                 $this->setHtmlArrayTemplate(array(
-                    'LANG-LINK' => $this->getSecureAppUrl($this->name, $this->navigation, array(new Param($this->config('param_lang'), $lang))),
+                    'LANG-LINK' => $this->getSecureAppUrl($this->name, $this->navigation, array(new Param($this->config('param_lang'), $this->item(Lang::$_LANGVALUE, $lang)))),
                     'LANG-TEXT' => $langname,
                 ));
                 $this->parseTemplate('LANGS');
@@ -742,10 +743,10 @@ class Application {
             $getter = "get" . strtoupper(substr($property["name"], 0, 1)) . substr($property["name"], 1);
             $value = $object->$getter();
             if ($property["type"] == PropertyTypes::$_LIST) {
-                $items = $object->__getList(new TransactionManager($this->data), $property["name"]);
+                $this->setVariableTemplate("$formName-NAME-$objectFormName-$paramName", "$objectName" . "_" . $property["name"]);
+                $items = $object->__getList($property["name"], $this);
                 foreach ($items as $item => $text) {
                     $this->setHTMLArrayTemplate(array(
-                        "$formName-LISTNAME-$objectFormName-$paramName" => "$objectName" . "_" . $property["name"],
                         "$formName-LISTVALUE-$objectFormName-$paramName" => $this->utf8tohtml(strval($item), true),
                         "$formName-LISTTEXT-$objectFormName-$paramName" => $this->lang($text),
                         "$formName-LISTSELECTED-$objectFormName-$paramName" => ($item == $value) ? "selected" : ""
@@ -753,10 +754,10 @@ class Application {
                     $this->parseTemplate($paramName);
                 }
             } else if ($property["type"] == PropertyTypes::$_SHORTLIST) {
-                $items = $object->__getList(new TransactionManager($this->data), $property["name"]);
+                $this->setVariableTemplate("$formName-NAME-$objectFormName-$paramName", "$objectName" . "_" . $property["name"]);
+                $items = $object->__getList($property["name"], $this);
                 foreach ($items as $item => $text) {
                     $this->setHTMLArrayTemplate(array(
-                        "$formName-LISTNAME-$objectFormName-$paramName" => "$objectName" . "_" . $property["name"],
                         "$formName-LISTVALUE-$objectFormName-$paramName" => $this->utf8tohtml(strval($item), true),
                         "$formName-LISTTEXT-$objectFormName-$paramName" => $this->lang($text),
                         "$formName-LISTSELECTED-$objectFormName-$paramName" => ($item == $value) ? "checked" : ""
@@ -790,6 +791,7 @@ class Application {
         $value = strval($value);
         $this->tpl->setVariable($name, $value);
     }
+    
 
     public function setHTMLVariableTemplate($name, $value) {
         $value = strval($value);
@@ -797,6 +799,11 @@ class Application {
         $var = str_replace("\r\n", "<br />", $var);
         $var = str_replace("\n", "<br />", $var);
         $this->tpl->setVariable($name, $var);
+    }
+    
+    public function setVariableCustomTemplate($tpl, $name, $value) {
+        $value = strval($value);
+        $tpl->setVariable($name, $value);
     }
 
     public function setHTMLArrayCustomTemplate($tpl, $array) {
@@ -1273,8 +1280,8 @@ class Application {
     }
 
     public function lang($string, $langstr = null) {
-        if ($langstr && !array_key_exists($langstr, Lang::$_ENUM)) {
-            $langstr = Lang::$_DEFAULT;
+        if ($langstr && !array_key_exists($langstr, Lang::$_LANGKEY)) {
+            $langstr = $this->item(Lang::$_LANGVALUE, Lang::$_DEFAULT);
         }
         if ($langstr && $langstr != $this->config('lang')) {
             $lang = null;
@@ -1359,6 +1366,20 @@ class Application {
         } else {
             return false;
         }
+    }
+    
+    public function alterLang($langstr) {
+        if ($langstr && !array_key_exists($langstr, Lang::$_LANGKEY)) {
+            $langstr = $this->item(Lang::$_LANGVALUE, Lang::$_DEFAULT);
+        }
+        if ($langstr && $langstr != $this->config('lang')) {
+            if (@require("lang/lang.$langstr.php")) {
+                $this->lang = $lang;
+                $this->config['lang'] = $langstr;
+                return true;
+            }
+        }
+        return false;
     }
 
 }

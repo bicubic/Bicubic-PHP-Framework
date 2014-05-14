@@ -31,7 +31,7 @@ abstract class DataObject {
         return false;
     }
     
-    public function __getList(TransactionManager $data, $paramname) {
+    public function __getList($paramname, Application $application = null) {
         return [];
     }
 

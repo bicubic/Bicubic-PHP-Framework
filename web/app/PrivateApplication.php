@@ -42,9 +42,10 @@ class PrivateApplication extends Application {
 
     public function setMainTemplate($navigationFolder, $navigationFile, $title = "") {
         parent::setMainTemplate($navigationFolder, $navigationFile, $title);
-        $this->setHTMLVariableTemplate('LINK-LOGOUT', $this->getSecureAppUrl("login", "logout"));
-
         if ($this->user) {
+            $this->setHTMLVariableTemplate('LINK-ACCOUNT', $this->getSecureAppUrl("login", "account"));
+            $this->setHTMLVariableTemplate('LINK-LOGOUT', $this->getSecureAppUrl("login", "logout"));
+            $this->parseTemplate("USER");
             if ($this->user->getConfirmemailtoken()) {
                 $this->setHTMLVariableTemplate('LINK-REVALIDATE', $this->getSecureAppUrl("login", "revalidate", array(new Param("token", $this->user->getConfirmemailtoken()))));
                 $this->parseTemplate("REVALIDATE");

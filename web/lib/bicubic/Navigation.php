@@ -39,6 +39,10 @@ class Navigation {
     public function photoUrl($baseUrl) {
         return $this->application->photoUrl($baseUrl);
     }
+    
+    public function sortByLang($array) {
+        uasort($array, array("Navigation", "compareLangStrings"));
+    }
 
     public function compareLangStrings($a, $b) {
         return strcasecmp($this->lang($a), $this->lang($b));
@@ -179,7 +183,7 @@ class Navigation {
                         $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LABEL", $this->lang("lang_" . $property["name"]));
                         $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-NAME", $objectName . "_" . $property["name"]);
                         $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-REQUIRED", $property["required"] ? "required" : "");
-                        $items = $object->__getList(new TransactionManager($this->application->data), $property["name"]);
+                        $items = $object->__getList($property["name"], $this->application);
                         foreach ($items as $item => $text) {
                             $this->application->setHTMLArrayCustomTemplate($result, array(
                                 "CATEGORY-VALUE" => $item,
@@ -193,7 +197,7 @@ class Navigation {
                 case PropertyTypes::$_SHORTLIST : {
                         $result = $this->application->setCustomTemplate("bicubic", "shortlist");
                         $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LABEL", $this->lang("lang_" . $property["name"]));
-                        $items = $object->__getList(new TransactionManager($this->application->data), $property["name"]);
+                        $items = $object->__getList($property["name"], $this->application);
                         foreach ($items as $item => $text) {
                             $this->application->setHTMLArrayCustomTemplate($result, array(
                                 "OBJECT-NAME-PROPERTY-NAME" => $objectName . "_" . $property["name"],

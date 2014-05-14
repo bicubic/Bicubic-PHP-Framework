@@ -48,15 +48,15 @@ class PropertyTypes {
 class Country {
 
     public static $_ENUM = array(
-        1 => "Chile",
-        2 => "New Zealand",
-        3 => "United States",
-        4 => "Australia",
-        5 => "Brazil",
-        6 => "Mexico",
-        7 => "Argentina",
-        8 => "Colombia",
-        9 => "Perú",
+        1 => "lang_chile",
+        2 => "lang_newzeland",
+        3 => "lang_unitedstates",
+        4 => "lang_australia",
+        5 => "lang_brazil",
+        6 => "lang_mexico",
+        7 => "lang_argentina",
+        8 => "lang_colombia",
+        9 => "lang_peru",
     );
     
     public static $_CURRENCIES = array(
@@ -100,10 +100,21 @@ class Country {
 class Lang {
 
     public static $_ENUM = array(
-        "es" => "Español",
-        "en" => "English",
+        1 => "lang_espanol",
+        2 => "lang_english",
     );
-    public static $_DEFAULT = "en";
+    
+    public static $_LANGVALUE = array(
+        1 => "es",
+        2 => "en",
+    );
+    
+    public static $_LANGKEY = array(
+        "es" => 1,
+        "en" => 1,
+    );
+    
+    public static $_DEFAULT = 2;
 
 }
 

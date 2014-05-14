@@ -55,7 +55,7 @@ $config['folder_navigation'] = "views/";
 $config['folder_uploads'] = "uploads/";
 $config['folder_images'] = "images/";
 //set languaje
-$langfile = Lang::$_DEFAULT;
+$langfile = Lang::$_LANGVALUE[Lang::$_DEFAULT];
 require_once("lang/lang.$langfile.php");
 $application = new Application($config, $lang, null, null);
 //Lang from browser
@@ -73,8 +73,8 @@ if (isset($fblocale)) {
     $langfile = substr($fblocale, 0, 2);
 }
 //Check Lang
-if (!array_key_exists($langfile, Lang::$_ENUM)) {
-    $langfile = Lang::$_DEFAULT;
+if (!array_key_exists($langfile, Lang::$_LANGKEY)) {
+    $langfile = Lang::$_LANGVALUE[Lang::$_DEFAULT];
 }
 //Lang reload
 require_once("lang/lang.$langfile.php");
