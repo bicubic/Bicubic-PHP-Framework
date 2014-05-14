@@ -1,0 +1,106 @@
+<form name="{EDITPROFILE-ID}" method="post" action="{EDITPROFILE-ACTION}">
+    <fieldset>
+        <legend>{LANG-EDITPROFILE}</legend>
+        <label>
+            {LANG-NAME}:
+        </label>
+        <input type="name" title="{LANG-NAME}" id="{EDITPROFILE-NAME-SYSTEMUSER-NAME}" name="{EDITPROFILE-NAME-SYSTEMUSER-NAME}" value="{EDITPROFILE-VALUE-SYSTEMUSER-NAME}" required="required" maxlength="256" data-langempty="{LANG-EMPTYNAME}"/>
+        <label>
+            {LANG-USERCOUNTRY}
+        </label>
+        <select id="{EDITPROFILE-NAME-SYSTEMUSER-USERCOUNTRY}" name="{EDITPROFILE-NAME-SYSTEMUSER-USERCOUNTRY}" required="required" data-langempty="{LANG-EMPTYUSERCOUNTRY}">
+            <option value="">{LANG-PLEASESELECT}</option>
+            <!-- BEGIN USERCOUNTRY -->
+            <option value="{EDITPROFILE-LISTVALUE-SYSTEMUSER-USERCOUNTRY}" {EDITPROFILE-LISTSELECTED-SYSTEMUSER-USERCOUNTRY}> {EDITPROFILE-LISTTEXT-SYSTEMUSER-USERCOUNTRY}</option>
+            <!-- END USERCOUNTRY -->
+        </select>
+        <label>
+            {LANG-USERLANG}
+        </label>
+        <select id="{EDITPROFILE-NAME-SYSTEMUSER-USERLANG}" name="{EDITPROFILE-NAME-SYSTEMUSER-USERLANG}" required="required" data-langempty="{LANG-EMPTYUSERLANG}">
+            <option value="">{LANG-PLEASESELECT}</option>
+            <!-- BEGIN USERLANG -->
+            <option value="{EDITPROFILE-LISTVALUE-SYSTEMUSER-USERLANG}" {EDITPROFILE-LISTSELECTED-SYSTEMUSER-USERLANG}> {EDITPROFILE-LISTTEXT-SYSTEMUSER-USERLANG}</option>
+            <!-- END USERLANG -->
+        </select>
+    </fieldset>
+    <button type="submit">{LANG-SUBMIT}</button> 
+</form>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var inputName = document.getElementById('{EDITPROFILE-NAME-SYSTEMUSER-NAME}');
+        if (inputName.required) {
+            inputName.addEventListener('blur', checkEmpty);
+        }
+        var inputusercountry = document.getElementById('{EDITPROFILE-NAME-SYSTEMUSER-USERCOUNTRY}');
+        if (inputusercountry.required) {
+            inputusercountry.addEventListener('blur', checkEmpty);
+        }
+        var inputuserlang = document.getElementById('{EDITPROFILE-NAME-SYSTEMUSER-USERLANG}');
+        if (inputuserlang.required) {
+            inputuserlang.addEventListener('blur', checkEmpty);
+        }
+    });
+</script>
+
+<form name="{EDITEMAIL-ID}" method="post" action="{EDITEMAIL-ACTION}">
+    <fieldset>
+        <legend>{LANG-EDITEMAIL}</legend>
+        <label>
+            {LANG-EMAIL}:
+        </label>
+        <input type="email" title="{LANG-EMAIL}" id="{EDITEMAIL-NAME-EMAIL}" name="{EDITEMAIL-NAME-EMAIL}" value="{EDITEMAIL-VALUE-EMAIL}" required="required" maxlength="256" data-langempty="{LANG-EMPTYEMAIL}"/>
+    </fieldset>
+    <button type="submit">{LANG-SUBMIT}</button> 
+</form>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var inputEmail = document.getElementById('{EDITEMAIL-NAME-EMAIL}');
+        if (inputEmail.required) {
+            inputEmail.addEventListener('blur', checkEmpty);
+        }
+    });
+</script>
+
+<form name="{EDITPASSWORD-ID}" method="post" action="{EDITPASSWORD-ACTION}">
+    <fieldset>
+        <legend>{LANG-EDITPASSWORD}</legend>
+        <label>
+            {LANG-CURRENTPASSWORD}:
+        </label>
+        <input type="password" title="{LANG-PASSWORD}" id="{EDITPASSWORD-NAME-CURRENTPASSWORD}" name="{EDITPASSWORD-NAME-CURRENTPASSWORD}" required="required" maxlength="2048" data-langempty="{LANG-EMPTYPASSWORD}"/>
+        <label>
+            {LANG-NEWPASSWORD}:
+        </label>
+        <input type="password" title="{LANG-PASSWORD}" id="{EDITPASSWORD-NAME-NEWPASSWORD}" name="{EDITPASSWORD-NAME-NEWPASSWORD}" required="required" maxlength="2048" data-langempty="{LANG-EMPTYPASSWORD}"/>
+        <label>
+            {LANG-CONFIRMNEWPASSWORD}:
+        </label>
+        <input type="password" title="{LANG-CONFIRMPASSWORD}" id="{EDITPASSWORD-NAME-CONFIRMPASSWORD}" name="{EDITPASSWORD-NAME-CONFIRMPASSWORD}" required="required" maxlength="2048" data-langempty="{LANG-EMPTYCONFIRMPASSWORD}" data-langnotequal="{LANG-NOTEQUALPASSWORD}"/>
+    </fieldset>
+    <button type="submit">{LANG-SUBMIT}</button> 
+</form>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var inputPassword = document.getElementById('{EDITPASSWORD-NAME-CURRENTPASSWORD}');
+        if (inputPassword.required) {
+            inputPassword.addEventListener('blur', checkEmpty);
+        }
+        var inputPassword = document.getElementById('{EDITPASSWORD-NAME-NEWPASSWORD}');
+        if (inputPassword.required) {
+            inputPassword.addEventListener('blur', checkEmpty);
+            inputPassword.addEventListener('blur', function() {
+                checkEqual(inputPassword2, inputPassword)
+            });
+        }
+        var inputPassword2 = document.getElementById('{EDITPASSWORD-NAME-CONFIRMPASSWORD}');
+        if (inputPassword2.required) {
+            inputPassword2.addEventListener('blur', checkEmpty);
+            inputPassword2.addEventListener('blur', function() {
+                checkEqual(inputPassword2, inputPassword)
+            });
+        }
+    });
+</script>
+
+
