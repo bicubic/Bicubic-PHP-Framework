@@ -40,7 +40,7 @@ class SystemUser extends DataObject {
             "changeemailtoken" => ["name" => "changeemailtoken", "type" => PropertyTypes::$_STRING1024, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
             "newemail" => ["name" => "newemail", "type" => PropertyTypes::$_STRING256, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
             "usercountry" => ["name" => "usercountry", "type" => PropertyTypes::$_LIST, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
-            "userlang" => ["name" => "userlang", "type" => PropertyTypes::$_STRING2, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
+            "userlang" => ["name" => "userlang", "type" => PropertyTypes::$_LIST, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
         );
     }
 
@@ -51,10 +51,17 @@ class SystemUser extends DataObject {
         return parent::__isComplete();
     }
 
-    public function __getList(TransactionManager $data, $paramname) {
+    public function __getList($paramname, Application $application) {
         switch ($paramname) {
             case "usercountry" : {
+                    $navigation = new Navigation($application);
+                    $navigation->sortByLang(Country::$_ENUM);
                     return Country::$_ENUM;
+                }
+            case "userlang" : {
+                    $navigation = new Navigation($application);
+                    $navigation->sortByLang(Country::$_ENUM);
+                    return Lang::$_ENUM;
                 }
         }
         return [];

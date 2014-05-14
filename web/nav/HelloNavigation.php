@@ -8,23 +8,19 @@
  * @license    MIT
  * @version 3.0.0
  */
-require_once("lib/google/recaptchalib.php");
 
+require_once("nav/AccountNavigation.php");
 
-class HelloNavigation extends Navigation {
-    
-    
+class HelloNavigation extends AccountNavigation {
 
     function __construct(Application $application) {
         parent::__construct($application);
     }
 
     public function hello() {
+        $this->checkSignedInUser();
         $this->application->setMainTemplate("hello", "hello");
-        $signupSystemUser = new SystemUser();
-        $confirmPassword = new Param("confirmpassword");
-        $this->application->setFormTemplate("signup", [$signupSystemUser, $confirmPassword], "login" , "signUpSubmit");
-        $this->application->setVariableTemplate("HTML-RECAPTCHA", recaptcha_get_html($this->config('recaptcha_publickey')), null, $this->config('sslavailable'));
+        $this->application->setVariableTemplate("SIGNUP-FORM", $this->makeSignUpForm());
         $this->application->render();
     }
 
