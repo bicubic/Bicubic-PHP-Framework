@@ -141,7 +141,7 @@ if (isset($argv)) {
                 break;
             }
         default: {
-                $application->secureRedirect("home", "hello");
+                $application->redirect("home", "hello");
                 break;
             }
     }

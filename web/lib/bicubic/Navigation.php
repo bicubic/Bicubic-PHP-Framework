@@ -251,7 +251,7 @@ class Navigation {
         $this->application->setMainTemplate("bicubic", "form");
         $objectName = get_class($object);
         $this->application->setVariableTemplate("FORM-ID", $this->application->navigation . "$objectName");
-        $this->application->setVariableTemplate("FORM-ACTION", $this->application->getSecureAppUrl($this->application->name, $callback));
+        $this->application->setVariableTemplate("FORM-ACTION", $this->application->getAppUrl($this->application->name, $callback));
         $this->application->setVariableTemplate("FORM-CONTENT", $this->getFormObectFormContent($object));
         $this->application->render();
     }
@@ -272,7 +272,7 @@ class Navigation {
             }
         }
         $data->data->commit();
-        $this->application->redirectToUrl($this->application->getSecureAppUrl($this->application->name, $callback));
+        $this->application->redirectToUrl($this->application->getAppUrl($this->application->name, $callback));
     }
 
 }

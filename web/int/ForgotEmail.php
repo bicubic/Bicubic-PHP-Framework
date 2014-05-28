@@ -22,7 +22,7 @@ class ForgotEmail {
         $this->systemUser = $systemUser;
         $this->key = $navigation->config('mandrill_key');
         $this->template = $navigation->config('mandrill_template');
-        $this->link = $navigation->application->getSecureAppUrl("login","forgotValidate",array(new Param("token", $systemUser->getForgottoken())));
+        $this->link = $navigation->application->getAppUrl("login","forgotValidate",array(new Param("token", $systemUser->getForgottoken())));
         $this->text = $navigation->lang('lang_emailforgottext');
     }
 
