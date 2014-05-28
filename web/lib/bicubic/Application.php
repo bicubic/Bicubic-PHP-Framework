@@ -57,7 +57,7 @@ class Application {
      * @param string $params <p>extra Param objects for the URL</p>
      * @return String the corresponding URL
      */
-    public function getSecureAppUrl($app, $navigation, $params = null) {
+    public function getAppUrl($app, $navigation, $params = null) {
         $link = $this->config('web_secure_url') . "?" . $this->config('param_app') . "=" . $app;
         $link .= "&" . $this->config('param_navigation') . "=" . $navigation;
         $hasLang = false;
@@ -82,7 +82,7 @@ class Application {
      * @param string $id <p>the id ob the object to look</p>
      * @return String the corresponding URL
      */
-    public function getSecureAppFlatUrl($app, $navigation, $id) {
+    public function getAppFlatUrl($app, $navigation, $id) {
         $link = $this->config('web_folder') . "$app/$navigation/$id";
         return $link;
     }
@@ -645,7 +645,7 @@ class Application {
             $this->setHTMLVariableTemplate("TEMPLATE-COPY", $this->config('web_copyright'));
             foreach (Lang::$_ENUM as $lang => $langname) {
                 $this->setHtmlArrayTemplate(array(
-                    'LANG-LINK' => $this->getSecureAppUrl($this->name, $this->navigation, array(new Param($this->config('param_lang'), $this->item(Lang::$_LANGVALUE, $lang)))),
+                    'LANG-LINK' => $this->getAppUrl($this->name, $this->navigation, array(new Param($this->config('param_lang'), $this->item(Lang::$_LANGVALUE, $lang)))),
                     'LANG-TEXT' => $langname,
                 ));
                 $this->parseTemplate('LANGS');
@@ -721,7 +721,7 @@ class Application {
     public function setFormTemplate($name, array $params, $application, $navigation, $urlparams = null) {
         $name = strtoupper($name);
         $this->setVariableTemplate("$name-ID", $this->navigation . "$name");
-        $this->setVariableTemplate("$name-ACTION", $this->getSecureAppUrl($application, $navigation, $urlparams));
+        $this->setVariableTemplate("$name-ACTION", $this->getAppUrl($application, $navigation, $urlparams));
         foreach ($params as $param) {
             if (get_class($param) == "Param") {
                 $this->setFormParam($param, $name);
@@ -969,9 +969,9 @@ class Application {
         $this->endApp();
     }
 
-    public function secureRedirect($app, $navigation, $params = null) {
+    public function redirect($app, $navigation, $params = null) {
         //Try redirect
-        header(sprintf("Location: %s", $this->getSecureAppUrl($app, $navigation, $params)));
+        header(sprintf("Location: %s", $this->getAppUrl($app, $navigation, $params)));
         $this->endApp();
     }
 
@@ -1443,9 +1443,10 @@ class Application {
         }
         $str .= "?>\n";
         
-        foreach(Lang::$_LANGVALUE as $key => $value) {
-            file_put_contents("./lang/lang.$value.php", $str);
-        }
+        echo $str;
+//        foreach(Lang::$_LANGVALUE as $key => $value) {
+//            file_put_contents("./lang/lang.$value.php", $str);
+//        }
     }
 
     protected function script_scanPHPLangs($dir) {
