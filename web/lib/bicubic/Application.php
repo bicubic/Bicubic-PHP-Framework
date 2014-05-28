@@ -1381,6 +1381,141 @@ class Application {
         }
         return false;
     }
+    
+    
+    
+    
+    protected function script_generateBeans() {
+        $data = new PostgreSQLData($this->config);
+        $query = "SELECT table_name FROM information_schema.tables WHERE table_schema='public'";
+        $result = $data->performRead($query);
+        $classes = array();
+        while ($row = $data->readNext($result)) {
+            $class = $row['table_name'];
+            $classes [] = $class;
+        }
+
+        foreach ($classes as $class) {
+            $query = "SELECT column_name FROM information_schema.columns WHERE table_name ='$class'";
+            $result = $data->performRead($query);
+            echo "begin class $class \n";
+            while ($row = $data->readNext($result)) {
+                $column = $row['column_name'];
+                echo 'private $' . $column . ";\n";
+            }
+            echo "end class $class \n";
+        }
+
+        foreach ($classes as $class) {
+            $query = "SELECT column_name FROM information_schema.columns WHERE table_name ='$class'";
+            $result = $data->performRead($query);
+            echo "begin class $class \n";
+            while ($row = $data->readNext($result)) {
+                $column = $row['column_name'];
+                echo "\"$column\" => [\"name\" => \"$column\", \"type\" => PropertyTypes::\$_LONG , \"required\" => true, \"serializable\" => true, \"updatenull\" => true, \"hidden\" => false, \"private\" => false],\n";
+            }
+            echo "end class $class \n";
+        }
+    }
+
+    protected function script_generatePassword() {
+        $clave = $this->navigation = $this->getUrlParam("password", PropertyTypes::$_STRING);
+        echo $clave . " converted to " . $this->blowfishCrypt($clave, 10);
+        echo "\n";
+    }
+
+    protected function script_generateLangFiles() {
+        $langs = array();
+        $langs = array_merge($langs, $this->scanPHPLangs('./app'));
+        $langs = array_merge($langs, $this->scanPHPLangs('./beans'));
+        $langs = array_merge($langs, $this->scanPHPLangs('./int'));
+        $langs = array_merge($langs, $this->scanPHPLangs('./nav'));
+        $langs = array_merge($langs, $this->scanHTMLLangs('./templates'));
+        $langs = array_merge($langs, $this->scanHTMLLangs('./views'));
+        
+        $navigation = new Navigation($this);
+        $langs = $navigation->sortByValue($langs);        
+        
+        $str = "<?php\n";
+        $str .= "\$lang = array();\n";
+        foreach ($langs as $key => $value) {
+            $str .= "\$lang['$value'] = '$value';\n";
+        }
+        $str .= "?>\n";
+        
+        foreach(Lang::$_LANGVALUE as $key => $value) {
+            file_put_contents("./lang/lang.$value.php", $str);
+        }
+    }
+
+    protected function script_scanPHPLangs($dir) {
+        $langs = array();
+        $handle = opendir($dir);
+        if ($handle) {
+            while (false !== ($entry = readdir($handle))) {
+                if ($entry != "." && $entry != ".." && $entry != "ScriptApplication.php") {
+                    echo "$dir/$entry\n";
+                    if (is_dir("$dir/$entry")) {
+                        $langs = array_merge($langs, $this->scanPHPLangs("$dir/$entry"));
+                    } else {
+                        $str = file_get_contents("$dir/$entry");
+                        $lastPos = 0;
+                        $needle = "'lang_";
+                        while (($lastPos = strpos($str, $needle, $lastPos)) !== false) {
+                            $endpos = strpos($str, "'", $lastPos + strlen($needle));
+                            $lang = substr($str, $lastPos + 1, $endpos - $lastPos - 1);
+                            echo "-      $lang\n";
+                            $langs [$lang] = $lang;
+                            $lastPos = $lastPos + strlen($needle);
+                        }
+                    }
+                }
+            }
+            closedir($handle);
+        }
+        return $langs;
+    }
+
+    protected function script_scanHTMLLangs($dir) {
+        $langs = array();
+        $handle = opendir($dir);
+        if ($handle) {
+            while (false !== ($entry = readdir($handle))) {
+                if ($entry != "." && $entry != "..") {
+                    echo "$dir/$entry\n";
+                    if (is_dir("$dir/$entry")) {
+                        $langs = array_merge($langs, $this->scanHTMLLangs("$dir/$entry"));
+                    } else {
+                        $str = file_get_contents("$dir/$entry");
+                        $lastPos = 0;
+                        $needle = "{LANG-";
+                        while (($lastPos = strpos($str, $needle, $lastPos)) !== false) {
+                            $endpos = strpos($str, "}", $lastPos + strlen($needle));
+                            $lang = substr($str, $lastPos + 1, $endpos - $lastPos - 1);
+                            $lang = strtolower($lang);
+                            $lang = str_replace("-", "_", $lang);
+                            echo "-      $lang\n";
+                            $langs [$lang] = $lang;
+                            $lastPos = $lastPos + strlen($needle);
+                        }
+                        $needle = "{TEXT-";
+                        while (($lastPos = strpos($str, $needle, $lastPos)) !== false) {
+                            $endpos = strpos($str, "}", $lastPos + strlen($needle));
+                            $lang = substr($str, $lastPos + 1, $endpos - $lastPos - 1);
+                            $lang = strtolower($lang);
+                            $lang = str_replace("-", "_", $lang);
+                             $lang = str_replace("text_", "lang_", $lang);
+                            echo "-      $lang\n";
+                            $langs [$lang] = $lang;
+                            $lastPos = $lastPos + strlen($needle);
+                        }
+                    }
+                }
+            }
+            closedir($handle);
+        }
+        return $langs;
+    }
 
 }
 

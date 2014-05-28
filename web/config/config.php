@@ -17,7 +17,6 @@ $config['web_name'] = "Bicubic PHP Framework";
 $config['web_copyright'] = "©2014 Bicubic Technology - All rights reserved";
 $config['web_contact_email'] = "hello@bicubic.cl";
 $config['web_contact_name'] = "Bicubic Technology";
-$config['web_time_out'] = 360000;
 //Data Base values
 $config['database_host'] = "localhost";
 $config['database_database'] = "bicubic";
@@ -58,5 +57,4 @@ $config['gs_storage'] = "http://storage.bicubic.cl/";
 //Certificates for ios push notification
 $config['certificate_private'] = "/.../server_certificates_bundle_sandbox.pem";
 $config['certificate_auth'] = "/.../entrust_root_certification_authority.pem";
-
 ?>
