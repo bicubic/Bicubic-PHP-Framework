@@ -120,7 +120,7 @@ class LoginApplication extends Application {
                     break;
                 }
             default : {
-                    $this->secureRedirect("login", "logout");
+                    $this->redirect("login", "logout");
                     break;
                 }
         }
@@ -128,7 +128,7 @@ class LoginApplication extends Application {
 
     public function setMainTemplate($navigationFolder, $navigationFile, $title = "") {
         parent::setMainTemplate($navigationFolder, $navigationFile, $title);
-        $this->setHTMLVariableTemplate('LINK-HOME', $this->getSecureAppUrl("home", "hello"));
+        $this->setHTMLVariableTemplate('LINK-HOME', $this->getAppUrl("home", "hello"));
     }
 
 }

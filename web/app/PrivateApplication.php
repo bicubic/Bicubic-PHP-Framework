@@ -23,7 +23,7 @@ class PrivateApplication extends Application {
         $navigation = new LoginNavigation($this);
         $this->user = $navigation->loginCheck();
         if (!$this->user) {
-            $this->secureRedirect("login", "login");
+            $this->redirect("login", "login");
         }
         $this->navigation = $this->getUrlParam($this->config('param_navigation'), PropertyTypes::$_LETTERS, false);
         switch ($this->navigation) {
@@ -43,11 +43,11 @@ class PrivateApplication extends Application {
     public function setMainTemplate($navigationFolder, $navigationFile, $title = "") {
         parent::setMainTemplate($navigationFolder, $navigationFile, $title);
         if ($this->user) {
-            $this->setHTMLVariableTemplate('LINK-ACCOUNT', $this->getSecureAppUrl("login", "account"));
-            $this->setHTMLVariableTemplate('LINK-LOGOUT', $this->getSecureAppUrl("login", "logout"));
+            $this->setHTMLVariableTemplate('LINK-ACCOUNT', $this->getAppUrl("login", "account"));
+            $this->setHTMLVariableTemplate('LINK-LOGOUT', $this->getAppUrl("login", "logout"));
             $this->parseTemplate("USER");
             if ($this->user->getConfirmemailtoken()) {
-                $this->setHTMLVariableTemplate('LINK-REVALIDATE', $this->getSecureAppUrl("login", "revalidate", array(new Param("token", $this->user->getConfirmemailtoken()))));
+                $this->setHTMLVariableTemplate('LINK-REVALIDATE', $this->getAppUrl("login", "revalidate", array(new Param("token", $this->user->getConfirmemailtoken()))));
                 $this->parseTemplate("REVALIDATE");
             }
         }
