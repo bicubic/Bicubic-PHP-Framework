@@ -45,8 +45,8 @@ class SystemUser extends DataObject {
     }
 
     public function __isComplete() {
-        if (!$this->token) {
-            $this->token = "";
+        if (!$this->sessiontoken) {
+            $this->sessiontoken = "";
         }
         return parent::__isComplete();
     }
