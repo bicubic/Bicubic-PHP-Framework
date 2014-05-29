@@ -40,12 +40,8 @@ require_once("lib/bicubic/TransactionManager.php");
 require_once("lib/bicubic/ErrorJson.php");
 require_once("lib/bicubic/ObjectJson.php");
 require_once("lib/bicubic/SuccessJson.php");
-//data
-require_once ("data/AtomManager.php");
-//beans
-require_once("beans/Constant.php");
-require_once("beans/SystemUser.php");
-require_once("beans/SystemUserLog.php");
+//custom
+require_once("require.php");
 //Params
 $config['param_app'] = "app";
 $config['param_navigation'] = "nav";
@@ -106,45 +102,22 @@ if (isset($argv)) {
         $request = preg_split('/=/', $argv[$i]);
         $_GET[$request[0]] = $request[1];
     }
-    $application = new Application($config, $lang, null, null);
     $app = $application->getUrlParam($config['param_app'], PropertyTypes::$_LETTERS);
-    switch ($app) {
-        case "script": {
-                require_once("app/ScriptApplication.php");
-                $application = new ScriptApplication($config, $lang);
-                break;
-            }
+    $application = ApplicationFactory::makeScriptApplication($app, $config, $lang);
+    if($application) {
+        $application->execute();
     }
-    $application->execute();
+    else {
+        ApplicationFactory::defaultScriptApplication($config, $lang);
+    }
 } else {
-    $application = new Application($config, $lang, null, null);
     $app = $application->getUrlParam($config['param_app'], PropertyTypes::$_LETTERS, false);
-    switch ($app) {
-        case "home": {
-                require_once("app/HomeApplication.php");
-                $application = new HomeApplication($config, $lang);
-                break;
-            }
-        case "login": {
-                require_once("app/LoginApplication.php");
-                $application = new LoginApplication($config, $lang);
-                break;
-            }
-        case "private": {
-                require_once("app/PrivateApplication.php");
-                $application = new PrivateApplication($config, $lang);
-                break;
-            }
-        case "json": {
-                require_once("app/JsonApplication.php");
-                $application = new JsonApplication($config, $lang);
-                break;
-            }
-        default: {
-                $application->redirect("home", "hello");
-                break;
-            }
+    $application = ApplicationFactory::makeWebApplication($app, $config, $lang);
+    if($application) {
+        $application->execute();
     }
-    $application->execute();
+    else {
+        ApplicationFactory::defaultWebApplication($config, $lang);
+    }
 }
 ?>
