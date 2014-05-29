@@ -42,10 +42,20 @@ class Navigation {
     
     public function sortByLang($array) {
         uasort($array, array("Navigation", "compareLangStrings"));
+        return $array;
+    }
+    
+    public function sortByValue($array) {
+        uasort($array, array("Navigation", "compareStrings"));
+        return $array;
     }
 
     public function compareLangStrings($a, $b) {
         return strcasecmp($this->lang($a), $this->lang($b));
+    }
+    
+    public function compareStrings($a, $b) {
+        return strcmp($a, $b);
     }
 
     public function compareObjectsByLangName($a, $b) {
@@ -235,13 +245,13 @@ class Navigation {
             $object->setId($id);
             $object = $data->getRecord($object);
             if (!$object) {
-                $this->error("lang_notvalid");
+                $this->error('lang_notvalid');
             }
         }
         $this->application->setMainTemplate("bicubic", "form");
         $objectName = get_class($object);
         $this->application->setVariableTemplate("FORM-ID", $this->application->navigation . "$objectName");
-        $this->application->setVariableTemplate("FORM-ACTION", $this->application->getSecureAppUrl($this->application->name, $callback));
+        $this->application->setVariableTemplate("FORM-ACTION", $this->application->getAppUrl($this->application->name, $callback));
         $this->application->setVariableTemplate("FORM-CONTENT", $this->getFormObectFormContent($object));
         $this->application->render();
     }
@@ -253,16 +263,16 @@ class Navigation {
         if (!$object->getId()) {
             if (!$data->insertRecord($object)) {
                 $data->data->rollback();
-                $this->error("lang_errordatabase");
+                $this->error('lang_errordatabase');
             }
         } else {
             if (!$data->updateRecord($object)) {
                 $data->data->rollback();
-                $this->error("lang_errordatabase");
+                $this->error('lang_errordatabase');
             }
         }
         $data->data->commit();
-        $this->application->redirectToUrl($this->application->getSecureAppUrl($this->application->name, $callback));
+        $this->application->redirectToUrl($this->application->getAppUrl($this->application->name, $callback));
     }
 
 }

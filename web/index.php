@@ -7,13 +7,16 @@
  * @license    MIT
  * @version 3.0.0
  */
+//constants
+define('BICUBIC_TIMEOUT', 300); 
+define('BICUBIC_TIMEZONE', 'America/Santiago'); 
+define('BICUBIC_ERRORREPORT', E_ALL & ~E_STRICT); //E_ERROR | E_PARSE | E_NOTICE | E_USER_ERROR | E_USER_WARNING | E_USER_NOTICE
 //base
 require_once("config/config.php");
 //default php config
-date_default_timezone_set("America/Santiago");
-error_reporting(E_ALL & ~E_STRICT );
-//error_reporting(E_ERROR | E_PARSE | E_NOTICE | E_USER_ERROR | E_USER_WARNING | E_USER_NOTICE);
-set_time_limit(300); //5 mins
+date_default_timezone_set(BICUBIC_TIMEZONE);
+error_reporting(BICUBIC_ERRORREPORT);
+set_time_limit(BICUBIC_TIMEOUT);
 //lib
 require_once("lib/ext/pear/Sigma.php");
 require_once("lib/ext/simple_html_dom.php");
@@ -21,6 +24,7 @@ require_once("lib/ext/pear/Date.php");
 require_once("lib/ext/pear/Mail.php");
 require_once("lib/ext/thread/singleton.class.php");
 //bicubic
+require_once("lib/bicubic/LibConstant.php");
 require_once("lib/bicubic/Application.php");
 require_once("lib/bicubic/Data.php");
 require_once("lib/bicubic/DataObject.php");
@@ -32,17 +36,12 @@ require_once("lib/bicubic/PostgreSQLData.php");
 require_once("lib/bicubic/MandrillEmail.php");
 require_once("lib/bicubic/SMTPEmail.php");
 require_once("lib/bicubic/TransactionManager.php");
-//beans
-require_once("beans/Constant.php");
-require_once("beans/SystemUser.php");
-require_once("beans/SystemUserLog.php");
 //json
-require_once("json/ErrorJson.php");
-require_once("json/LoginErrorJson.php");
-require_once("json/ObjectJson.php");
-require_once("json/SuccessJson.php");
-//data
-require_once ("data/AtomManager.php");
+require_once("lib/bicubic/ErrorJson.php");
+require_once("lib/bicubic/ObjectJson.php");
+require_once("lib/bicubic/SuccessJson.php");
+//custom
+require_once("require.php");
 //Params
 $config['param_app'] = "app";
 $config['param_navigation'] = "nav";
@@ -103,45 +102,22 @@ if (isset($argv)) {
         $request = preg_split('/=/', $argv[$i]);
         $_GET[$request[0]] = $request[1];
     }
-    $application = new Application($config, $lang, null, null);
     $app = $application->getUrlParam($config['param_app'], PropertyTypes::$_LETTERS);
-    switch ($app) {
-        case "script": {
-                require_once("app/ScriptApplication.php");
-                $application = new ScriptApplication($config, $lang);
-                break;
-            }
+    $application = ApplicationFactory::makeScriptApplication($app, $config, $lang);
+    if($application) {
+        $application->execute();
     }
-    $application->execute();
+    else {
+        ApplicationFactory::defaultScriptApplication($config, $lang);
+    }
 } else {
-    $application = new Application($config, $lang, null, null);
     $app = $application->getUrlParam($config['param_app'], PropertyTypes::$_LETTERS, false);
-    switch ($app) {
-        case "home": {
-                require_once("app/HomeApplication.php");
-                $application = new HomeApplication($config, $lang);
-                break;
-            }
-        case "login": {
-                require_once("app/LoginApplication.php");
-                $application = new LoginApplication($config, $lang);
-                break;
-            }
-        case "private": {
-                require_once("app/PrivateApplication.php");
-                $application = new PrivateApplication($config, $lang);
-                break;
-            }
-        case "json": {
-                require_once("app/JsonApplication.php");
-                $application = new JsonApplication($config, $lang);
-                break;
-            }
-        default: {
-                $application->secureRedirect("home", "hello");
-                break;
-            }
+    $application = ApplicationFactory::makeWebApplication($app, $config, $lang);
+    if($application) {
+        $application->execute();
     }
-    $application->execute();
+    else {
+        ApplicationFactory::defaultWebApplication($config, $lang);
+    }
 }
 ?>

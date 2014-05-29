@@ -22,7 +22,7 @@ class NewEmailEmail {
         $this->systemUser = $systemUser;
         $this->key = $navigation->config('mandrill_key');
         $this->template = $navigation->config('mandrill_template');
-        $this->link = $navigation->application->getSecureAppUrl("login","emailValidate",array(new Param("token", $systemUser->getChangeemailtoken())));
+        $this->link = $navigation->application->getAppUrl("login","emailValidate",array(new Param("token", $systemUser->getChangeemailtoken())));
         $this->text = $navigation->lang('lang_emailchangetext');
     }
 

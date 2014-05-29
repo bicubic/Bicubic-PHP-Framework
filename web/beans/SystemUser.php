@@ -1,4 +1,4 @@
- <?php
+<?php
 
 /**
  * Bicubic PHP Framework
@@ -55,12 +55,12 @@ class SystemUser extends DataObject {
         switch ($paramname) {
             case "usercountry" : {
                     $navigation = new Navigation($application);
-                    $navigation->sortByLang(Country::$_ENUM);
+                    Country::$_ENUM = $navigation->sortByLang(Country::$_ENUM);
                     return Country::$_ENUM;
                 }
             case "userlang" : {
                     $navigation = new Navigation($application);
-                    $navigation->sortByLang(Country::$_ENUM);
+                    Lang::$_ENUM = $navigation->sortByLang(Lang::$_ENUM);
                     return Lang::$_ENUM;
                 }
         }

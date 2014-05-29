@@ -57,7 +57,7 @@ class Application {
      * @param string $params <p>extra Param objects for the URL</p>
      * @return String the corresponding URL
      */
-    public function getSecureAppUrl($app, $navigation, $params = null) {
+    public function getAppUrl($app, $navigation, $params = null) {
         $link = $this->config('web_secure_url') . "?" . $this->config('param_app') . "=" . $app;
         $link .= "&" . $this->config('param_navigation') . "=" . $navigation;
         $hasLang = false;
@@ -82,7 +82,7 @@ class Application {
      * @param string $id <p>the id ob the object to look</p>
      * @return String the corresponding URL
      */
-    public function getSecureAppFlatUrl($app, $navigation, $id) {
+    public function getAppFlatUrl($app, $navigation, $id) {
         $link = $this->config('web_folder') . "$app/$navigation/$id";
         return $link;
     }
@@ -645,7 +645,7 @@ class Application {
             $this->setHTMLVariableTemplate("TEMPLATE-COPY", $this->config('web_copyright'));
             foreach (Lang::$_ENUM as $lang => $langname) {
                 $this->setHtmlArrayTemplate(array(
-                    'LANG-LINK' => $this->getSecureAppUrl($this->name, $this->navigation, array(new Param($this->config('param_lang'), $this->item(Lang::$_LANGVALUE, $lang)))),
+                    'LANG-LINK' => $this->getAppUrl($this->name, $this->navigation, array(new Param($this->config('param_lang'), $this->item(Lang::$_LANGVALUE, $lang)))),
                     'LANG-TEXT' => $langname,
                 ));
                 $this->parseTemplate('LANGS');
@@ -721,7 +721,7 @@ class Application {
     public function setFormTemplate($name, array $params, $application, $navigation, $urlparams = null) {
         $name = strtoupper($name);
         $this->setVariableTemplate("$name-ID", $this->navigation . "$name");
-        $this->setVariableTemplate("$name-ACTION", $this->getSecureAppUrl($application, $navigation, $urlparams));
+        $this->setVariableTemplate("$name-ACTION", $this->getAppUrl($application, $navigation, $urlparams));
         foreach ($params as $param) {
             if (get_class($param) == "Param") {
                 $this->setFormParam($param, $name);
@@ -969,9 +969,9 @@ class Application {
         $this->endApp();
     }
 
-    public function secureRedirect($app, $navigation, $params = null) {
+    public function redirect($app, $navigation, $params = null) {
         //Try redirect
-        header(sprintf("Location: %s", $this->getSecureAppUrl($app, $navigation, $params)));
+        header(sprintf("Location: %s", $this->getAppUrl($app, $navigation, $params)));
         $this->endApp();
     }
 
@@ -1380,6 +1380,142 @@ class Application {
             }
         }
         return false;
+    }
+    
+    
+    
+    
+    protected function script_generateBeans() {
+        $data = new PostgreSQLData($this->config);
+        $query = "SELECT table_name FROM information_schema.tables WHERE table_schema='public'";
+        $result = $data->performRead($query);
+        $classes = array();
+        while ($row = $data->readNext($result)) {
+            $class = $row['table_name'];
+            $classes [] = $class;
+        }
+
+        foreach ($classes as $class) {
+            $query = "SELECT column_name FROM information_schema.columns WHERE table_name ='$class'";
+            $result = $data->performRead($query);
+            echo "begin class $class \n";
+            while ($row = $data->readNext($result)) {
+                $column = $row['column_name'];
+                echo 'private $' . $column . ";\n";
+            }
+            echo "end class $class \n";
+        }
+
+        foreach ($classes as $class) {
+            $query = "SELECT column_name FROM information_schema.columns WHERE table_name ='$class'";
+            $result = $data->performRead($query);
+            echo "begin class $class \n";
+            while ($row = $data->readNext($result)) {
+                $column = $row['column_name'];
+                echo "\"$column\" => [\"name\" => \"$column\", \"type\" => PropertyTypes::\$_LONG , \"required\" => true, \"serializable\" => true, \"updatenull\" => true, \"hidden\" => false, \"private\" => false],\n";
+            }
+            echo "end class $class \n";
+        }
+    }
+
+    protected function script_generatePassword() {
+        $clave = $this->navigation = $this->getUrlParam("password", PropertyTypes::$_STRING);
+        echo $clave . " converted to " . $this->blowfishCrypt($clave, 10);
+        echo "\n";
+    }
+
+    protected function script_generateLangFiles() {
+        $langs = array();
+        $langs = array_merge($langs, $this->scanPHPLangs('./app'));
+        $langs = array_merge($langs, $this->scanPHPLangs('./beans'));
+        $langs = array_merge($langs, $this->scanPHPLangs('./int'));
+        $langs = array_merge($langs, $this->scanPHPLangs('./nav'));
+        $langs = array_merge($langs, $this->scanHTMLLangs('./templates'));
+        $langs = array_merge($langs, $this->scanHTMLLangs('./views'));
+        
+        $navigation = new Navigation($this);
+        $langs = $navigation->sortByValue($langs);        
+        
+        $str = "<?php\n";
+        $str .= "\$lang = array();\n";
+        foreach ($langs as $key => $value) {
+            $str .= "\$lang['$value'] = '$value';\n";
+        }
+        $str .= "?>\n";
+        
+        echo $str;
+//        foreach(Lang::$_LANGVALUE as $key => $value) {
+//            file_put_contents("./lang/lang.$value.php", $str);
+//        }
+    }
+
+    protected function script_scanPHPLangs($dir) {
+        $langs = array();
+        $handle = opendir($dir);
+        if ($handle) {
+            while (false !== ($entry = readdir($handle))) {
+                if ($entry != "." && $entry != ".." && $entry != "ScriptApplication.php") {
+                    echo "$dir/$entry\n";
+                    if (is_dir("$dir/$entry")) {
+                        $langs = array_merge($langs, $this->scanPHPLangs("$dir/$entry"));
+                    } else {
+                        $str = file_get_contents("$dir/$entry");
+                        $lastPos = 0;
+                        $needle = "'lang_";
+                        while (($lastPos = strpos($str, $needle, $lastPos)) !== false) {
+                            $endpos = strpos($str, "'", $lastPos + strlen($needle));
+                            $lang = substr($str, $lastPos + 1, $endpos - $lastPos - 1);
+                            echo "-      $lang\n";
+                            $langs [$lang] = $lang;
+                            $lastPos = $lastPos + strlen($needle);
+                        }
+                    }
+                }
+            }
+            closedir($handle);
+        }
+        return $langs;
+    }
+
+    protected function script_scanHTMLLangs($dir) {
+        $langs = array();
+        $handle = opendir($dir);
+        if ($handle) {
+            while (false !== ($entry = readdir($handle))) {
+                if ($entry != "." && $entry != "..") {
+                    echo "$dir/$entry\n";
+                    if (is_dir("$dir/$entry")) {
+                        $langs = array_merge($langs, $this->scanHTMLLangs("$dir/$entry"));
+                    } else {
+                        $str = file_get_contents("$dir/$entry");
+                        $lastPos = 0;
+                        $needle = "{LANG-";
+                        while (($lastPos = strpos($str, $needle, $lastPos)) !== false) {
+                            $endpos = strpos($str, "}", $lastPos + strlen($needle));
+                            $lang = substr($str, $lastPos + 1, $endpos - $lastPos - 1);
+                            $lang = strtolower($lang);
+                            $lang = str_replace("-", "_", $lang);
+                            echo "-      $lang\n";
+                            $langs [$lang] = $lang;
+                            $lastPos = $lastPos + strlen($needle);
+                        }
+                        $needle = "{TEXT-";
+                        while (($lastPos = strpos($str, $needle, $lastPos)) !== false) {
+                            $endpos = strpos($str, "}", $lastPos + strlen($needle));
+                            $lang = substr($str, $lastPos + 1, $endpos - $lastPos - 1);
+                            $lang = strtolower($lang);
+                            $lang = str_replace("-", "_", $lang);
+                             $lang = str_replace("text_", "lang_", $lang);
+                            echo "-      $lang\n";
+                            $langs [$lang] = $lang;
+                            $lastPos = $lastPos + strlen($needle);
+                        }
+                    }
+                }
+            }
+            closedir($handle);
+        }
+        return $langs;
     }
 
 }
