@@ -41,7 +41,7 @@ require_once("lib/bicubic/ErrorJson.php");
 require_once("lib/bicubic/ObjectJson.php");
 require_once("lib/bicubic/SuccessJson.php");
 //custom
-require_once("require.php");
+require_once("factory.php");
 //Params
 $config['param_app'] = "app";
 $config['param_navigation'] = "nav";

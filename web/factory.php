@@ -9,7 +9,6 @@
  * @version 3.0.0
  */
 //add custom require here
-require_once("app/ApplicationFactory.php");
 require_once("data/AtomManager.php");
 require_once("beans/Constant.php");
 require_once("beans/SystemUser.php");
