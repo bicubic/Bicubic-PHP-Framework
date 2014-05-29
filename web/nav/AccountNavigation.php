@@ -17,14 +17,14 @@ class AccountNavigation extends Navigation {
     protected function checkSignedInUser() {
         $user = $this->loginCheck();
         if ($user) {
-            $this->application->secureRedirect("private", "hello");
+            $this->application->redirect("private", "hello");
         }
     }
     
     protected function makeSignUpForm() {
         $result = $this->application->setCustomTemplate("login", "signup");
         $this->application->setVariableCustomTemplate($result, "SIGNUP-ID", "signup");
-        $this->application->setVariableCustomTemplate($result, "SIGNUP-ACTION", $this->application->getSecureAppUrl("login" , "signUpSubmit"));
+        $this->application->setVariableCustomTemplate($result, "SIGNUP-ACTION", $this->application->getAppUrl("login" , "signUpSubmit"));
         $this->application->setHTMLVariableCustomTemplate($result, "SIGNUP-NAME-SYSTEMUSER-NAME", "SystemUser_name");
         $this->application->setHTMLVariableCustomTemplate($result, "SIGNUP-NAME-SYSTEMUSER-EMAIL", "SystemUser_email");
         $this->application->setHTMLVariableCustomTemplate($result, "SIGNUP-NAME-SYSTEMUSER-PASSWORD", "SystemUser_password");
@@ -104,7 +104,7 @@ class AccountNavigation extends Navigation {
         $email->send();
         $this->loginSet($dbSystemUser);
         $data->data->commit();
-        $this->application->secureRedirect("private", "hello");
+        $this->application->redirect("private", "hello");
     }
     
     public function loginSet(SystemUser $user) {

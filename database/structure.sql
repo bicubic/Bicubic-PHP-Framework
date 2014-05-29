@@ -7,17 +7,6 @@
 --  * @version 3.0.0
 --  */
 
-CREATE TABLE "systemadmin" (
-    "id" BIGSERIAL NOT NULL, 
-    "name" VARCHAR(256) NOT NULL, 
-    "email" VARCHAR(256) NOT NULL, 
-    "password" VARCHAR(1024) NOT NULL, 
-    "sessiontoken" VARCHAR(1024), 
-    CONSTRAINT "systemadmin_pk" PRIMARY KEY ("id")
-);
-CREATE INDEX systemadmin_email_index ON systemadmin USING btree (email);
-CREATE INDEX systemadmin_password_index ON systemadmin USING btree (password);
-INSERT INTO "systemadmin"("name", "email", "password") VALUES ('Administrator', 'admin@localhost', '$2a$10$s2/s7.yPO2WZWy0fSqWiH.YfEao1o1BC47hcyoiKK6m5Ph8V/zLWu');
 
 CREATE TABLE "systemuser" (
     "id" BIGSERIAL NOT NULL, 
@@ -29,8 +18,8 @@ CREATE TABLE "systemuser" (
     "forgottoken" VARCHAR(1024), 
     "changeemailtoken" VARCHAR(1024), 
     "changepasswordtoken" VARCHAR(1024), 
-    "usercountry" VARCHAR(2),
-    "userlang" VARCHAR(2), 
+    "usercountry" INTEGER,
+    "userlang" INTEGER, 
     CONSTRAINT "systemuser_pk" PRIMARY KEY ("id")
 );
 CREATE INDEX systemuser_email_index ON systemuser USING btree (email);
@@ -42,19 +31,6 @@ CREATE INDEX systemuser_changepasswordtoken_index ON systemuser USING btree (cha
 CREATE INDEX systemuser_usercountry_index ON systemuser USING btree (usercountry);
 CREATE INDEX systemuser_userlang_index ON systemuser USING btree (userlang);
 
-CREATE TABLE "systememail" (
-    "id" BIGSERIAL NOT NULL, 
-    "broadcast" INT NOT NULL, 
-    "broadcastcountry" VARCHAR(2), 
-    "broadcastlang" VARCHAR(2), 
-    "to" VARCHAR(256), 
-    "from" VARCHAR(256) NOT NULL, 
-    "subject" VARCHAR(1024) NOT NULL, 
-    "body" TEXT NOT NULL, 
-    "sent" INT NOT NULL,
-    CONSTRAINT "systememail_pk" PRIMARY KEY ("id")
-);
-CREATE INDEX systememail_sent_index ON systememail USING btree (sent);
 
 CREATE TABLE "systemuserlog" (
     "id" BIGSERIAL NOT NULL, 

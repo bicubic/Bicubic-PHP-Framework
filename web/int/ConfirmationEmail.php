@@ -22,7 +22,7 @@ class ConfirmationEmail {
         $this->systemUser = $systemUser;
         $this->key = $navigation->config('mandrill_key');
         $this->template = $navigation->config('mandrill_template');
-        $this->link = $navigation->application->getSecureAppUrl("login","validate",array(new Param("token", $systemUser->getConfirmemailtoken())));
+        $this->link = $navigation->application->getAppUrl("login","validate",array(new Param("token", $systemUser->getConfirmemailtoken())));
         $this->text = $navigation->lang('lang_emailconfirmationtext');
     }
 

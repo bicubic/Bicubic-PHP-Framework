@@ -28,7 +28,7 @@ class HomeApplication extends Application {
                     break;
                 }
             default : {
-                    $this->secureRedirect("home", "hello");
+                    $this->redirect("home", "hello");
                     break;
                 }
         }
@@ -36,7 +36,7 @@ class HomeApplication extends Application {
 
     public function setMainTemplate($navigationFolder, $navigationFile, $title = "") {
         parent::setMainTemplate($navigationFolder, $navigationFile, $title);
-        $this->setHTMLVariableTemplate('LINK-LOGIN', $this->getSecureAppUrl("login", "login"));
+        $this->setHTMLVariableTemplate('LINK-LOGIN', $this->getAppUrl("login", "login"));
     }
 
 }

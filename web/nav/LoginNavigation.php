@@ -28,7 +28,7 @@ class LoginNavigation extends AccountNavigation {
             new Param("loginToken", $loginToken)
         );
         $this->application->setFormTemplate("login", $params, "login", "loginSubmit");
-        $this->application->setHTMLVariableTemplate('LINK-FORGOT', $this->application->getSecureAppUrl("login", "forgot"));
+        $this->application->setHTMLVariableTemplate('LINK-FORGOT', $this->application->getAppUrl("login", "forgot"));
         $this->application->render();
     }
 
@@ -52,12 +52,12 @@ class LoginNavigation extends AccountNavigation {
         }
         $this->loginSet($dbSystemUser);
         $data->data->commit();
-        $this->application->secureRedirect("private", "hello");
+        $this->application->redirect("private", "hello");
     }
 
     public function logout() {
         $this->loginUnset();
-        $this->application->secureRedirect("login", "login");
+        $this->application->redirect("login", "login");
     }
 
     public function validate() {
