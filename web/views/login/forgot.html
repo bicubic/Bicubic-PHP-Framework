@@ -4,16 +4,8 @@
         <label>
             {LANG-EMAIL}:
         </label>
-        <input type="email" title="{LANG-EMAIL}" id="{FORGOT-NAME-SYSTEMUSER-EMAIL}" name="{FORGOT-NAME-SYSTEMUSER-EMAIL}" required="required" maxlength="32" />
+        <input id="systemuser-email" type="email" title="{LANG-EMAIL}" name="{FORGOT-NAME-SYSTEMUSER-EMAIL}" required="required" maxlength="32" />
     </fieldset>
     <input type="hidden" name="{FORGOT-NAME-FORGOTTOKEN}" value="{FORGOT-VALUE-FORGOTTOKEN}" />
     <button type="submit">{LANG-VALIDATE}</button>
 </form>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var inputEmail = document.getElementById('{FORGOT-NAME-SYSTEMUSER-EMAIL}');
-        if (inputEmail.required) {
-            inputEmail.addEventListener('blur', checkEmpty);
-        }
-    });
-</script>

@@ -4,23 +4,23 @@
         <label>
             {LANG-NAME}:
         </label>
-        <input type="name" title="{LANG-NAME}" id="{SIGNUP-NAME-SYSTEMUSER-NAME}" name="{SIGNUP-NAME-SYSTEMUSER-NAME}" required="required" maxlength="256" data-langempty="{LANG-EMPTYNAME}"/>
+        <input id="systemuser-name" type="name" title="{LANG-NAME}" name="{SIGNUP-NAME-SYSTEMUSER-NAME}" required="required" maxlength="256" data-langempty="{LANG-EMPTYNAME}"/>
         <label>
             {LANG-EMAIL}:
         </label>
-        <input type="email" title="{LANG-EMAIL}" id="{SIGNUP-NAME-SYSTEMUSER-EMAIL}" name="{SIGNUP-NAME-SYSTEMUSER-EMAIL}" required="required" maxlength="32" data-langempty="{LANG-EMPTYEMAIL}"/>
+        <input id="systemuser-newemail" type="email" title="{LANG-EMAIL}" name="{SIGNUP-NAME-SYSTEMUSER-EMAIL}" required="required" maxlength="32" data-langempty="{LANG-EMPTYEMAIL}"/>
         <label>
             {LANG-PASSWORD}:
         </label>
-        <input type="password" title="{LANG-PASSWORD}" id="{SIGNUP-NAME-SYSTEMUSER-PASSWORD}" name="{SIGNUP-NAME-SYSTEMUSER-PASSWORD}" required="required" maxlength="2048" data-langempty="{LANG-EMPTYPASSWORD}"/>
+        <input id="systemuser-newpassword" type="password" title="{LANG-PASSWORD}" name="{SIGNUP-NAME-SYSTEMUSER-PASSWORD}" required="required" maxlength="2048" data-langempty="{LANG-EMPTYPASSWORD}"/>
         <label>
             {LANG-CONFIRMPASSWORD}:
         </label>
-        <input type="password" title="{LANG-CONFIRMPASSWORD}" id="{SIGNUP-NAME-CONFIRMPASSWORD}" name="{SIGNUP-NAME-CONFIRMPASSWORD}" required="required" maxlength="2048" data-langempty="{LANG-EMPTYCONFIRMPASSWORD}" data-langnotequal="{LANG-NOTEQUALPASSWORD}"/>
+        <input id="systemuser-confirmnewpassword" type="password" title="{LANG-CONFIRMPASSWORD}" name="{SIGNUP-NAME-CONFIRMPASSWORD}" required="required" maxlength="2048" data-langempty="{LANG-EMPTYCONFIRMPASSWORD}" data-langnotequal="{LANG-NOTEQUALPASSWORD}"/>
         <label>
             {LANG-USERCOUNTRY}
         </label>
-        <select id="{SIGNUP-NAME-SYSTEMUSER-USERCOUNTRY}" name="{SIGNUP-NAME-SYSTEMUSER-USERCOUNTRY}" required="required" data-langempty="{LANG-EMPTYUSERCOUNTRY}">
+        <select id="systemuser-usercountry" name="{SIGNUP-NAME-SYSTEMUSER-USERCOUNTRY}" required="required" data-langempty="{LANG-EMPTYUSERCOUNTRY}">
             <option value="">{LANG-PLEASESELECT}</option>
             <!-- BEGIN USERCOUNTRIES -->
             <option value="{USERCOUNTRY-VALUE}">{USERCOUNTRY-NAME}</option>
@@ -29,7 +29,7 @@
         <label>
             {LANG-USERLANG}
         </label>
-        <select id="{SIGNUP-NAME-SYSTEMUSER-USERLANG}" name="{SIGNUP-NAME-SYSTEMUSER-USERLANG}" required="required" data-langempty="{LANG-EMPTYUSERLANG}">
+        <select id="systemuser-userlang" name="{SIGNUP-NAME-SYSTEMUSER-USERLANG}" required="required" data-langempty="{LANG-EMPTYUSERLANG}">
             <option value="">{LANG-PLEASESELECT}</option>
             <!-- BEGIN USERLANGS -->
             <option value="{USERLANG-VALUE}">{USERLANG-NAME}</option>
@@ -42,37 +42,3 @@
     </fieldset>
     <button type="submit">{LANG-SIGNUP}</button> 
 </form>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var inputName = document.getElementById('{SIGNUP-NAME-SYSTEMUSER-NAME}');
-        if (inputName.required) {
-            inputName.addEventListener('blur', checkEmpty);
-        }
-        var inputEmail = document.getElementById('{SIGNUP-NAME-SYSTEMUSER-EMAIL}');
-        if (inputEmail.required) {
-            inputEmail.addEventListener('blur', checkEmpty);
-        }
-        var inputPassword = document.getElementById('{SIGNUP-NAME-SYSTEMUSER-PASSWORD}');
-        if (inputPassword.required) {
-            inputPassword.addEventListener('blur', checkEmpty);
-            inputPassword.addEventListener('blur', function() {
-                checkEqual(inputPassword2, inputPassword)
-            });
-        }
-        var inputPassword2 = document.getElementById('{SIGNUP-NAME-CONFIRMPASSWORD}');
-        if (inputPassword2.required) {
-            inputPassword2.addEventListener('blur', checkEmpty);
-            inputPassword2.addEventListener('blur', function() {
-                checkEqual(inputPassword2, inputPassword)
-            });
-        }
-        var inputusercountry = document.getElementById('{SIGNUP-NAME-SYSTEMUSER-USERCOUNTRY}');
-        if (inputusercountry.required) {
-            inputusercountry.addEventListener('blur', checkEmpty);
-        }
-        var inputuserlang = document.getElementById('{SIGNUP-NAME-SYSTEMUSER-USERLANG}');
-        if (inputuserlang.required) {
-            inputuserlang.addEventListener('blur', checkEmpty);
-        }
-    });
-</script>
