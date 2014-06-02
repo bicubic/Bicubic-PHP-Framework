@@ -14,8 +14,14 @@ require_once("beans/Constant.php");
 require_once("beans/SystemUser.php");
 require_once("beans/SystemUserLog.php");
 
+class LangFactory {
+    public static function getAvailableLangList() {
+        return array("es", "en", "pt");
+    }
+}
+
 //manage applications here, do not rename this class or functions
-class ApplicationFactory extends Application {
+class ApplicationFactory  {
 
     public static function makeScriptApplication($app, $config, $lang) {
         $application = null;
@@ -67,5 +73,3 @@ class ApplicationFactory extends Application {
 
 }
 ?>
-
-

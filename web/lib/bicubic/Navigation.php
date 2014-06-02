@@ -49,6 +49,11 @@ class Navigation {
         uasort($array, array("Navigation", "compareStrings"));
         return $array;
     }
+    
+    public function sortByKey($array) {
+        ksort($array, SORT_STRING);
+        return $array;
+    }
 
     public function compareLangStrings($a, $b) {
         return strcasecmp($this->lang($a), $this->lang($b));

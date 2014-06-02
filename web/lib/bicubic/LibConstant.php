@@ -98,14 +98,17 @@ class Lang {
     public static $_ENUM = array(
         1 => 'lang_espanol',
         2 => 'lang_english',
+        3 => 'lang_portuges',
     );
     public static $_LANGVALUE = array(
         1 => "es",
         2 => "en",
+        3 => "pt",
     );
     public static $_LANGKEY = array(
         "es" => 1,
         "en" => 2,
+        "pt" => 3,
     );
     public static $_DEFAULT = 2;
 
