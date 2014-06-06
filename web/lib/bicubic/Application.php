@@ -1546,6 +1546,55 @@ class Application {
         return $langs;
     }
 
+    protected function script_generateDB() {
+        $sql = "";
+        $indexes = "";
+        $constraints = "";
+        foreach (get_declared_classes() as $classname) {
+            echo $classname . "\n";
+            if (is_subclass_of($classname, "DataObject")) {
+                $tablename = strtolower($classname);
+                $object = new $classname();
+                $sql .= "CREATE TABLE $tablename ( \n";
+                $properties = $object->__getProperties();
+                foreach ($properties as $property) {
+                    if (!$property["serializable"]) {
+                        continue;
+                    }
+                    $name = $property["name"];
+                    if ($name == "id" && !$object->__isChild) {
+                        $sql .= "id serial NOT NULL";
+                        $constraints.= "ALTER TABLE ONLY $tablename ADD CONSTRAINT $tablename" . "_pk PRIMARY KEY (id); \n";
+                    } else {
+                        $type = PropertyTypes::$_POSTGRESQLTYPES[$property["type"]];
+                        $notnull = $property["required"] ? "NOT NULL" : "";
+                        $default = $property["default"] ? "DEFAULT " . $property["default"] : "";
+                        $sql .= ",\n";
+                        $sql .= "$name $type $notnull $default";
+                    }
+                    if ($property["index"]) {
+                        $indexes.= "CREATE INDEX $tablename" . "_" . "$name" . "_index ON $tablename USING btree ($name); \n";
+                    }
+                    if ($property["reference"] !== null) {
+                        $constraints.= "ALTER TABLE ONLY $tablename ADD CONSTRAINT $tablename" . "_" . $property["reference"] . "_fkey FOREIGN KEY (" . $property["reference"] . ") REFERENCES " . $property["reference"] . "(id) MATCH FULL ON DELETE CASCADE; \n";
+                    }
+                }
+                $sql .= "\n";
+                $sql .= "); \n";
+            }
+        }
+        $sql .= $indexes;
+        $sql .= $constraints;
+        $data = new TransactionManager($this->data);
+        $this->data->debug = true;
+        echo "TRYING QUERY \n";
+        echo $sql;
+        echo "------------- \n";
+        if (!$data->executeCustomWriteSQL($sql)) {
+            echo "error " . $data->error . "\n";
+        }
+    }
+
 }
 
 ?>

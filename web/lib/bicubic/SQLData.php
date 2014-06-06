@@ -13,7 +13,7 @@ abstract class SQLData extends Data {
     public $localError;
     protected $idname = "id";
     protected $connection;
-    protected $debug = false;
+    public $debug = false;
 
     public function insert(DataObject $object) {
         if (!$object->__isComplete()) {

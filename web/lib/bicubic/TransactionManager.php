@@ -124,6 +124,19 @@ class TransactionManager {
         return true;
     }
 
+    public function executeCustomWriteSQL($sql) {
+        if (!$this->data->performWrite($sql)) {
+            $this->error = $this->data->getError();
+            return false;
+        }
+        return true;
+    }
+    
+    public function executeCustomReadSQL($sql) {
+        $result = $this->data->performRead($sql);
+        return $result;
+    }
+
 }
 
 ?>
