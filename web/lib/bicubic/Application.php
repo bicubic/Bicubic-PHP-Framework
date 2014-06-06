@@ -1585,14 +1585,7 @@ class Application {
         }
         $sql .= $indexes;
         $sql .= $constraints;
-        $data = new TransactionManager($this->data);
-        $this->data->debug = true;
-        echo "TRYING QUERY \n";
         echo $sql;
-        echo "------------- \n";
-        if (!$data->executeCustomWriteSQL($sql)) {
-            echo "error " . $data->error . "\n";
-        }
     }
 
 }
