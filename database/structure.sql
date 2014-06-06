@@ -48,8 +48,7 @@ CREATE SEQUENCE systemuserlog_id_seq
     NO MAXVALUE
     CACHE 1;
 ALTER TABLE ONLY systemuserlog ALTER COLUMN id SET DEFAULT nextval('systemuserlog_id_seq'::regclass);
-ALTER TABLE ONLY systemuser
-    ADD CONSTRAINT systemuser_pk PRIMARY KEY (id);
+ALTER TABLE ONLY systemuser ADD CONSTRAINT systemuser_pk PRIMARY KEY (id);
 ALTER TABLE ONLY systemuserlog
     ADD CONSTRAINT systemuserlog_pk PRIMARY KEY (id);
 CREATE INDEX systemuser_changeemailtoken_index ON systemuser USING btree (changeemailtoken);
@@ -61,5 +60,4 @@ CREATE INDEX systemuser_password_index ON systemuser USING btree (password);
 CREATE INDEX systemuser_usercountry_index ON systemuser USING btree (usercountry);
 CREATE INDEX systemuser_userlang_index ON systemuser USING btree (userlang);
 CREATE INDEX systemuserlog_systemuser_index ON systemuserlog USING btree (systemuser);
-ALTER TABLE ONLY systemuserlog
-    ADD CONSTRAINT systemuserlog_systemuser_fkey FOREIGN KEY (systemuser) REFERENCES systemuser(id) MATCH FULL ON DELETE CASCADE;
+ALTER TABLE ONLY systemuserlog ADD CONSTRAINT systemuserlog_systemuser_fkey FOREIGN KEY (systemuser) REFERENCES systemuser(id) MATCH FULL ON DELETE CASCADE;

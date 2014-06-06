@@ -21,8 +21,8 @@ class ScriptApplication extends Application {
         parent::execute();
         $this->navigation = $this->getUrlParam($this->config('param_navigation'), PropertyTypes::$_LETTERS, false);
         switch ($this->navigation) {
-            case "beans" : {
-                    $this-> script_generateBeans();
+            case "data" : {
+                    $this->script_generateDB();
                     break;
                 }
             case "password" : {
