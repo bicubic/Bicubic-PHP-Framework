@@ -4,16 +4,8 @@
         <label>
             {LANG-PASSWORD}:
         </label>
-        <input type="password" title="{LANG-PASSWORD}" id="{NEWEMAIL-NAME-SYSTEMUSER-PASSWORD}" name="{NEWEMAIL-NAME-SYSTEMUSER-PASSWORD}" required="required" maxlength="2048" data-langempty="{LANG-EMPTYNEWPASSWORD}"/>
+        <input id="systemuser-currentpassword" type="password" title="{LANG-PASSWORD}"  name="{NEWEMAIL-NAME-SYSTEMUSER-PASSWORD}" required="required" maxlength="2048" data-langempty="{LANG-EMPTYNEWPASSWORD}"/>
     </fieldset>
     <input type="hidden" name="{NEWEMAIL-NAME-TOKEN}" value="{NEWEMAIL-VALUE-TOKEN}" />
     <button type="submit">{LANG-SUBMIT}</button>
 </form>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var inputPassword = document.getElementById('{NEWEMAIL-NAME-SYSTEMUSER-PASSWORD}');
-        if (inputPassword.required) {
-            inputPassword.addEventListener('blur', checkEmpty);
-        }
-    });
-</script>

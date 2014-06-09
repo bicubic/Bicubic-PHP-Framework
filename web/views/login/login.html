@@ -4,25 +4,13 @@
         <label>
             {LANG-EMAIL}:
         </label>
-        <input type="email" title="{LANG-EMAIL}" id="{LOGIN-NAME-SYSTEMUSER-EMAIL}" name="{LOGIN-NAME-SYSTEMUSER-EMAIL}" required="required" maxlength="32" />
+        <input id="systemuser-email" type="email" title="{LANG-EMAIL}" name="{LOGIN-NAME-SYSTEMUSER-EMAIL}" required="required" maxlength="32" />
         <label>
             {LANG-PASSWORD}:
         </label>
-        <input type="password" title="{LANG-PASSWORD}" id="{LOGIN-NAME-SYSTEMUSER-PASSWORD}" name="{LOGIN-NAME-SYSTEMUSER-PASSWORD}" required="required" maxlength="2048" />
+        <input id="systemuser-password" type="password" title="{LANG-PASSWORD}"  name="{LOGIN-NAME-SYSTEMUSER-PASSWORD}" required="required" maxlength="2048" />
     </fieldset>
     <input type="hidden" name="{LOGIN-NAME-LOGINTOKEN}" value="{LOGIN-VALUE-LOGINTOKEN}" />
     <button type="submit">{LANG-LOGIN}</button> 
     <a href="{LINK-FORGOT}">{LANG-FORGOT}</a>
 </form>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var inputEmail = document.getElementById('{LOGIN-NAME-SYSTEMUSER-EMAIL}');
-        if (inputEmail.required) {
-            inputEmail.addEventListener('blur', checkEmpty);
-        }
-        var inputPassword = document.getElementById('{LOGIN-NAME-SYSTEMUSER-PASSWORD}');
-        if (inputPassword.required) {
-            inputPassword.addEventListener('blur', checkEmpty);
-        }
-    });
-</script>

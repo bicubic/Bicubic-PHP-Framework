@@ -18,9 +18,15 @@ abstract class DataObject {
             if ($property["required"]) {
                 $pname = $property["name"];
                 $getter = "get$pname";
+                $setter = "set$pname";
                 $value = $this->$getter();
                 if($value === null) {
-                    return false;
+                    if($property["default"] !== null) {
+                        $this->$setter($property["default"]);
+                    }
+                    else {
+                        return false;
+                    }
                 }
             }
         }
