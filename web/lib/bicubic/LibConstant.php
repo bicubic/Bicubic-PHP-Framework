@@ -41,6 +41,38 @@ class PropertyTypes {
     public static $_STRINGARRAY = "string-array";
     public static $_JSON = "json";
     public static $_RUT = "rut";
+    
+    public static $_POSTGRESQLTYPES = array(
+        "int" => 'integer',
+        "list" => 'integer',
+        "shortlist" => 'integer',
+        "long" => 'bigint',
+        "double" => 'double precision',
+        "email" => 'character varying(256)',
+        "password" => 'character varying(1024)',
+        "string" => 'character varying',
+        "string2048" => 'character varying(2048)',
+        "string1024" => 'character varying(1024)',
+        "string512" => 'character varying(512)',
+        "string256" => 'character varying(256)',
+        "string128" => 'character varying(128)',
+        "string64" => 'character varying(64)',
+        "string16" => 'character varying(16)',
+        "string8" => 'character varying(8)',
+        "string4" => 'character varying(4)',
+        "string2" => 'character varying(2)',
+        "string1" => 'character varying(1)',
+        "flat" => 'character varying',
+        "letters" => 'character varying',
+        "alphanumeric" => 'character varying',
+        "date" => 'bigint',
+        "boolean" => 'integer',
+        "int-array" => 'character varying',
+        "double-array" => 'character varying',
+        "string-array" => 'character varying',
+        "json" => 'character varying',
+        "rut" => 'character varying',
+    );
 
 }
 
@@ -98,14 +130,17 @@ class Lang {
     public static $_ENUM = array(
         1 => 'lang_espanol',
         2 => 'lang_english',
+        3 => 'lang_portuges',
     );
     public static $_LANGVALUE = array(
         1 => "es",
         2 => "en",
+        3 => "pt",
     );
     public static $_LANGKEY = array(
         "es" => 1,
         "en" => 2,
+        "pt" => 3,
     );
     public static $_DEFAULT = 2;
 

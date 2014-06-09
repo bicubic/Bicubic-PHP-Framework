@@ -87,7 +87,6 @@ class Application {
         return $link;
     }
 
-
     /**
      * Gets a variable from the GET array, filtered by type, escapes for prevent SQL injection
      * @param string $name <p>The name of the variable</p>
@@ -643,12 +642,17 @@ class Application {
             $this->setHTMLVariableTemplate("TEMPLATE-LANG", $this->config('lang'));
             $this->setHTMLVariableTemplate("TEMPLATE-TITLE", $title);
             $this->setHTMLVariableTemplate("TEMPLATE-COPY", $this->config('web_copyright'));
-            foreach (Lang::$_ENUM as $lang => $langname) {
-                $this->setHtmlArrayTemplate(array(
-                    'LANG-LINK' => $this->getAppUrl($this->name, $this->navigation, array(new Param($this->config('param_lang'), $this->item(Lang::$_LANGVALUE, $lang)))),
-                    'LANG-TEXT' => $langname,
-                ));
-                $this->parseTemplate('LANGS');
+            $langs = LangFactory::getAvailableLangList();
+            foreach ($langs as $langKey) {
+                $lang = $this->item(Lang::$_LANGKEY, $langKey);
+                if ($lang) {
+                    $langname = $this->item(Lang::$_ENUM, $lang);
+                    $this->setHtmlArrayTemplate(array(
+                        'LANG-LINK' => $this->getAppUrl($this->name, $this->navigation, array(new Param($this->config('param_lang'), $this->item(Lang::$_LANGVALUE, $lang)))),
+                        'LANG-TEXT' => $this->lang($langname),
+                    ));
+                    $this->parseTemplate('LANGS');
+                }
             }
         }
     }
@@ -791,7 +795,6 @@ class Application {
         $value = strval($value);
         $this->tpl->setVariable($name, $value);
     }
-    
 
     public function setHTMLVariableTemplate($name, $value) {
         $value = strval($value);
@@ -800,7 +803,7 @@ class Application {
         $var = str_replace("\n", "<br />", $var);
         $this->tpl->setVariable($name, $var);
     }
-    
+
     public function setVariableCustomTemplate($tpl, $name, $value) {
         $value = strval($value);
         $tpl->setVariable($name, $value);
@@ -1367,7 +1370,7 @@ class Application {
             return false;
         }
     }
-    
+
     public function alterLang($langstr) {
         if ($langstr && !array_key_exists($langstr, Lang::$_LANGKEY)) {
             $langstr = $this->item(Lang::$_LANGVALUE, Lang::$_DEFAULT);
@@ -1381,10 +1384,7 @@ class Application {
         }
         return false;
     }
-    
-    
-    
-    
+
     protected function script_generateBeans() {
         $data = new PostgreSQLData($this->config);
         $query = "SELECT table_name FROM information_schema.tables WHERE table_schema='public'";
@@ -1426,27 +1426,52 @@ class Application {
 
     protected function script_generateLangFiles() {
         $langs = array();
-        $langs = array_merge($langs, $this->scanPHPLangs('./app'));
-        $langs = array_merge($langs, $this->scanPHPLangs('./beans'));
-        $langs = array_merge($langs, $this->scanPHPLangs('./int'));
-        $langs = array_merge($langs, $this->scanPHPLangs('./nav'));
-        $langs = array_merge($langs, $this->scanHTMLLangs('./templates'));
-        $langs = array_merge($langs, $this->scanHTMLLangs('./views'));
-        
+        $langs = array_merge($langs, $this->script_scanPHPLangs('./app'));
+        $langs = array_merge($langs, $this->script_scanPHPLangs('./beans'));
+        $langs = array_merge($langs, $this->script_scanPHPLangs('./int'));
+        $langs = array_merge($langs, $this->script_scanPHPLangs('./nav'));
+        $langs = array_merge($langs, $this->script_scanHTMLLangs('./templates'));
+        $langs = array_merge($langs, $this->script_scanHTMLLangs('./views'));
+        $langs = array_merge($langs, $this->script_scanPHPLangs('./lib/bicubic'));
+
         $navigation = new Navigation($this);
-        $langs = $navigation->sortByValue($langs);        
-        
-        $str = "<?php\n";
-        $str .= "\$lang = array();\n";
-        foreach ($langs as $key => $value) {
-            $str .= "\$lang['$value'] = '$value';\n";
+        $langs = $navigation->sortByValue($langs);
+
+//        echo $str;
+        foreach (Lang::$_LANGVALUE as $valueVal) {
+            if (!file_exists("./lang/lang.$valueVal.php")) {
+                $str = "<?php\n";
+                $str .= "\$lang = array();\n";
+                foreach ($langs as $key => $value) {
+                    $str .= "\$lang['$value'] = '$value';\n";
+                }
+                $str .= "?>\n";
+                file_put_contents("./lang/lang.$valueVal.php", $str);
+            } else {
+                include("lang/lang.$valueVal.php");
+                foreach ($langs as $key => $value) {
+                    if (!array_key_exists($key, $lang)) {
+                        $lang[$key] = $value;
+                    }
+                }
+                foreach ($lang as $key => $value) {
+                    if (!array_key_exists($key, $langs)) {
+                        unset($lang[$key]);
+                        echo "unset $key \n";
+                    }
+                }
+                $lang = $navigation->sortByKey($lang);
+                $str = "<?php\n";
+                $str .= "\$lang = array();\n";
+                foreach ($lang as $key => $value) {
+                    if ($value) {
+                        $str .= "\$lang['$key'] = '$value';\n";
+                    }
+                }
+                $str .= "?>\n";
+                file_put_contents("./lang/lang.$valueVal.php", $str);
+            }
         }
-        $str .= "?>\n";
-        
-        echo $str;
-//        foreach(Lang::$_LANGVALUE as $key => $value) {
-//            file_put_contents("./lang/lang.$value.php", $str);
-//        }
     }
 
     protected function script_scanPHPLangs($dir) {
@@ -1457,16 +1482,19 @@ class Application {
                 if ($entry != "." && $entry != ".." && $entry != "ScriptApplication.php") {
                     echo "$dir/$entry\n";
                     if (is_dir("$dir/$entry")) {
-                        $langs = array_merge($langs, $this->scanPHPLangs("$dir/$entry"));
+                        $langs = array_merge($langs, $this->script_scanPHPLangs("$dir/$entry"));
                     } else {
                         $str = file_get_contents("$dir/$entry");
                         $lastPos = 0;
                         $needle = "'lang_";
                         while (($lastPos = strpos($str, $needle, $lastPos)) !== false) {
+                            $brpos = strpos($str, "\n", $lastPos + strlen($needle));
                             $endpos = strpos($str, "'", $lastPos + strlen($needle));
-                            $lang = substr($str, $lastPos + 1, $endpos - $lastPos - 1);
-                            echo "-      $lang\n";
-                            $langs [$lang] = $lang;
+                            if ($brpos !== FALSE && $endpos < $brpos) {
+                                $lang = substr($str, $lastPos + 1, $endpos - $lastPos - 1);
+                                echo "-      $lang\n";
+                                $langs [$lang] = $lang;
+                            }
                             $lastPos = $lastPos + strlen($needle);
                         }
                     }
@@ -1485,7 +1513,7 @@ class Application {
                 if ($entry != "." && $entry != "..") {
                     echo "$dir/$entry\n";
                     if (is_dir("$dir/$entry")) {
-                        $langs = array_merge($langs, $this->scanHTMLLangs("$dir/$entry"));
+                        $langs = array_merge($langs, $this->script_scanHTMLLangs("$dir/$entry"));
                     } else {
                         $str = file_get_contents("$dir/$entry");
                         $lastPos = 0;
@@ -1505,7 +1533,7 @@ class Application {
                             $lang = substr($str, $lastPos + 1, $endpos - $lastPos - 1);
                             $lang = strtolower($lang);
                             $lang = str_replace("-", "_", $lang);
-                             $lang = str_replace("text_", "lang_", $lang);
+                            $lang = str_replace("text_", "lang_", $lang);
                             echo "-      $lang\n";
                             $langs [$lang] = $lang;
                             $lastPos = $lastPos + strlen($needle);
@@ -1516,6 +1544,48 @@ class Application {
             closedir($handle);
         }
         return $langs;
+    }
+
+    protected function script_generateDB() {
+        $sql = "\n\n\n\n\n";
+        $indexes = "";
+        $constraints = "";
+        foreach (get_declared_classes() as $classname) {
+//            echo $classname . "\n";
+            if (is_subclass_of($classname, "DataObject")) {
+                $tablename = strtolower($classname);
+                $object = new $classname();
+                $sql .= "CREATE TABLE $tablename ( \n";
+                $properties = $object->__getProperties();
+                foreach ($properties as $property) {
+                    if (!$property["serializable"]) {
+                        continue;
+                    }
+                    $name = $property["name"];
+                    if ($name == "id" && !$object->__isChild()) {
+                        $sql .= "id serial NOT NULL";
+                        $constraints.= "ALTER TABLE ONLY $tablename ADD CONSTRAINT $tablename" . "_pk PRIMARY KEY (id); \n";
+                    } else {
+                        $type = PropertyTypes::$_POSTGRESQLTYPES[$property["type"]];
+                        $notnull = $property["required"] ? "NOT NULL" : "";
+                        $default = $property["default"] ? "DEFAULT " . $property["default"] : "";
+                        $sql .= ",\n";
+                        $sql .= "$name $type $notnull $default";
+                    }
+                    if ($property["index"]) {
+                        $indexes.= "CREATE INDEX $tablename" . "_" . "$name" . "_index ON $tablename USING btree ($name); \n";
+                    }
+                    if ($property["reference"] !== null) {
+                        $constraints.= "ALTER TABLE ONLY $tablename ADD CONSTRAINT $tablename" . "_" . $property["reference"] . "_fkey FOREIGN KEY (" . $property["reference"] . ") REFERENCES " . $property["reference"] . "(id) MATCH FULL ON DELETE CASCADE; \n";
+                    }
+                }
+                $sql .= "\n";
+                $sql .= "); \n";
+            }
+        }
+        $sql .= $indexes;
+        $sql .= $constraints;
+        echo $sql;
     }
 
 }

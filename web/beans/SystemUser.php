@@ -30,26 +30,20 @@ class SystemUser extends DataObject {
 
     public function __getProperties() {
         return array(
-            "id" => ["name" => "id", "type" => PropertyTypes::$_LONG, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => true, "private" => false],
-            "name" => ["name" => "name", "type" => PropertyTypes::$_STRING256, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
-            "email" => ["name" => "email", "type" => PropertyTypes::$_EMAIL, "required" => true, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
-            "password" => ["name" => "password", "type" => PropertyTypes::$_PASSWORD, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
-            "sessiontoken" => ["name" => "sessiontoken", "type" => PropertyTypes::$_STRING1024, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
-            "confirmemailtoken" => ["name" => "confirmemailtoken", "type" => PropertyTypes::$_STRING1024, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
-            "forgottoken" => ["name" => "forgottoken", "type" => PropertyTypes::$_STRING1024, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
-            "changeemailtoken" => ["name" => "changeemailtoken", "type" => PropertyTypes::$_STRING1024, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
-            "newemail" => ["name" => "newemail", "type" => PropertyTypes::$_STRING256, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
-            "usercountry" => ["name" => "usercountry", "type" => PropertyTypes::$_LIST, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
-            "userlang" => ["name" => "userlang", "type" => PropertyTypes::$_LIST, "required" => false, "serializable" => true, "updatenull" => true, "hidden" => false, "private" => false],
+            "id" => ["name" => "id", "type" => PropertyTypes::$_LONG, "required" => false, "default" => null, "serializable" => true, "index" => true, "reference" => null, "updatenull" => true, "hidden" => true, "private" => false],
+            "name" => ["name" => "name", "type" => PropertyTypes::$_STRING256, "required" => false, "default" => null, "serializable" => true, "index" => false, "reference" => null, "updatenull" => true, "hidden" => false, "private" => false],
+            "email" => ["name" => "email", "type" => PropertyTypes::$_EMAIL, "required" => true, "default" => null, "serializable" => true, "index" => true, "reference" => null, "updatenull" => true, "hidden" => false, "private" => false],
+            "password" => ["name" => "password", "type" => PropertyTypes::$_PASSWORD, "required" => false, "default" => null, "serializable" => true, "index" => true, "reference" => null, "updatenull" => true, "hidden" => false, "private" => false],
+            "sessiontoken" => ["name" => "sessiontoken", "type" => PropertyTypes::$_STRING1024, "required" => false, "default" => "", "serializable" => true, "index" => false, "reference" => null, "updatenull" => true, "hidden" => false, "private" => true],
+            "confirmemailtoken" => ["name" => "confirmemailtoken", "type" => PropertyTypes::$_STRING1024, "required" => false, "default" => null, "serializable" => true, "index" => true, "reference" => null, "updatenull" => true, "hidden" => false, "private" => true],
+            "forgottoken" => ["name" => "forgottoken", "type" => PropertyTypes::$_STRING1024, "required" => false, "default" => null, "serializable" => true, "index" => true, "reference" => null, "updatenull" => true, "hidden" => false, "private" => true],
+            "changeemailtoken" => ["name" => "changeemailtoken", "type" => PropertyTypes::$_STRING1024, "required" => false, "default" => null, "serializable" => true, "index" => true, "reference" => null, "updatenull" => true, "hidden" => false, "private" => true],
+            "newemail" => ["name" => "newemail", "type" => PropertyTypes::$_STRING256, "required" => false, "default" => null, "serializable" => true, "index" => true, "reference" => null, "updatenull" => true, "hidden" => false, "private" => false],
+            "usercountry" => ["name" => "usercountry", "type" => PropertyTypes::$_LIST, "required" => false, "default" => null, "serializable" => true, "index" => true, "reference" => null, "updatenull" => true, "hidden" => false, "private" => false],
+            "userlang" => ["name" => "userlang", "type" => PropertyTypes::$_LIST, "required" => false, "default" => null, "serializable" => true, "index" => true, "reference" => null, "updatenull" => true, "hidden" => false, "private" => false],
         );
     }
 
-    public function __isComplete() {
-        if (!$this->token) {
-            $this->token = "";
-        }
-        return parent::__isComplete();
-    }
 
     public function __getList($paramname, Application $application) {
         switch ($paramname) {

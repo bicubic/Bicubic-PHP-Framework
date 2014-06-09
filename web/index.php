@@ -41,7 +41,7 @@ require_once("lib/bicubic/ErrorJson.php");
 require_once("lib/bicubic/ObjectJson.php");
 require_once("lib/bicubic/SuccessJson.php");
 //custom
-require_once("require.php");
+require_once("factory.php");
 //Params
 $config['param_app'] = "app";
 $config['param_navigation'] = "nav";
@@ -76,7 +76,14 @@ if (!array_key_exists($langfile, Lang::$_LANGKEY)) {
     $langfile = Lang::$_LANGVALUE[Lang::$_DEFAULT];
 }
 //Lang reload
-require_once("lang/lang.$langfile.php");
+if(file_exists("lang/lang.$langfile.php")) {
+    require_once("lang/lang.$langfile.php");
+}
+else {
+    $langfile = Lang::$_LANGVALUE[Lang::$_DEFAULT];
+    require_once("lang/lang.$langfile.php");
+}
+
 $config["lang"] = $langfile;
 //set temp folder
 $config['server_temp_folder'] = sys_get_temp_dir() . "/";
