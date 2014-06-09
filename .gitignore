@@ -1,5 +1,6 @@
-web/config/config.php
+config.php
 .buildpath
 .project
 .settings
+.DS_Store
 
