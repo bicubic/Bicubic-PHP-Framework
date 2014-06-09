@@ -1547,11 +1547,11 @@ class Application {
     }
 
     protected function script_generateDB() {
-        $sql = "";
+        $sql = "\n\n\n\n\n";
         $indexes = "";
         $constraints = "";
         foreach (get_declared_classes() as $classname) {
-            echo $classname . "\n";
+//            echo $classname . "\n";
             if (is_subclass_of($classname, "DataObject")) {
                 $tablename = strtolower($classname);
                 $object = new $classname();
@@ -1562,7 +1562,7 @@ class Application {
                         continue;
                     }
                     $name = $property["name"];
-                    if ($name == "id" && !$object->__isChild) {
+                    if ($name == "id" && !$object->__isChild()) {
                         $sql .= "id serial NOT NULL";
                         $constraints.= "ALTER TABLE ONLY $tablename ADD CONSTRAINT $tablename" . "_pk PRIMARY KEY (id); \n";
                     } else {
