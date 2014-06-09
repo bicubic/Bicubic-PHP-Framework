@@ -1,7 +1,11 @@
 Bicubic-PHP-Framework
 =====================
 
-A simple and efficient MVC framework written in PHP fos PostgreSQL, or similar DB.
+A simple and efficient MVC framework written in PHP for PostgreSQL, or similar DB.
+
+Arquitecture
+-------
+![MVC](/doc/framework.jpeg)
 
 Directory Structure
 -------
