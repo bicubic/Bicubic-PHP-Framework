@@ -171,25 +171,35 @@ class Navigation {
                 case PropertyTypes::$_STRING1024 :
                 case PropertyTypes::$_STRING2048 : {
                         $result = $this->application->setCustomTemplate("bicubic", $property["type"]);
-                        $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LABEL", $this->lang("lang_" . $property["name"]));
-                        $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-PLACEHOLDER", $this->lang("lang_" . $property["name"] . "placeholder"));
+                        $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LABEL", $this->lang($property["lang"]));
                         $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-NAME", $objectName . "_" . $property["name"]);
                         $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-VALUE", $value);
                         $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-REQUIRED", $property["required"] ? "required" : "");
                         return $this->application->renderCustomTemplate($result);
                     }
+                case PropertyTypes::$_FILE :
+                case PropertyTypes::$_IMAGE256 : {
+                        $result = $this->application->setCustomTemplate("bicubic", $property["type"]);
+                        $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LABEL", $this->lang($property["lang"]));
+                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-NAME", $objectName . "_" . $property["name"]);
+                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-REQUIRED", $property["required"] ? "required" : "");
+                        return $this->application->renderCustomTemplate($result);
+                    }
                 case PropertyTypes::$_DATE : {
                         $result = $this->application->setCustomTemplate("bicubic", $property["type"]);
-                        $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LABEL", $this->lang("lang_" . $property["name"]));
-                        $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-PLACEHOLDER", $this->lang("lang_" . $property["name"] . "placeholder"));
-                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-NAME", $objectName . "_" . $property["name"]);
-                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-VALUE", $this->application->formatWiredDate($value));
+                        $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LABEL", $this->lang($property["lang"])); //date('d/m/Y', $date)
+                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-NAME-DAY", $objectName . "_" . $property["name"] . "-day");
+                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-VALUE-DAY", ($value ? date('d', $value) : ""));
+                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-NAME-MONTH", $objectName . "_" . $property["name"] . "-month");
+                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-VALUE-MONTH", ($value ? date('m', $value) : ""));
+                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-NAME-YEAR", $objectName . "_" . $property["name"] . "-year");
+                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-VALUE-YEAR", ($value ? date('Y', $value) : ""));
                         $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-REQUIRED", $property["required"] ? "required" : "");
                         return $this->application->renderCustomTemplate($result);
                     }
                 case PropertyTypes::$_BOOLEAN : {
                         $result = $this->application->setCustomTemplate("bicubic", $property["type"]);
-                        $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LABEL", $this->lang("lang_" . $property["name"]));
+                        $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LABEL", $this->lang($property["lang"]));
                         $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-NAME", $objectName . "_" . $property["name"]);
                         $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-REQUIRED", $property["required"] ? "required" : "");
                         if ($value) {
@@ -201,7 +211,7 @@ class Navigation {
                     }
                 case PropertyTypes::$_LIST : {
                         $result = $this->application->setCustomTemplate("bicubic", "list");
-                        $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LABEL", $this->lang("lang_" . $property["name"]));
+                        $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LABEL", $this->lang($property["lang"]));
                         $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-NAME", $objectName . "_" . $property["name"]);
                         $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-REQUIRED", $property["required"] ? "required" : "");
                         $items = $object->__getList($property["name"], $this->application);
@@ -217,7 +227,7 @@ class Navigation {
                     }
                 case PropertyTypes::$_SHORTLIST : {
                         $result = $this->application->setCustomTemplate("bicubic", "shortlist");
-                        $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LABEL", $this->lang("lang_" . $property["name"]));
+                        $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LABEL",$this->lang($property["lang"]));
                         $items = $object->__getList($property["name"], $this->application);
                         foreach ($items as $item => $text) {
                             $this->application->setHTMLArrayCustomTemplate($result, array(

@@ -41,6 +41,8 @@ class PropertyTypes {
     public static $_STRINGARRAY = "string-array";
     public static $_JSON = "json";
     public static $_RUT = "rut";
+    public static $_FILE = "file";
+    public static $_IMAGE256 = "image256";
     
     public static $_POSTGRESQLTYPES = array(
         "int" => 'integer',
@@ -72,11 +74,23 @@ class PropertyTypes {
         "string-array" => 'character varying',
         "json" => 'character varying',
         "rut" => 'character varying',
+        "file" => 'character varying(1024)',
+        "image256" => 'character varying(1024)',
     );
 
 }
 
 class Country {
+    
+    public static $_CHILE = 1;
+    public static $_NEWZEALAND = 2;
+    public static $_UNITEDSTATES = 3;
+    public static $_AUSTRALIA = 4;
+    public static $_BRAZIL = 5;
+    public static $_MEXICO = 6;
+    public static $_ARGENTINA = 7;
+    public static $_COLOMBIA = 8;
+    public static $_PERU = 9;
 
     public static $_ENUM = array(
         1 => 'lang_chile',
@@ -126,6 +140,10 @@ class Country {
 }
 
 class Lang {
+    
+    public static $_ESPANOL = 1;
+    public static $_ENGLISH = 2;
+    public static $_PORTUGES = 3;
 
     public static $_ENUM = array(
         1 => 'lang_espanol',

@@ -117,25 +117,30 @@ class Application {
      * @return the value of the param, null if does not exist or does not fir the type
      */
     public function getFormParam($name, $type, $force = true) {
+        $value = null;
         if (isset($_POST[$name])) {
             $value = $_POST[$name];
             $value = $this->filter($value, $type);
-            if ($force && !isset($value)) {
-                $this->error($this->lang('lang_notvalid') . " : " . (array_key_exists($name, $this->lang) ? $this->lang($name) : $name));
-            }
-            return $value;
-        } else if (isset($_FILES[$name])) {
-            $value = $_FILES[$name]['name'];
-            $value = $this->filter($value, $type);
-            if ($force && !isset($value)) {
-                $this->error($this->lang('lang_notvalid') . " : " . (array_key_exists($name, $this->lang) ? $this->lang($name) : $name));
-            }
-            return $value;
         }
-        if ($force) {
+        if ($type == PropertyTypes::$_DATE && !isset($value)) {
+            $year = $this->getFormParam("$name-year", PropertyTypes::$_INT, false);
+            $month = $this->getFormParam("$name-month", PropertyTypes::$_INT, false);
+            $day = $this->getFormParam("$name-day", PropertyTypes::$_INT, false);
+            if (isset($year) && $month && $day) {
+                $value = "$year-$month-$day";
+                $value = $this->filter($value, PropertyTypes::$_DATE);
+            }
+        }
+        if ($type == PropertyTypes::$_FILE && !isset($value)) {
+            $value = $this->uploadGS($name, "$name", $this->createRandomString(32), $force, true);
+        }
+        if ($type == PropertyTypes::$_IMAGE256 && !isset($value)) {
+            $value = $this->uploadGS($name, "$name", $this->createRandomString(32), $force, true, true, 256, 256);
+        }
+        if ($force && !isset($value)) {
             $this->error($this->lang('lang_notvalid') . " : " . (array_key_exists($name, $this->lang) ? $this->lang($name) : $name));
         }
-        return null;
+        return $value;
     }
 
     /**
@@ -415,6 +420,24 @@ class Application {
                     }
                     break;
                 }
+            case PropertyTypes::$_FILE : {
+                    if ($value) {
+                        $value = trim($value);
+                        if ($value) {
+                            return $value;
+                        }
+                    }
+                    break;
+                }
+            case PropertyTypes::$_IMAGE256 : {
+                    if ($value) {
+                        $value = trim($value);
+                        if ($value) {
+                            return $value;
+                        }
+                    }
+                    break;
+                }
             case PropertyTypes::$_FLAT : {
                     return ($value);
                 }
@@ -648,8 +671,8 @@ class Application {
                 if ($lang) {
                     $langname = $this->item(Lang::$_ENUM, $lang);
                     $this->setHtmlArrayTemplate(array(
-                        'LANG-LINK' => $this->getAppUrl($this->name, $this->navigation, array(new Param($this->config('param_lang'), $this->item(Lang::$_LANGVALUE, $lang)))),
-                        'LANG-TEXT' => $this->lang($langname),
+                        'LANG-LINK'=>$this->getAppUrl($this->name, $this->navigation, array(new Param($this->config('param_lang'), $this->item(Lang::$_LANGVALUE, $lang)))),
+                        'LANG-TEXT'=>$this->lang($langname),
                     ));
                     $this->parseTemplate('LANGS');
                 }
@@ -749,22 +772,22 @@ class Application {
             if ($property["type"] == PropertyTypes::$_LIST) {
                 $this->setVariableTemplate("$formName-NAME-$objectFormName-$paramName", "$objectName" . "_" . $property["name"]);
                 $items = $object->__getList($property["name"], $this);
-                foreach ($items as $item => $text) {
+                foreach ($items as $item=> $text) {
                     $this->setHTMLArrayTemplate(array(
-                        "$formName-LISTVALUE-$objectFormName-$paramName" => $this->utf8tohtml(strval($item), true),
-                        "$formName-LISTTEXT-$objectFormName-$paramName" => $this->lang($text),
-                        "$formName-LISTSELECTED-$objectFormName-$paramName" => ($item == $value) ? "selected" : ""
+                        "$formName-LISTVALUE-$objectFormName-$paramName"=>$this->utf8tohtml(strval($item), true),
+                        "$formName-LISTTEXT-$objectFormName-$paramName"=>$this->lang($text),
+                        "$formName-LISTSELECTED-$objectFormName-$paramName"=>($item == $value) ? "selected" : ""
                     ));
                     $this->parseTemplate($paramName);
                 }
             } else if ($property["type"] == PropertyTypes::$_SHORTLIST) {
                 $this->setVariableTemplate("$formName-NAME-$objectFormName-$paramName", "$objectName" . "_" . $property["name"]);
                 $items = $object->__getList($property["name"], $this);
-                foreach ($items as $item => $text) {
+                foreach ($items as $item=> $text) {
                     $this->setHTMLArrayTemplate(array(
-                        "$formName-LISTVALUE-$objectFormName-$paramName" => $this->utf8tohtml(strval($item), true),
-                        "$formName-LISTTEXT-$objectFormName-$paramName" => $this->lang($text),
-                        "$formName-LISTSELECTED-$objectFormName-$paramName" => ($item == $value) ? "checked" : ""
+                        "$formName-LISTVALUE-$objectFormName-$paramName"=>$this->utf8tohtml(strval($item), true),
+                        "$formName-LISTTEXT-$objectFormName-$paramName"=>$this->lang($text),
+                        "$formName-LISTSELECTED-$objectFormName-$paramName"=>($item == $value) ? "checked" : ""
                     ));
                     $this->parseTemplate($paramName);
                 }
@@ -893,14 +916,14 @@ class Application {
             return $object;
         }
         if (is_array($object)) {
-            foreach ($object as $key => $value) {
+            foreach ($object as $key=> $value) {
                 $object[$key] = $this->unescapeJsonObject($value);
             }
             return $object;
         }
         if (is_object($object)) {
             $vars = get_object_vars($object);
-            foreach ($vars as $key => $value) {
+            foreach ($vars as $key=> $value) {
                 $object->$key = $this->unescapeJsonObject($value);
             }
             return $object;
@@ -1443,19 +1466,19 @@ class Application {
             if (!file_exists("./lang/lang.$valueVal.php")) {
                 $str = "<?php\n";
                 $str .= "\$lang = array();\n";
-                foreach ($langs as $key => $value) {
+                foreach ($langs as $key=> $value) {
                     $str .= "\$lang['$value'] = '$value';\n";
                 }
                 $str .= "?>\n";
                 file_put_contents("./lang/lang.$valueVal.php", $str);
             } else {
                 include("lang/lang.$valueVal.php");
-                foreach ($langs as $key => $value) {
+                foreach ($langs as $key=> $value) {
                     if (!array_key_exists($key, $lang)) {
                         $lang[$key] = $value;
                     }
                 }
-                foreach ($lang as $key => $value) {
+                foreach ($lang as $key=> $value) {
                     if (!array_key_exists($key, $langs)) {
                         unset($lang[$key]);
                         echo "unset $key \n";
@@ -1464,7 +1487,7 @@ class Application {
                 $lang = $navigation->sortByKey($lang);
                 $str = "<?php\n";
                 $str .= "\$lang = array();\n";
-                foreach ($lang as $key => $value) {
+                foreach ($lang as $key=> $value) {
                     if ($value) {
                         $str .= "\$lang['$key'] = '$value';\n";
                     }
@@ -1559,8 +1582,7 @@ class Application {
                 echo "-      $lang\n";
                 $properties = $object->__getProperties();
                 foreach ($properties as $property) {
-                    $name = $property["name"];
-                    $lang = "lang_$name";
+                    $lang = $property["lang"];
                     $langs[$lang] = $lang;
                     echo "-      $lang\n";
                 }
@@ -1588,6 +1610,9 @@ class Application {
                     if ($name == "id" && !$object->__isChild()) {
                         $sql .= "id serial NOT NULL";
                         $constraints.= "ALTER TABLE ONLY $tablename ADD CONSTRAINT $tablename" . "_pk PRIMARY KEY (id); \n";
+                    } else if ($name == "id" && $object->__isChild()) {
+                        $sql .= "id bigint NOT NULL";
+                        $constraints.= "ALTER TABLE ONLY $tablename ADD CONSTRAINT $tablename" . "_pk PRIMARY KEY (id); \n";
                     } else {
                         $type = PropertyTypes::$_POSTGRESQLTYPES[$property["type"]];
                         $notnull = $property["required"] ? "NOT NULL" : "";
@@ -1596,7 +1621,11 @@ class Application {
                         $sql .= "$name $type $notnull $default";
                     }
                     if ($property["index"]) {
-                        $indexes.= "CREATE INDEX $tablename" . "_" . "$name" . "_index ON $tablename USING btree ($name); \n";
+                        if (array_key_exists("unique", $property) && $property["unique"]) {
+                            $indexes.= "CREATE UNIQUE INDEX $tablename" . "_" . "$name" . "_index ON $tablename USING btree ($name); \n";
+                        } else {
+                            $indexes.= "CREATE INDEX $tablename" . "_" . "$name" . "_index ON $tablename USING btree ($name); \n";
+                        }
                     }
                     if ($property["reference"] !== null) {
                         $constraints.= "ALTER TABLE ONLY $tablename ADD CONSTRAINT $tablename" . "_" . $property["reference"] . "_fkey FOREIGN KEY (" . $property["reference"] . ") REFERENCES " . $property["reference"] . "(id) MATCH FULL ON DELETE CASCADE; \n";
@@ -1612,4 +1641,5 @@ class Application {
     }
 
 }
+
 ?>
