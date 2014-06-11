@@ -215,11 +215,11 @@ class Navigation {
                         $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-NAME", $objectName . "_" . $property["name"]);
                         $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-REQUIRED", $property["required"] ? "required" : "");
                         $items = $object->__getList($property["name"], $this->application);
-                        foreach ($items as $item => $text) {
+                        foreach ($items as $item=> $text) {
                             $this->application->setHTMLArrayCustomTemplate($result, array(
-                                "CATEGORY-VALUE" => $item,
-                                "CATEGORY-NAME" => $this->lang($text),
-                                "CATEGORY-SELECTED" => ($item == $value) ? "selected" : "",
+                                "CATEGORY-VALUE"=>$item,
+                                "CATEGORY-NAME"=>$this->lang($text),
+                                "CATEGORY-SELECTED"=>($item == $value) ? "selected" : "",
                             ));
                             $this->application->parseCustomTemplate($result, "CATEGORIES");
                         }
@@ -227,15 +227,15 @@ class Navigation {
                     }
                 case PropertyTypes::$_SHORTLIST : {
                         $result = $this->application->setCustomTemplate("bicubic", "shortlist");
-                        $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LABEL",$this->lang($property["lang"]));
+                        $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LABEL", $this->lang($property["lang"]));
                         $items = $object->__getList($property["name"], $this->application);
-                        foreach ($items as $item => $text) {
+                        foreach ($items as $item=> $text) {
                             $this->application->setHTMLArrayCustomTemplate($result, array(
-                                "OBJECT-NAME-PROPERTY-NAME" => $objectName . "_" . $property["name"],
-                                "OPTION-VALUE" => $item,
-                                "OPTION-NAME" => $this->lang($text),
-                                "OPTION-SELECTED" => ($item == $value) ? "checked" : "",
-                                "OBJECT-NAME-PROPERTY-REQUIRED" => $property["required"] ? "required" : "",
+                                "OBJECT-NAME-PROPERTY-NAME"=>$objectName . "_" . $property["name"],
+                                "OPTION-VALUE"=>$item,
+                                "OPTION-NAME"=>$this->lang($text),
+                                "OPTION-SELECTED"=>($item == $value) ? "checked" : "",
+                                "OBJECT-NAME-PROPERTY-REQUIRED"=>$property["required"] ? "required" : "",
                             ));
                             $this->application->parseCustomTemplate($result, "CATEGORIES");
                         }
@@ -247,7 +247,7 @@ class Navigation {
         return "";
     }
 
-    public function getFormObectFormContent(DataObject $object) {
+    public function objectFormContent(DataObject $object) {
         $properties = $object->__getProperties();
         if ($object->__isChild()) {
             $properties = array_merge($properties, $object->__getParentProperties());
@@ -273,7 +273,7 @@ class Navigation {
         $objectName = get_class($object);
         $this->application->setVariableTemplate("FORM-ID", $this->application->navigation . "$objectName");
         $this->application->setVariableTemplate("FORM-ACTION", $this->application->getAppUrl($this->application->name, $callback));
-        $this->application->setVariableTemplate("FORM-CONTENT", $this->getFormObectFormContent($object));
+        $this->application->setVariableTemplate("FORM-CONTENT", $this->objectFormContent($object));
         $this->application->render();
     }
 
@@ -294,6 +294,107 @@ class Navigation {
         }
         $data->data->commit();
         $this->application->redirectToUrl($this->application->getAppUrl($this->application->name, $callback));
+    }
+
+    public function objectTable(DataObject $object, $viewCallbak = null, $editCallbak = null, $deleteCallback = null) {
+        $result = $this->application->setCustomTemplate("bicubic", "table");
+        $this->application->setVariableCustomTemplate($result, "TABLE-CONTENT", $this->objectTableContent($object, $viewCallbak, $editCallbak, $deleteCallback));
+        $content = $this->application->renderCustomTemplate($result);
+        return $content;
+    }
+
+    public function objectTableContent(DataObject $object, $viewCallbak = null, $editCallbak = null, $deleteCallback = null) {
+        $data = new AtomManager($this->application->data);
+        $objects = $data->getAllPaged($object, "id", "DESC", 100, 0);
+        $rowscontent = "";
+        foreach ($objects as $object) {
+            $rowscontent .= $this->objectTableRow($object, $viewCallbak, $editCallbak, $deleteCallback);
+        }
+        $content = $this->objectTableHeader($object) . $rowscontent;
+        return $content;
+    }
+
+    public function objectTableHeader(DataObject $object) {
+        $properties = $object->__getProperties();
+        if ($object->__isChild()) {
+            $properties = array_merge($properties, $object->__getParentProperties());
+        }
+        $headercontent = "";
+        foreach ($properties as $property) {
+            if ($property["hidden"] || !$property["serializable"]) {
+                if ($property["name"] != "id") {
+                    continue;
+                }
+            }
+            $headercontent .= $this->objectTableHeaderValue($object, $property);
+        }
+        $headercontent .= $this->objectTableHeaderActions();
+
+        $result = $this->application->setCustomTemplate("bicubic", "tabletr");
+        $this->application->setVariableCustomTemplate($result, "TR-CONTENT", $headercontent);
+        $content = $this->application->renderCustomTemplate($result);
+        return $content;
+    }
+
+    public function objectTableHeaderValue(DataObject $object, $property) {
+        $result = $this->application->setCustomTemplate("bicubic", "tableth");
+        $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-HEADER", $this->lang($property["lang"]));
+        $content = $this->application->renderCustomTemplate($result);
+        return $content;
+    }
+
+    public function objectTableHeaderActions() {
+        $result = $this->application->setCustomTemplate("bicubic", "tableth");
+        $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-HEADER", $this->lang("lang_actions"));
+        $content = $this->application->renderCustomTemplate($result);
+        return $content;
+    }
+
+    public function objectTableRow(DataObject $object, $viewCallbak = null, $editCallbak = null, $deleteCallback = null) {
+        $properties = $object->__getProperties();
+        if ($object->__isChild()) {
+            $properties = array_merge($properties, $object->__getParentProperties());
+        }
+        $rowcontent = "";
+        foreach ($properties as $property) {
+            if ($property["hidden"] || !$property["serializable"]) {
+                if ($property["name"] != "id") {
+                    continue;
+                }
+            }
+            $rowcontent .= $this->objectTableRowValue($object, $property);
+        }
+        $rowcontent .= $this->objectTableRowActions($object, $viewCallbak, $editCallbak, $deleteCallback);
+
+        $result = $this->application->setCustomTemplate("bicubic", "tabletr");
+        $this->application->setVariableCustomTemplate($result, "TR-CONTENT", $rowcontent);
+        $content = $this->application->renderCustomTemplate($result);
+        return $content;
+    }
+
+    public function objectTableRowValue(DataObject $object, $property) {
+        $result = $this->application->setCustomTemplate("bicubic", "tabletd");
+        $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-VALUE", $this->application->formatProperty($object, $property));
+        $content = $this->application->renderCustomTemplate($result);
+        return $content;
+    }
+
+    public function objectTableRowActions(DataObject $object, $viewCallbak = null, $editCallbak = null, $deleteCallback = null) {
+        $result = $this->application->setCustomTemplate("bicubic", "tableactions");
+        if ($viewCallbak) {
+            $this->application->setHTMLVariableCustomTemplate($result, 'LINK-ACTIONVIEW', $this->application->getAppUrl($this->application->name, $viewCallbak, [new Param("id", $object->getId())]));
+            $this->application->parseCustomTemplate($result, "ACTIONVIEW");
+        }
+        if ($editCallbak) {
+            $this->application->setHTMLVariableCustomTemplate($result, 'LINK-ACTIONEDIT', $this->application->getAppUrl($this->application->name, $editCallbak, [new Param("id", $object->getId())]));
+            $this->application->parseCustomTemplate($result, "ACTIONEDIT");
+        }
+        if ($deleteCallback) {
+            $this->application->setHTMLVariableCustomTemplate($result, 'LINK-ACTIONDELETE', $this->application->getAppUrl($this->application->name, $deleteCallback, [new Param("id", $object->getId())]));
+            $this->application->parseCustomTemplate($result, "ACTIONDELETE");
+        }
+        $content = $this->application->renderCustomTemplate($result);
+        return $content;
     }
 
 }
