@@ -39,17 +39,17 @@ class Navigation {
     public function photoUrl($baseUrl) {
         return $this->application->photoUrl($baseUrl);
     }
-    
+
     public function sortByLang($array) {
         uasort($array, array("Navigation", "compareLangStrings"));
         return $array;
     }
-    
+
     public function sortByValue($array) {
         uasort($array, array("Navigation", "compareStrings"));
         return $array;
     }
-    
+
     public function sortByKey($array) {
         ksort($array, SORT_STRING);
         return $array;
@@ -58,7 +58,7 @@ class Navigation {
     public function compareLangStrings($a, $b) {
         return strcasecmp($this->lang($a), $this->lang($b));
     }
-    
+
     public function compareStrings($a, $b) {
         return strcmp($a, $b);
     }
@@ -149,9 +149,8 @@ class Navigation {
         } else {
             switch ($property["type"]) {
                 case PropertyTypes::$_ALPHANUMERIC :
-                case PropertyTypes::$_DATE :
                 case PropertyTypes::$_DOUBLE :
-                case PropertyTypes::$_EMAIL : 
+                case PropertyTypes::$_EMAIL :
                 case PropertyTypes::$_RUT :
                 case PropertyTypes::$_INT :
                 case PropertyTypes::$_LETTERS :
@@ -178,7 +177,15 @@ class Navigation {
                         $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-VALUE", $value);
                         $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-REQUIRED", $property["required"] ? "required" : "");
                         return $this->application->renderCustomTemplate($result);
-                        break;
+                    }
+                case PropertyTypes::$_DATE : {
+                        $result = $this->application->setCustomTemplate("bicubic", $property["type"]);
+                        $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LABEL", $this->lang("lang_" . $property["name"]));
+                        $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-PLACEHOLDER", $this->lang("lang_" . $property["name"] . "placeholder"));
+                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-NAME", $objectName . "_" . $property["name"]);
+                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-VALUE", $this->application->formatWiredDate($value));
+                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-REQUIRED", $property["required"] ? "required" : "");
+                        return $this->application->renderCustomTemplate($result);
                     }
                 case PropertyTypes::$_BOOLEAN : {
                         $result = $this->application->setCustomTemplate("bicubic", $property["type"]);
@@ -191,7 +198,6 @@ class Navigation {
                             $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-SELECTED-NO", "selected");
                         }
                         return $this->application->renderCustomTemplate($result);
-                        break;
                     }
                 case PropertyTypes::$_LIST : {
                         $result = $this->application->setCustomTemplate("bicubic", "list");
@@ -230,7 +236,7 @@ class Navigation {
 
         return "";
     }
-    
+
     public function getFormObectFormContent(DataObject $object) {
         $properties = $object->__getProperties();
         if ($object->__isChild()) {

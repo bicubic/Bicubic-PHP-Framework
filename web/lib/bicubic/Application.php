@@ -1433,6 +1433,7 @@ class Application {
         $langs = array_merge($langs, $this->script_scanHTMLLangs('./templates'));
         $langs = array_merge($langs, $this->script_scanHTMLLangs('./views'));
         $langs = array_merge($langs, $this->script_scanPHPLangs('./lib/bicubic'));
+        $langs = array_merge($langs, $this->script_scanBeansLangs());
 
         $navigation = new Navigation($this);
         $langs = $navigation->sortByValue($langs);
@@ -1546,6 +1547,28 @@ class Application {
         return $langs;
     }
 
+    protected function script_scanBeansLangs() {
+        echo "BEANS\n";
+        $langs = array();
+        foreach (get_declared_classes() as $classname) {
+            if (is_subclass_of($classname, "DataObject")) {
+                $object = new $classname();
+                $name = strtolower($classname);
+                $lang = "lang_$name";
+                $langs[$lang] = $lang;
+                echo "-      $lang\n";
+                $properties = $object->__getProperties();
+                foreach ($properties as $property) {
+                    $name = $property["name"];
+                    $lang = "lang_$name";
+                    $langs[$lang] = $lang;
+                    echo "-      $lang\n";
+                }
+            }
+        }
+        return $langs;
+    }
+
     protected function script_generateDB() {
         $sql = "\n\n\n\n\n";
         $indexes = "";
@@ -1589,5 +1612,4 @@ class Application {
     }
 
 }
-
 ?>
