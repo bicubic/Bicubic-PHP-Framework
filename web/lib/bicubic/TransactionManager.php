@@ -28,7 +28,7 @@ class TransactionManager {
         return $data;
     }
 
-    public function getRecord(DataObject $dataObject) {
+    public function getRecord(DataObject $dataObject, $checkempty = true) {
         $properties = $dataObject->__getProperties();
         $empty = true;
         foreach ($properties as $property) {
@@ -40,7 +40,7 @@ class TransactionManager {
                 break;
             }
         }
-        if ($empty) {
+        if ($checkempty && $empty) {
             return null;
         }
         $dataObject = $this->data->selectOne($dataObject);

@@ -696,7 +696,7 @@ class Application {
             if (strpos($placeholder, "$prefix-") !== false) {
                 $var = substr($placeholder, 5);
                 $name = strtolower($var);
-                $this->setVariableTemplate("$prefix-$var", $this->lang("lang_$name"));
+                $this->setHtmlVariableTemplate("$prefix-$var", $this->lang("lang_$name"));
             }
         }
         $placeholders = $this->tpl->getPlaceholderList($blockName);
@@ -704,7 +704,7 @@ class Application {
             if (is_string($placeholder) && strpos($placeholder, "$prefix-") !== false) {
                 $var = substr($placeholder, 5);
                 $name = strtolower($var);
-                $this->setVariableTemplate("$prefix-$var", $this->lang("lang_$name"));
+                $this->setHtmlVariableTemplate("$prefix-$var", $this->lang("lang_$name"));
             }
         }
     }
@@ -728,7 +728,7 @@ class Application {
             if (is_string($placeholder) && strpos($placeholder, "$prefix-") !== false) {
                 $var = substr($placeholder, 5);
                 $name = strtolower($var);
-                $this->setVariableTemplate("$prefix-$var", $this->lang("lang_$name"));
+                $this->setHtmlVariableTemplate("$prefix-$var", $this->lang("lang_$name"));
             }
         }
     }
@@ -819,11 +819,16 @@ class Application {
         $this->tpl->setVariable($name, $value);
     }
 
+    private function makeBreaks($value) {
+        $value = str_replace('\r\n', "\r\n", $value);
+        $value = str_replace('\n', "\n", $value);
+        return $value;
+    }
+
     public function setHTMLVariableTemplate($name, $value) {
         $value = strval($value);
         $var = $this->utf8tohtml($value, true);
-        $var = str_replace("\r\n", "<br />", $var);
-        $var = str_replace("\n", "<br />", $var);
+        $var = $this->makeBreaks($var);
         $this->tpl->setVariable($name, $var);
     }
 
@@ -836,8 +841,7 @@ class Application {
         foreach ($array as &$value) {
             $value = strval($value);
             $value = $this->utf8tohtml($value, true);
-            $value = str_replace("\r\n", "<br />", $value);
-            $value = str_replace("\n", "<br />", $value);
+            $value = $this->makeBreaks($value);
         }
         $tpl->setVariable($array);
     }
@@ -845,8 +849,7 @@ class Application {
     public function setHTMLVariableCustomTemplate($tpl, $name, $value) {
         $value = strval($value);
         $var = $this->utf8tohtml($value, true);
-        $var = str_replace("\r\n", "<br />", $var);
-        $var = str_replace("\n", "<br />", $var);
+        $var = $this->makeBreaks($var);
         $tpl->setVariable($name, $var);
     }
 
@@ -861,8 +864,7 @@ class Application {
         foreach ($array as &$value) {
             $value = strval($value);
             $value = $this->utf8tohtml($value, true);
-            $value = str_replace("\r\n", "<br />", $value);
-            $value = str_replace("\n", "<br />", $value);
+            $value = $this->makeBreaks($value);
         }
         $this->tpl->setVariable($array);
     }
@@ -1236,8 +1238,72 @@ class Application {
         return $num;
     }
 
+    public function formatProperty(DataObject $object, $property) {
+        $getter = "get" . strtoupper(substr($property["name"], 0, 1)) . substr($property["name"], 1);
+        $value = $object->$getter();
+        switch ($property["type"]) {
+            case PropertyTypes::$_INT :
+            case PropertyTypes::$_LONG : {
+                    return $this->formatInteger($value);
+                }
+            case PropertyTypes::$_DOUBLE : {
+                    return $this->formatDouble($value);
+                }
+            case PropertyTypes::$_INT :
+            case PropertyTypes::$_LIST :
+            case PropertyTypes::$_SHORTLIST : {
+                    return $this->lang($this->item($object->__getList($property["name"], $this), $value));
+                }
+            case PropertyTypes::$_EMAIL :
+            case PropertyTypes::$_RUT :
+            case PropertyTypes::$_STRING :
+            case PropertyTypes::$_STRING1 :
+            case PropertyTypes::$_STRING2 :
+            case PropertyTypes::$_STRING4 :
+            case PropertyTypes::$_STRING8 :
+            case PropertyTypes::$_STRING16 :
+            case PropertyTypes::$_STRING24 :
+            case PropertyTypes::$_STRING32 :
+            case PropertyTypes::$_STRING64 :
+            case PropertyTypes::$_STRING128 :
+            case PropertyTypes::$_STRING256 :
+            case PropertyTypes::$_STRING512 :
+            case PropertyTypes::$_STRING1024 :
+            case PropertyTypes::$_STRING2048 :
+            case PropertyTypes::$_LETTERS :
+            case PropertyTypes::$_ALPHANUMERIC : {
+                    return $value;
+                }
+            case PropertyTypes::$_PASSWORD: {
+                    return "";
+                }
+            case PropertyTypes::$_FILE : {
+                    return "";
+                }
+            case PropertyTypes::$_IMAGE256 : {
+                    return "";
+                }
+            case PropertyTypes::$_FLAT :
+            case PropertyTypes::$_JSON :
+            case PropertyTypes::$_STRINGARRAY :
+            case PropertyTypes::$_DOUBLEARRAY :
+            case PropertyTypes::$_INTARRAY : {
+                    return strval($value);
+                }
+            case PropertyTypes::$_DATE : {
+                    return $this->formatDate($value);
+                }
+            case PropertyTypes::$_BOOLEAN : {
+                    return $this->formatBoolean($value);
+                }
+            default : {
+                    return null;
+                }
+        }
+    }
+
     public function formatBoolean($boolean) {
-        return $boolean ? $this->lang('text_yes') : $this->lang('text_no');
+        return $boolean ? $this->lang('lang_yes') : $this->lang('lang_no');
     }
 
     public function formatMount($mount) {
@@ -1251,6 +1317,22 @@ class Application {
     public function formatNumber($number) {
         if (isset($number)) {
             return number_format($number, 0, ",", ".");
+        } else {
+            return '';
+        }
+    }
+
+    public function formatInteger($number) {
+        if (isset($number)) {
+            return number_format($number, 0, ",", ".");
+        } else {
+            return '';
+        }
+    }
+
+    public function formatDouble($number) {
+        if (isset($number)) {
+            return number_format($number, 2, ",", ".");
         } else {
             return '';
         }
