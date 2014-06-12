@@ -8,7 +8,10 @@
  * @license    MIT
  * @version 3.0.0
  */
-class HomeApplication extends Application {
+
+require_once("app/LoginApplication.php");
+
+class HomeApplication extends LoginApplication {
 
     function __construct($config, $lang, Data $data = null, $name = "home") {
         if (!$data) {
@@ -21,14 +24,14 @@ class HomeApplication extends Application {
         parent::execute();
         $this->navigation = $this->getUrlParam($this->config('param_navigation'), PropertyTypes::$_LETTERS, false);
         switch ($this->navigation) {
-            case "hello" : {
+            case "home" : {
                     require_once('nav/HelloNavigation.php');
                     $navigation = new HelloNavigation($this);
                     $navigation->hello();
                     break;
                 }
             default : {
-                    $this->redirect("home", "hello");
+                    $this->redirect($this->name, "home");
                     break;
                 }
         }
@@ -36,7 +39,7 @@ class HomeApplication extends Application {
 
     public function setMainTemplate($navigationFolder, $navigationFile, $title = "") {
         parent::setMainTemplate($navigationFolder, $navigationFile, $title);
-        $this->setHTMLVariableTemplate('LINK-LOGIN', $this->getAppUrl("login", "login"));
+        $this->setHTMLVariableTemplate('LINK-LOGIN', $this->getAppUrl($this->name, "login"));
     }
 
 }

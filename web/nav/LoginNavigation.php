@@ -20,44 +20,20 @@ class LoginNavigation extends AccountNavigation {
     }
 
     public function login() {
-        $this->application->setMainTemplate("login", "login", $this->lang('lang_login'));
-        $loginToken = $this->application->createRandomString(64);
-        $this->application->setSessionParam("LoginNavigation_logintoken", $loginToken);
-        $params = array(
-            new SystemUser(),
-            new Param("loginToken", $loginToken)
-        );
-        $this->application->setFormTemplate("login", $params, "login", "loginSubmit");
-        $this->application->setHTMLVariableTemplate('LINK-FORGOT', $this->application->getAppUrl("login", "forgot"));
+        $this->application->setMainTemplate("bicubic", "empty");
+        $this->application->setVariableTemplate("NAVIGATION-CONTENT", $this->makeLoginForm());
+        $this->application->render();
+    }
+    
+    public function signup() {
+        $this->application->setMainTemplate("bicubic", "empty");
+        $this->application->setVariableTemplate("NAVIGATION-CONTENT", $this->makeSignUpForm());
         $this->application->render();
     }
 
-    public function loginSubmit() {
-        $data = new AtomManager($this->application->data);
-        $data->data->begin();
-        $systemUser = $this->application->getFormObject(new SystemUser());
-        $dbSystemUser = $data->getRecord(new SystemUser(null, $systemUser->getEmail()));
-        if (!$dbSystemUser) {
-            $data->data->rollback();
-            $this->application->error($this->lang('lang_loginerror'));
-        }
-        if (crypt($systemUser->getPassword(), $dbSystemUser->getPassword()) != $dbSystemUser->getPassword()) {
-            $data->data->rollback();
-            $this->application->error($this->lang('lang_loginerror'));
-        }
-        $dbSystemUser->setSessiontoken($this->application->createRandomString(1024));
-        if (!$data->updateRecord($dbSystemUser)) {
-            $data->data->rollback();
-            $this->application->error($this->lang('lang_servererror'));
-        }
-        $this->loginSet($dbSystemUser);
-        $data->data->commit();
-        $this->application->redirect("private", "hello");
-    }
-
-    public function logout() {
+    public function logout($callBackApp, $callBackNav) {
         $this->loginUnset();
-        $this->application->redirect("login", "login");
+        $this->application->redirect($callBackApp, $callBackNav);
     }
 
     public function validate() {
@@ -105,7 +81,7 @@ class LoginNavigation extends AccountNavigation {
             new SystemUser(),
             new Param("forgotToken", $forgotToken)
         );
-        $this->application->setFormTemplate("forgot", $params, "login", "forgotSubmit");
+        $this->application->setFormTemplate("forgot", $params, $this->application->name, "forgotSubmit");
         $this->application->render();
     }
 
@@ -157,7 +133,7 @@ class LoginNavigation extends AccountNavigation {
             new Param("token",$token),
             new Param("confirmpassword"),
         );
-        $this->application->setFormTemplate("newpassword", $params, "login", "forgotValidateSubmit");
+        $this->application->setFormTemplate("newpassword", $params, $this->application->name, "forgotValidateSubmit");
         $data->data->commit();
         $this->application->render();
     }
@@ -203,17 +179,17 @@ class LoginNavigation extends AccountNavigation {
         $params = array(
             $user,
         );
-        $this->application->setFormTemplate("editprofile", $params, "login", "profileSubmit");
+        $this->application->setFormTemplate("editprofile", $params, $this->application->name, "profileSubmit");
         $params = array(
             new Param("email", $user->getEmail()),
         );
-        $this->application->setFormTemplate("editemail", $params, "login", "emailSubmit");
+        $this->application->setFormTemplate("editemail", $params, $this->application->name, "emailSubmit");
         $params = array(
             new Param("currentpassword"),
             new Param("newpassword"),
             new Param("confirmpassword"),
         );
-        $this->application->setFormTemplate("editpassword", $params, "login", "passwordSubmit");
+        $this->application->setFormTemplate("editpassword", $params, $this->application->name, "passwordSubmit");
         $this->application->render();
     }
     
@@ -319,7 +295,7 @@ class LoginNavigation extends AccountNavigation {
             new SystemUser(),
             new Param("token", $token),
         );
-        $this->application->setFormTemplate("newemail", $params, "login", "emailValidateSubmit");
+        $this->application->setFormTemplate("newemail", $params, $this->application->name, "emailValidateSubmit");
         $data->data->commit();
         $this->application->render();
     }

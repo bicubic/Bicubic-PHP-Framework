@@ -259,25 +259,16 @@ class Navigation {
         return $formContent;
     }
 
-    public function objectForm(DataObject $object, $callback) {
-        $id = $this->application->getUrlParam($this->config("param_id"), PropertyTypes::$_INT);
-        if ($id) {
-            $data = new TransactionManager($this->application->data);
-            $object->setId($id);
-            $object = $data->getRecord($object);
-            if (!$object) {
-                $this->error('lang_notvalid');
-            }
-        }
-        $this->application->setMainTemplate("bicubic", "form");
-        $objectName = get_class($object);
-        $this->application->setVariableTemplate("FORM-ID", $this->application->navigation . "$objectName");
-        $this->application->setVariableTemplate("FORM-ACTION", $this->application->getAppUrl($this->application->name, $callback));
-        $this->application->setVariableTemplate("FORM-CONTENT", $this->objectFormContent($object));
-        $this->application->render();
+    public function objectForm(DataObject $object, $callBackNav) {
+        $result = $this->application->setCustomTemplate("bicubic", "form");
+        $this->application->setVariableCustomTemplate($result, "FORM-ID", $this->application->navigation . get_class($object));
+        $this->application->setVariableCustomTemplate($result, "FORM-ACTION", $this->application->getAppUrl($this->application->name, $callBackNav));
+        $this->application->setVariableCustomTemplate($result, "FORM-CONTENT", $this->objectFormContent($object));
+        $content = $this->application->renderCustomTemplate($result);
+        return $content;
     }
 
-    public function objectFormSubmit(DataObject $object, $callback) {
+    public function objectFormSubmit(DataObject $object, $callBackNav) {
         $object = $this->application->getFormObject($object);
         $data = new TransactionManager($this->application->data);
         $data->data->begin();
@@ -293,22 +284,22 @@ class Navigation {
             }
         }
         $data->data->commit();
-        $this->application->redirectToUrl($this->application->getAppUrl($this->application->name, $callback));
+        $this->application->redirectToUrl($this->application->getAppUrl($this->application->name, $callBackNav));
     }
 
-    public function objectTable(DataObject $object, $viewCallbak = null, $editCallbak = null, $deleteCallback = null) {
+    public function objectTable(DataObject $object, $viewCallBackNav = null, $editCallBackNav = null, $deleteCallBackNav = null) {
         $result = $this->application->setCustomTemplate("bicubic", "table");
-        $this->application->setVariableCustomTemplate($result, "TABLE-CONTENT", $this->objectTableContent($object, $viewCallbak, $editCallbak, $deleteCallback));
+        $this->application->setVariableCustomTemplate($result, "TABLE-CONTENT", $this->objectTableContent($object, $viewCallBackNav, $editCallBackNav, $deleteCallBackNav));
         $content = $this->application->renderCustomTemplate($result);
         return $content;
     }
 
-    public function objectTableContent(DataObject $object, $viewCallbak = null, $editCallbak = null, $deleteCallback = null) {
+    public function objectTableContent(DataObject $object, $viewCallBackNav = null, $editCallBackNav = null, $deleteCallBackNav = null) {
         $data = new AtomManager($this->application->data);
         $objects = $data->getAllPaged($object, "id", "DESC", 100, 0);
         $rowscontent = "";
         foreach ($objects as $object) {
-            $rowscontent .= $this->objectTableRow($object, $viewCallbak, $editCallbak, $deleteCallback);
+            $rowscontent .= $this->objectTableRow($object, $viewCallBackNav, $editCallBackNav, $deleteCallBackNav);
         }
         $content = $this->objectTableHeader($object) . $rowscontent;
         return $content;
@@ -350,7 +341,7 @@ class Navigation {
         return $content;
     }
 
-    public function objectTableRow(DataObject $object, $viewCallbak = null, $editCallbak = null, $deleteCallback = null) {
+    public function objectTableRow(DataObject $object, $viewCallBackNav = null, $editCallBackNav = null, $deleteCallBackNav = null) {
         $properties = $object->__getProperties();
         if ($object->__isChild()) {
             $properties = array_merge($properties, $object->__getParentProperties());
@@ -364,7 +355,7 @@ class Navigation {
             }
             $rowcontent .= $this->objectTableRowValue($object, $property);
         }
-        $rowcontent .= $this->objectTableRowActions($object, $viewCallbak, $editCallbak, $deleteCallback);
+        $rowcontent .= $this->objectTableRowActions($object, $viewCallBackNav, $editCallBackNav, $deleteCallBackNav);
 
         $result = $this->application->setCustomTemplate("bicubic", "tabletr");
         $this->application->setVariableCustomTemplate($result, "TR-CONTENT", $rowcontent);
@@ -379,18 +370,18 @@ class Navigation {
         return $content;
     }
 
-    public function objectTableRowActions(DataObject $object, $viewCallbak = null, $editCallbak = null, $deleteCallback = null) {
+    public function objectTableRowActions(DataObject $object, $viewCallBackNav = null, $editCallBackNav = null, $deleteCallBackNav = null) {
         $result = $this->application->setCustomTemplate("bicubic", "tableactions");
-        if ($viewCallbak) {
-            $this->application->setHTMLVariableCustomTemplate($result, 'LINK-ACTIONVIEW', $this->application->getAppUrl($this->application->name, $viewCallbak, [new Param("id", $object->getId())]));
+        if ($viewCallBackNav) {
+            $this->application->setHTMLVariableCustomTemplate($result, 'LINK-ACTIONVIEW', $this->application->getAppUrl($this->application->name, $viewCallBackNav, [new Param("id", $object->getId())]));
             $this->application->parseCustomTemplate($result, "ACTIONVIEW");
         }
-        if ($editCallbak) {
-            $this->application->setHTMLVariableCustomTemplate($result, 'LINK-ACTIONEDIT', $this->application->getAppUrl($this->application->name, $editCallbak, [new Param("id", $object->getId())]));
+        if ($editCallBackNav) {
+            $this->application->setHTMLVariableCustomTemplate($result, 'LINK-ACTIONEDIT', $this->application->getAppUrl($this->application->name, $editCallBackNav, [new Param("id", $object->getId())]));
             $this->application->parseCustomTemplate($result, "ACTIONEDIT");
         }
-        if ($deleteCallback) {
-            $this->application->setHTMLVariableCustomTemplate($result, 'LINK-ACTIONDELETE', $this->application->getAppUrl($this->application->name, $deleteCallback, [new Param("id", $object->getId())]));
+        if ($deleteCallBackNav) {
+            $this->application->setHTMLVariableCustomTemplate($result, 'LINK-ACTIONDELETE', $this->application->getAppUrl($this->application->name, $deleteCallBackNav, [new Param("id", $object->getId())]));
             $this->application->parseCustomTemplate($result, "ACTIONDELETE");
         }
         $content = $this->application->renderCustomTemplate($result);
