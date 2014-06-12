@@ -8,23 +8,22 @@
  * @license    MIT
  * @version 3.0.0
  */
-
 require_once("int/ConfirmationEmail.php");
 require_once("lib/google/recaptchalib.php");
 
 class AccountNavigation extends Navigation {
-    
-    protected function checkSignedInUser() {
+
+    protected function checkSignedInUser($callBackApp, $callBackNav) {
         $user = $this->loginCheck();
         if ($user) {
-            $this->application->redirect("private", "hello");
+            $this->application->redirect($callBackApp, $callBackNav);
         }
     }
-    
+
     protected function makeSignUpForm() {
         $result = $this->application->setCustomTemplate("login", "signup");
         $this->application->setVariableCustomTemplate($result, "SIGNUP-ID", "signup");
-        $this->application->setVariableCustomTemplate($result, "SIGNUP-ACTION", $this->application->getAppUrl("login" , "signUpSubmit"));
+        $this->application->setVariableCustomTemplate($result, "SIGNUP-ACTION", $this->application->getAppUrl($this->application->name, "signUpSubmit"));
         $this->application->setHTMLVariableCustomTemplate($result, "SIGNUP-NAME-SYSTEMUSER-NAME", "SystemUser_name");
         $this->application->setHTMLVariableCustomTemplate($result, "SIGNUP-NAME-SYSTEMUSER-EMAIL", "SystemUser_email");
         $this->application->setHTMLVariableCustomTemplate($result, "SIGNUP-NAME-SYSTEMUSER-PASSWORD", "SystemUser_password");
@@ -33,25 +32,25 @@ class AccountNavigation extends Navigation {
         $this->application->setHTMLVariableCustomTemplate($result, "SIGNUP-NAME-SYSTEMUSER-USERLANG", "SystemUser_userlang");
         $this->application->setVariableCustomTemplate($result, "HTML-RECAPTCHA", recaptcha_get_html($this->config('recaptcha_publickey')), null, $this->config('sslavailable'));
         uasort(Country::$_ENUM, array("Navigation", "compareLangStrings"));
-        foreach (Country::$_ENUM as $key => $value) {
+        foreach (Country::$_ENUM as $key=> $value) {
             $this->application->setHTMLArrayCustomTemplate($result, [
-                "USERCOUNTRY-NAME" => $value,
-                "USERCOUNTRY-VALUE" => $key,
+                "USERCOUNTRY-NAME"=>$value,
+                "USERCOUNTRY-VALUE"=>$key,
             ]);
             $this->application->parseCustomTemplate($result, "USERCOUNTRIES");
         }
         uasort(Lang::$_ENUM, array("Navigation", "compareLangStrings"));
-        foreach (Lang::$_ENUM as $key => $value) {
+        foreach (Lang::$_ENUM as $key=> $value) {
             $this->application->setHTMLArrayCustomTemplate($result, [
-                "USERLANG-NAME" => $value,
-                "USERLANG-VALUE" => $key,
+                "USERLANG-NAME"=>$value,
+                "USERLANG-VALUE"=>$key,
             ]);
             $this->application->parseCustomTemplate($result, "USERLANGS");
         }
         return $this->application->renderCustomTemplate($result);
     }
-    
-    public function signUpSubmit() {
+
+    public function signUpSubmit($callBackApp, $callBackNav) {
         $data = new AtomManager($this->application->data);
         $data->data->begin();
         $systemUser = $this->application->getFormObject(new SystemUser());
@@ -104,9 +103,42 @@ class AccountNavigation extends Navigation {
         $email->send();
         $this->loginSet($dbSystemUser);
         $data->data->commit();
-        $this->application->redirect("private", "hello");
+        $this->application->redirect($callBackApp, $callBackNav);
+    }
+
+    protected function makeLoginForm() {
+        $result = $this->application->setCustomTemplate("login", "login");
+        $this->application->setVariableCustomTemplate($result, "LOGIN-ID", "login");
+        $this->application->setVariableCustomTemplate($result, "LOGIN-ACTION", $this->application->getAppUrl($this->application->name, "loginSubmit"));
+        $this->application->setHTMLVariableCustomTemplate($result, 'LOGIN-NAME-SYSTEMUSER-EMAIL', 'SystemUser_email');
+        $this->application->setHTMLVariableCustomTemplate($result, 'LOGIN-NAME-SYSTEMUSER-PASSWORD', 'SystemUser_password');
+        $this->application->setHTMLVariableCustomTemplate($result, 'LINK-FORGOT', $this->application->getAppUrl($this->application->name, "forgot"));
+        return $this->application->renderCustomTemplate($result);
     }
     
+    public function loginSubmit($callBackApp, $callBackNav) {
+        $data = new AtomManager($this->application->data);
+        $data->data->begin();
+        $systemUser = $this->application->getFormObject(new SystemUser());
+        $dbSystemUser = $data->getRecord(new SystemUser(null, $systemUser->getEmail()));
+        if (!$dbSystemUser) {
+            $data->data->rollback();
+            $this->application->error($this->lang('lang_loginerror'));
+        }
+        if (crypt($systemUser->getPassword(), $dbSystemUser->getPassword()) != $dbSystemUser->getPassword()) {
+            $data->data->rollback();
+            $this->application->error($this->lang('lang_loginerror'));
+        }
+        $dbSystemUser->setSessiontoken($this->application->createRandomString(1024));
+        if (!$data->updateRecord($dbSystemUser)) {
+            $data->data->rollback();
+            $this->application->error($this->lang('lang_servererror'));
+        }
+        $this->loginSet($dbSystemUser);
+        $data->data->commit();
+        $this->application->redirect($callBackApp, $callBackNav);
+    }
+
     public function loginSet(SystemUser $user) {
         $this->application->setSessionParam("LoginApplication_login", true);
         $this->application->setSessionParam("LoginApplication_user", $user);
@@ -168,6 +200,5 @@ class AccountNavigation extends Navigation {
         $data->data->rollback();
         return false;
     }
-    
-    
+
 }

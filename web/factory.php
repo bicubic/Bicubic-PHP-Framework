@@ -47,11 +47,6 @@ class ApplicationFactory  {
                     $application = new HomeApplication($config, $lang);
                     break;
                 }
-            case "login": {
-                    require_once("app/LoginApplication.php");
-                    $application = new LoginApplication($config, $lang);
-                    break;
-                }
             case "private": {
                     require_once("app/PrivateApplication.php");
                     $application = new PrivateApplication($config, $lang);
