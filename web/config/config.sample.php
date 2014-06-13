@@ -18,6 +18,11 @@ $config['web_copyright'] = "©2014 Bicubic Technology - All rights reserved";
 $config['web_contact_email'] = "hello@bicubic.cl";
 $config['web_contact_name'] = "Bicubic Technology";
 $config['web_time_out'] = 360000;
+$config['web_table_size'] = 100;
+//Code
+$config['code_time_out'] = 300;
+$config['code_time_zone'] = 'America/Santiago';
+$config['code_error_report'] =  E_ALL & ~E_STRICT;//E_ERROR | E_PARSE | E_NOTICE | E_USER_ERROR | E_USER_WARNING | E_USER_NOTICE
 //Data Base values
 $config['database_host'] = "localhost";
 $config['database_database'] = "bicubic";
