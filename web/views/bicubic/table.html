@@ -1,3 +1,61 @@
-<table>
+<ul>
+    <!-- BEGIN FEATURELINK -->
+    <li>
+        <a href="{FEATURELINK-LINK}">
+            {FEATURELINK-NAME}
+        </a>
+    </li>
+    <!-- END FEATURELINK -->
+    <!-- BEGIN FEATUREIMAGE -->
+    <li>
+        <a href="{FEATUREIMAGE-LINK}">
+            <img src="{FEATUREIMAGE-SRC}" />
+        </a>
+    </li>
+    <!-- END FEATUREIMAGE -->
+</ul>
+
+<table id="bicubic-table" data-lastid="{TABLE-LASTID}" data-size="{TABLE-SIZE}" data-url="{TABLE-URL}" data-maxsize="{TABLE-MAXSIZE}">
     {TABLE-CONTENT}
 </table>
+<script>
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var tableRequest = new XMLHttpRequest();
+        var vtable = document.getElementById('bicubic-table');
+        var url = vtable.getAttribute("data-url");
+        var maxSize = vtable.getAttribute("data-maxsize");
+        var tableMore = true;
+        document.addEventListener('scroll', function() {
+            var lastid = vtable.getAttribute("data-lastid")
+            var size = vtable.getAttribute("data-size");
+            if(!url || size < maxSize) {
+                tableMore = false;
+            }
+            if (tableMore) {
+                var scrollAmount = document.body.scrollHeight;
+                var documentHeight = document.body.clientHeight;
+                var scrollPercent = (scrollAmount / documentHeight) * 100;
+                if (scrollPercent > 80) {
+                    if (tableRequest.readyState === 4 || tableRequest.readyState === 0) {
+                        tableRequest.open("POST", url);
+                        tableRequest.onreadystatechange = function() {
+                            if (tableRequest.readyState === 4 && tableRequest.status === 200) {
+                                var response = JSON.parse(this.responseText);
+                                if (response.status === 'success') {
+                                    vtable.innerHTML = vtable.innerHTML + response.data;
+                                    vtable.setAttribute("data-lastid", response.lastid);
+                                    vtable.setAttribute("data-size", response.size);
+                                }
+                            }
+                        };
+                        tableRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                        tableRequest.send("lastid=" + lastid);
+                    }
+
+                }
+            }
+
+        });
+    });
+</script>

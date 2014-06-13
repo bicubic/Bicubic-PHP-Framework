@@ -7,16 +7,12 @@
  * @license    MIT
  * @version 3.0.0
  */
-//constants
-define('BICUBIC_TIMEOUT', 300); 
-define('BICUBIC_TIMEZONE', 'America/Santiago'); 
-define('BICUBIC_ERRORREPORT', E_ALL & ~E_STRICT); //E_ERROR | E_PARSE | E_NOTICE | E_USER_ERROR | E_USER_WARNING | E_USER_NOTICE
 //base
 require_once("config/config.php");
 //default php config
-date_default_timezone_set(BICUBIC_TIMEZONE);
-error_reporting(BICUBIC_ERRORREPORT);
-set_time_limit(BICUBIC_TIMEOUT);
+date_default_timezone_set($config['code_time_zone']);
+error_reporting($config['code_error_report']);
+set_time_limit($config['code_time_out']);
 //lib
 require_once("lib/ext/pear/Sigma.php");
 require_once("lib/ext/simple_html_dom.php");
@@ -31,6 +27,8 @@ require_once("lib/bicubic/DataObject.php");
 require_once("lib/bicubic/Navigation.php");
 require_once("lib/bicubic/ObjectParamList.php");
 require_once("lib/bicubic/Param.php");
+require_once("lib/bicubic/LinkParam.php");
+require_once("lib/bicubic/ImageParam.php");
 require_once("lib/bicubic/SQLData.php");
 require_once("lib/bicubic/PostgreSQLData.php");
 require_once("lib/bicubic/MandrillEmail.php");

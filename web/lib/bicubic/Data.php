@@ -36,9 +36,9 @@ abstract class Data {
 
     public abstract function lastInsertId($table);
 
-    public abstract function select(DataObject $object, $orderIndex = null, $orderDirection = null, $limit = null, $lastIndex = null, $keyword = null, $keywordfield = null);
+    public abstract function select(DataObject $object, $orderIndex = "id", $orderDirection = "DESC", $limit = null, $lastIndex = 0, $keyword = null, $keywordfield = null);
 
-    public abstract function selectOne(DataObject $object, $orderIndex = null, $orderDirection = null);
+    public abstract function selectOne(DataObject $object);
 
     public abstract function insert(DataObject $object);
 

@@ -51,7 +51,7 @@ abstract class SQLData extends Data {
         }
         $query .= ") VALUES (";
         $i = 0;
-        foreach ($params as $key => $value) {
+        foreach ($params as $key=> $value) {
             $value = $this->escapeChars($value);
             if ($i == 0) {
                 $query .= "'$value'";
@@ -74,7 +74,7 @@ abstract class SQLData extends Data {
         return $id;
     }
 
-    public function select(DataObject $object, $orderIndex = null, $orderDirection = null, $limit = null, $lastIndex = null, $keyword = null, $keywordfield = null) {
+    public function select(DataObject $object, $orderIndex = "id", $orderDirection = "DESC", $limit = null, $lastIndex = PHP_INT_MAX, $keyword = null, $keywordfield = null) {
         $class = strtolower(get_class($object));
         $data = array();
         $query = "SELECT * FROM  " . ($class) . " ";
@@ -107,21 +107,26 @@ abstract class SQLData extends Data {
                 $query .= "AND $keywordfield ~* '.*$keyword.*' ";
             }
         }
-        if (isset($lastIndex)) {
-            if ($i == 0) {
-                $lastIndex = $this->escapeChars($lastIndex);
+
+        $lastIndex = $this->escapeChars($lastIndex);
+        if ($i == 0) {
+            if($orderDirection == "DESC") {
+                $query .= "WHERE $this->idname < $lastIndex";
+            }
+            else {
                 $query .= "WHERE $this->idname > $lastIndex";
-            } else {
-                $lastIndex = $this->escapeChars($lastIndex);
+            }
+        } else {
+            if($orderDirection == "DESC") {
+                $query .= "AND $this->idname < $lastIndex ";
+            }
+            else {
                 $query .= "AND $this->idname > $lastIndex ";
             }
         }
-        if (isset($orderIndex) && isset($orderDirection)) {
-            $query .= "ORDER BY $orderIndex $orderDirection ";
-        } else {
-            $query .= "ORDER BY id ASC ";
-        }
-        if (isset($limit)) {
+        $query .= "ORDER BY $orderIndex $orderDirection ";
+
+        if ($limit) {
             if ($limit < 0) {
                 $limit = 0;
             }
@@ -137,7 +142,7 @@ abstract class SQLData extends Data {
         return $data;
     }
 
-    public function selectOne(DataObject $object, $orderIndex = null, $orderDirection = null) {
+    public function selectOne(DataObject $object) {
         $class = strtolower(get_class($object));
         $query = "SELECT * FROM  " . ($class) . " ";
         $i = 0;
@@ -160,11 +165,7 @@ abstract class SQLData extends Data {
                 $i++;
             }
         }
-        if (isset($orderIndex) && isset($orderDirection)) {
-            $query .= "ORDER BY $orderIndex $orderDirection ";
-        } else {
-            $query .= "ORDER BY id DESC ";
-        }
+        $query .= " ORDER BY id DESC ";
         $query .= " LIMIT 1 ";
         $result = $this->performRead($query);
         $row = $this->readNext($result);

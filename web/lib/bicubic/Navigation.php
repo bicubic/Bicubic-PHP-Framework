@@ -11,9 +11,15 @@
 class Navigation {
 
     public $application;
+    private $tableLastId;
+    private $tableMaxSize;
+    private $tableSize;
 
     function __construct(Application $application) {
         $this->application = $application;
+        $this->tableLastId = PHP_INT_MAX;
+        $this->tableMaxSize = $this->config('web_table_size');
+        $this->tableSize = 0;
     }
 
     public function lang($string, $langstr = null) {
@@ -268,58 +274,84 @@ class Navigation {
         return $content;
     }
 
-    public function objectFormSubmit(DataObject $object, $callBackNav) {
-        $object = $this->application->getFormObject($object);
-        $data = new TransactionManager($this->application->data);
-        $data->data->begin();
-        if (!$object->getId()) {
-            if (!$data->insertRecord($object)) {
-                $data->data->rollback();
-                $this->error('lang_errordatabase');
-            }
-        } else {
-            if (!$data->updateRecord($object)) {
-                $data->data->rollback();
-                $this->error('lang_errordatabase');
+    public function objectTable(DataObject $object, $callBackParams = array(), $featureParams = array(), $loadMoreCallBackUrl = null) {
+        $result = $this->application->setCustomTemplate("bicubic", "table");
+        foreach ($featureParams as $featureParam) {
+            if (is_a($featureParam, "LinkParam")) {
+                $this->application->setHTMLArrayCustomTemplate($result, [
+                    'FEATURELINK-LINK'=>$this->application->getAppUrl($this->application->name, $featureParam->name),
+                    'FEATURELINK-NAME'=>$this->lang($featureParam->value),
+                ]);
+                $this->application->parseCustomTemplate($result, "FEATURELINK");
+            } else if (is_a($featureParam, "ImageParam")) {
+                $this->application->setHTMLArrayCustomTemplate($result, [
+                    'FEATUREIMAGE-LINK'=>$this->application->getAppUrl($this->application->name, $featureParam->name),
+                    'FEATUREIMAGE-SRC'=>$this->photoUrl($featureParam->value),
+                ]);
+                $this->application->parseCustomTemplate($result, "FEATUREIMAGE");
             }
         }
-        $data->data->commit();
-        $this->application->redirectToUrl($this->application->getAppUrl($this->application->name, $callBackNav));
-    }
+        if ($loadMoreCallBackUrl) {
+            $this->application->setVariableCustomTemplate($result, "TABLE-CONTENT", $this->objectTableHeader($object, $callBackParams) . $this->objectTableContentMore($object, $callBackParams));
+            $this->application->setVariableCustomTemplate($result, "TABLE-LASTID", $this->tableLastId);
+            $this->application->setVariableCustomTemplate($result, "TABLE-SIZE", $this->tableSize);
+            $this->application->setVariableCustomTemplate($result, "TABLE-MAXSIZE", $this->tableMaxSize);
+            $this->application->setVariableCustomTemplate($result, "TABLE-URL", $loadMoreCallBackUrl);
+        } else {
+            $this->application->setVariableCustomTemplate($result, "TABLE-CONTENT", $this->objectTableContent($object, $callBackParams));
+        }
 
-    public function objectTable(DataObject $object, $viewCallBackNav = null, $editCallBackNav = null, $deleteCallBackNav = null) {
-        $result = $this->application->setCustomTemplate("bicubic", "table");
-        $this->application->setVariableCustomTemplate($result, "TABLE-CONTENT", $this->objectTableContent($object, $viewCallBackNav, $editCallBackNav, $deleteCallBackNav));
         $content = $this->application->renderCustomTemplate($result);
         return $content;
     }
 
-    public function objectTableContent(DataObject $object, $viewCallBackNav = null, $editCallBackNav = null, $deleteCallBackNav = null) {
-        $data = new AtomManager($this->application->data);
-        $objects = $data->getAllPaged($object, "id", "DESC", 100, 0);
-        $rowscontent = "";
-        foreach ($objects as $object) {
-            $rowscontent .= $this->objectTableRow($object, $viewCallBackNav, $editCallBackNav, $deleteCallBackNav);
-        }
-        $content = $this->objectTableHeader($object) . $rowscontent;
+    public function objectTableJson(DataObject $object, $callBackParams) {
+        $lastid = $this->application->getFormParam("lastid", PropertyTypes::$_INT);
+        $json = new SuccessJson();
+        $json->data = $this->objectTableContentMore($object, $callBackParams, $lastid);
+        $json->lastid = $this->tableLastId;
+        $json->size = $this->tableSize;
+        $this->application->renderToJson($json);
+    }
+
+    public function objectTableContent(DataObject $object, $callBackParams = array()) {
+        $content = $this->objectTableHeader($object, $callBackParams) . $this->objectTableRows($object, $callBackParams);
         return $content;
     }
 
-    public function objectTableHeader(DataObject $object) {
+    public function objectTableContentMore(DataObject $object, $callBackParams = array(), $lastid = PHP_INT_MAX) {
+        $content = $this->objectTableRows($object, $callBackParams, $this->tableMaxSize, $lastid);
+        return $content;
+    }
+
+    public function objectTableRows(DataObject $object, $callBackParams = array(), $size = PHP_INT_MAX, $lastid = PHP_INT_MAX) {
+        $data = new AtomManager($this->application->data);
+        $objects = $data->getAllPaged($object, "id", "DESC", $size, $lastid);
+        $rowscontent = "";
+        foreach ($objects as $object) {
+            $this->tableLastId = $object->getId();
+            $this->tableSize++;
+            $rowscontent .= $this->objectTableRow($object, $callBackParams);
+        }
+        return $rowscontent;
+    }
+
+    public function objectTableHeader(DataObject $object, $callBackParams = array()) {
         $properties = $object->__getProperties();
         if ($object->__isChild()) {
             $properties = array_merge($properties, $object->__getParentProperties());
         }
         $headercontent = "";
         foreach ($properties as $property) {
-            if ($property["hidden"] || !$property["serializable"]) {
-                if ($property["name"] != "id") {
-                    continue;
-                }
+            if (!$property["table"]) {
+                continue;
             }
             $headercontent .= $this->objectTableHeaderValue($object, $property);
         }
-        $headercontent .= $this->objectTableHeaderActions();
+        if ($callBackParams) {
+            $headercontent .= $this->objectTableHeaderActions();
+        }
+
 
         $result = $this->application->setCustomTemplate("bicubic", "tabletr");
         $this->application->setVariableCustomTemplate($result, "TR-CONTENT", $headercontent);
@@ -341,21 +373,22 @@ class Navigation {
         return $content;
     }
 
-    public function objectTableRow(DataObject $object, $viewCallBackNav = null, $editCallBackNav = null, $deleteCallBackNav = null) {
+    public function objectTableRow(DataObject $object, $callBackParams = array()) {
         $properties = $object->__getProperties();
         if ($object->__isChild()) {
             $properties = array_merge($properties, $object->__getParentProperties());
         }
         $rowcontent = "";
         foreach ($properties as $property) {
-            if ($property["hidden"] || !$property["serializable"]) {
-                if ($property["name"] != "id") {
-                    continue;
-                }
+            if (!$property["table"]) {
+                continue;
             }
             $rowcontent .= $this->objectTableRowValue($object, $property);
         }
-        $rowcontent .= $this->objectTableRowActions($object, $viewCallBackNav, $editCallBackNav, $deleteCallBackNav);
+        if ($callBackParams) {
+            $rowcontent .= $this->objectTableRowActions($object, $callBackParams);
+        }
+
 
         $result = $this->application->setCustomTemplate("bicubic", "tabletr");
         $this->application->setVariableCustomTemplate($result, "TR-CONTENT", $rowcontent);
@@ -370,22 +403,81 @@ class Navigation {
         return $content;
     }
 
-    public function objectTableRowActions(DataObject $object, $viewCallBackNav = null, $editCallBackNav = null, $deleteCallBackNav = null) {
+    public function objectTableRowActions(DataObject $object, $callBackParams = array()) {
         $result = $this->application->setCustomTemplate("bicubic", "tableactions");
-        if ($viewCallBackNav) {
-            $this->application->setHTMLVariableCustomTemplate($result, 'LINK-ACTIONVIEW', $this->application->getAppUrl($this->application->name, $viewCallBackNav, [new Param("id", $object->getId())]));
-            $this->application->parseCustomTemplate($result, "ACTIONVIEW");
-        }
-        if ($editCallBackNav) {
-            $this->application->setHTMLVariableCustomTemplate($result, 'LINK-ACTIONEDIT', $this->application->getAppUrl($this->application->name, $editCallBackNav, [new Param("id", $object->getId())]));
-            $this->application->parseCustomTemplate($result, "ACTIONEDIT");
-        }
-        if ($deleteCallBackNav) {
-            $this->application->setHTMLVariableCustomTemplate($result, 'LINK-ACTIONDELETE', $this->application->getAppUrl($this->application->name, $deleteCallBackNav, [new Param("id", $object->getId())]));
-            $this->application->parseCustomTemplate($result, "ACTIONDELETE");
+        foreach ($callBackParams as $callBackParam) {
+            if (is_a($callBackParam, "LinkParam")) {
+                $this->application->setHTMLArrayCustomTemplate($result, [
+                    'ACTIONLINK-LINK'=>$this->application->getAppUrl($this->application->name, $callBackParam->name, [new Param("id", $object->getId())]),
+                    'ACTIONLINK-NAME'=>$this->lang($callBackParam->value),
+                ]);
+                $this->application->parseCustomTemplate($result, "ACTIONLINK");
+            } else if (is_a($callBackParam, "ImageParam")) {
+                $this->application->setHTMLArrayCustomTemplate($result, [
+                    'ACTIONIMAGE-LINK'=>$this->application->getAppUrl($this->application->name, $callBackParam->name, [new Param("id", $object->getId())]),
+                    'ACTIONIMAGE-SRC'=>$this->photoUrl($callBackParam->value),
+                ]);
+                $this->application->parseCustomTemplate($result, "ACTIONIMAGE");
+            }
         }
         $content = $this->application->renderCustomTemplate($result);
         return $content;
+    }
+
+    public function objectExport(DataObject $object) {
+        require_once "lib/ext/PHPExcel/PHPExcel.php";
+        $excel = new PHPExcel();
+        $cacheMethod = PHPExcel_CachedObjectStorageFactory:: cache_to_phpTemp;
+        $cacheSettings = array(' memoryCacheSize '=>'512MB');
+        PHPExcel_Settings::setCacheStorageMethod($cacheMethod, $cacheSettings);
+        PHPExcel_Settings::setZipClass(PHPExcel_Settings::PCLZIP);
+        $excel->setActiveSheetIndex(0);
+        $properties = $object->__getProperties();
+        if ($object->__isChild()) {
+            $properties = array_merge($properties, $object->__getParentProperties());
+        }
+        $column = "A";
+        $rowNumber = 1;
+        foreach ($properties as $property) {
+            if (!$property["table"]) {
+                continue;
+            }
+            $excel->getActiveSheet()->setCellValue($column . $rowNumber, $this->lang($property["lang"]));
+            $column++;
+        }
+        $data = new AtomManager($this->application->data);
+        $lastid = 0;
+        $items = 100;
+        $objects = $data->getAllPaged($object, "id", "ASC", $items, $lastid);
+        $rowNumber = 2;
+        while ($objects) {
+            foreach ($objects as $object) {
+                $lastid = $object->getId();
+                $column = "A";
+                foreach ($properties as $property) {
+                    if (!$property["table"]) {
+                        continue;
+                    }
+                    $excel->getActiveSheet()->setCellValue($column . $rowNumber, $this->application->formatProperty($object, $property));
+                    $column++;
+                }
+                $rowNumber++;
+            }
+            $objects = $data->getAllPaged($object, "id", "ASC", $items, $lastid);
+        }
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="export.xlsx"');
+        header('Cache-Control: max-age=0');
+        $objWriter = PHPExcel_IOFactory::createWriter($excel, 'Excel2007');
+        $objWriter->save('php://output');
+    }
+
+    public function objectImport(DataObject $object, $callBack) {
+        
+    }
+
+    public function objectImportSubmit(DataObject $object, $callBack) {
+        
     }
 
 }

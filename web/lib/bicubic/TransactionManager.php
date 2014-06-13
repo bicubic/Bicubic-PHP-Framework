@@ -18,12 +18,12 @@ class TransactionManager {
         $this->data = $data;
     }
 
-    public function getAll(DataObject $dataObject, $orderIndex = 'id', $orderDirection = 'DESC') {
+    public function getAll(DataObject $dataObject, $orderIndex = "id", $orderDirection = "DESC") {
         $data = $this->data->select($dataObject, $orderIndex, $orderDirection);
         return $data;
     }
 
-    public function getAllPaged(DataObject $dataObject, $orderIndex = 'id', $orderDirection = 'DESC', $itemsPerPage = 10, $lastIndex = 0, $keyword = null, $keywordfield = null) {
+    public function getAllPaged(DataObject $dataObject, $orderIndex = "id", $orderDirection = "DESC", $itemsPerPage = null, $lastIndex = PHP_INT_MAX, $keyword = null, $keywordfield = null) {
         $data = $this->data->select($dataObject, $orderIndex, $orderDirection, $itemsPerPage, $lastIndex, $keyword, $keywordfield);
         return $data;
     }
