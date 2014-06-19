@@ -22,7 +22,7 @@ $config['web_table_size'] = 100;
 //Code
 $config['code_time_out'] = 300;
 $config['code_time_zone'] = 'America/Santiago';
-$config['code_error_report'] =  E_ALL & ~E_STRICT;//E_ERROR | E_PARSE | E_NOTICE | E_USER_ERROR | E_USER_WARNING | E_USER_NOTICE
+$config['code_error_report'] =  E_ALL & ~E_STRICT;
 //Data Base values
 $config['database_host'] = "localhost";
 $config['database_database'] = "bicubic";
@@ -35,11 +35,10 @@ $config['email_auth'] = true;
 $config['email_user'] = "";
 $config['email_password'] = "";
 //Email with Mandrill
-$config['mandrill_key'] = "";
-$config['mandrill_template'] = "";
+$config['mandrill_key'] = "3NeY1O1sRDHpTCIu0wmfYQ";
 //recaptcha
-$config['recaptcha_publickey'] = "";
-$config['recaptcha_privatekey'] = "";
+$config['recaptcha_publickey'] = "6LcQvvISAAAAAOLuwWc7ZnyE6Uzbe2wZLLPWjGM7";
+$config['recaptcha_privatekey'] = "6LcQvvISAAAAABRhjEajksKtTzn7k7XRnENOGDUB";
 //Facebook
 $config['facebook_appid'] = "";
 $config['facebook_secret'] = "";
@@ -55,12 +54,10 @@ $config['instagram_secret'] = "";
 //Bitly
 $config['bitly_login'] = "";
 $config['bitly_apikey'] = "";
-//Google Cloud Storage
-$config['gs_util'] = "gsutil";
-$config['gs_bucket'] = "gs://mystorage/";
-$config['gs_bucketprivate'] = "gs://mystorageprivate/";
-$config['gs_storage'] = "http://storage.bicubic.cl/";
+//Mylodon Cloud Storage
+$config['mylodon_apikey'] = "hadiuqwye126JjJOUWkhsaKJFDHJKfhjdksjKFJhiubdj39759SKJDH283746273864201982390123JG67DWOWI59137JHAJ498DKBAUWD23ddsadK";
 //Certificates for ios push notification
-$config['certificate_private'] = "/.../server_certificates_bundle_sandbox.pem";
-$config['certificate_auth'] = "/.../entrust_root_certification_authority.pem";
+$config['certificate_private'] = "";
+$config['certificate_auth'] = "";
+
 ?>

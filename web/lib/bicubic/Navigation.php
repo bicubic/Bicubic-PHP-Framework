@@ -42,10 +42,6 @@ class Navigation {
         return $this->application->message($message);
     }
 
-    public function photoUrl($baseUrl) {
-        return $this->application->photoUrl($baseUrl);
-    }
-
     public function sortByLang($array) {
         uasort($array, array("Navigation", "compareLangStrings"));
         return $array;
@@ -150,6 +146,7 @@ class Navigation {
         } else if ($this->item($property, "hidden", false)) {
             $result = $this->application->setCustomTemplate("bicubic", "hidden");
             $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-NAME", $objectName . "_" . $property["name"]);
+            $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-ID", "bicubic-" . strtolower($objectName) . "-" . strtolower($property["name"]));
             $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-VALUE", $value);
             return $this->application->renderCustomTemplate($result);
         } else {
@@ -179,6 +176,7 @@ class Navigation {
                         $result = $this->application->setCustomTemplate("bicubic", $property["type"]);
                         $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LABEL", $this->lang($property["lang"]));
                         $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-NAME", $objectName . "_" . $property["name"]);
+                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-ID", "bicubic-" . strtolower($objectName) . "-" . strtolower($property["name"]));
                         $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-VALUE", $value);
                         $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-REQUIRED", $property["required"] ? "required" : "");
                         return $this->application->renderCustomTemplate($result);
@@ -188,6 +186,7 @@ class Navigation {
                         $result = $this->application->setCustomTemplate("bicubic", $property["type"]);
                         $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LABEL", $this->lang($property["lang"]));
                         $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-NAME", $objectName . "_" . $property["name"]);
+                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-ID", "bicubic-" . strtolower($objectName) . "-" . strtolower($property["name"]));
                         $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-REQUIRED", $property["required"] ? "required" : "");
                         return $this->application->renderCustomTemplate($result);
                     }
@@ -195,10 +194,13 @@ class Navigation {
                         $result = $this->application->setCustomTemplate("bicubic", $property["type"]);
                         $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LABEL", $this->lang($property["lang"])); //date('d/m/Y', $date)
                         $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-NAME-DAY", $objectName . "_" . $property["name"] . "-day");
+                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-ID-DAY", "bicubic-" . strtolower($objectName) . "-" . strtolower($property["name"]) . "-day");
                         $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-VALUE-DAY", ($value ? date('d', $value) : ""));
                         $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-NAME-MONTH", $objectName . "_" . $property["name"] . "-month");
+                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-ID-MONTH", "bicubic-" . strtolower($objectName) . "-" . strtolower($property["name"]) . "-month");
                         $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-VALUE-MONTH", ($value ? date('m', $value) : ""));
                         $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-NAME-YEAR", $objectName . "_" . $property["name"] . "-year");
+                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-ID-YEAR", "bicubic-" . strtolower($objectName) . "-" . strtolower($property["name"]) . "-year");
                         $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-VALUE-YEAR", ($value ? date('Y', $value) : ""));
                         $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-REQUIRED", $property["required"] ? "required" : "");
                         return $this->application->renderCustomTemplate($result);
@@ -207,6 +209,9 @@ class Navigation {
                         $result = $this->application->setCustomTemplate("bicubic", $property["type"]);
                         $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LABEL", $this->lang($property["lang"]));
                         $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-NAME", $objectName . "_" . $property["name"]);
+                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-ID-GENERAL", "bicubic-" . strtolower($objectName) . "-" . strtolower($property["name"]));
+                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-ID-YES", "bicubic-" . strtolower($objectName) . "-" . strtolower($property["name"]) . "-yes");
+                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-ID-NO", "bicubic-" . strtolower($objectName) . "-" . strtolower($property["name"]) . "-no");
                         $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-REQUIRED", $property["required"] ? "required" : "");
                         if ($value) {
                             $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-SELECTED-YES", "selected");
@@ -219,6 +224,7 @@ class Navigation {
                         $result = $this->application->setCustomTemplate("bicubic", "list");
                         $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LABEL", $this->lang($property["lang"]));
                         $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-NAME", $objectName . "_" . $property["name"]);
+                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-ID", "bicubic-" . strtolower($objectName) . "-" . strtolower($property["name"]));
                         $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-REQUIRED", $property["required"] ? "required" : "");
                         $items = $object->__getList($property["name"], $this->application);
                         foreach ($items as $item=> $text) {
@@ -234,10 +240,12 @@ class Navigation {
                 case PropertyTypes::$_SHORTLIST : {
                         $result = $this->application->setCustomTemplate("bicubic", "shortlist");
                         $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LABEL", $this->lang($property["lang"]));
+                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-ID-GENERAL", "bicubic-" . strtolower($objectName) . "-" . strtolower($property["name"]));
                         $items = $object->__getList($property["name"], $this->application);
                         foreach ($items as $item=> $text) {
                             $this->application->setHTMLArrayCustomTemplate($result, array(
                                 "OBJECT-NAME-PROPERTY-NAME"=>$objectName . "_" . $property["name"],
+                                "OBJECT-NAME-PROPERTY-ID"=> "bicubic-" . strtolower($objectName) . "-" . strtolower($property["name"] . "-" . $text),
                                 "OPTION-VALUE"=>$item,
                                 "OPTION-NAME"=>$this->lang($text),
                                 "OPTION-SELECTED"=>($item == $value) ? "checked" : "",
@@ -286,7 +294,7 @@ class Navigation {
             } else if (is_a($featureParam, "ImageParam")) {
                 $this->application->setHTMLArrayCustomTemplate($result, [
                     'FEATUREIMAGE-LINK'=>$this->application->getAppUrl($this->application->name, $featureParam->name),
-                    'FEATUREIMAGE-SRC'=>$this->photoUrl($featureParam->value),
+                    'FEATUREIMAGE-SRC'=>$featureParam->value,
                 ]);
                 $this->application->parseCustomTemplate($result, "FEATUREIMAGE");
             }
@@ -415,7 +423,7 @@ class Navigation {
             } else if (is_a($callBackParam, "ImageParam")) {
                 $this->application->setHTMLArrayCustomTemplate($result, [
                     'ACTIONIMAGE-LINK'=>$this->application->getAppUrl($this->application->name, $callBackParam->name, [new Param("id", $object->getId())]),
-                    'ACTIONIMAGE-SRC'=>$this->photoUrl($callBackParam->value),
+                    'ACTIONIMAGE-SRC'=>$callBackParam->value,
                 ]);
                 $this->application->parseCustomTemplate($result, "ACTIONIMAGE");
             }

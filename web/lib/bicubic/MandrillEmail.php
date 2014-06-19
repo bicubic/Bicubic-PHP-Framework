@@ -23,15 +23,15 @@ class MandrillEmail {
         $this->subject = $subject;
     }
 
-    function send($key, $template, $vars = array()) {
+    function send($key, $html, $text = "") {
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "https://mandrillapp.com/api/1.0/messages/send-template.json");
+        curl_setopt($ch, CURLOPT_URL, "https://mandrillapp.com/api/1.0/messages/send.json");
         curl_setopt($ch, CURLOPT_POST, 1);
         $jsonObject = new ObjectJson();
         $jsonObject->key = $key;
-        $jsonObject->template_name = $template;
-        $jsonObject->template_content = array();
         $jsonObject->message = new ObjectJson();
+        $jsonObject->message->html = $html;
+        $jsonObject->message->text = $text;
         $jsonObject->message->subject = $this->subject;
         $jsonObject->message->from_email = $this->from;
         $jsonObject->message->from_name = $this->fromName;
@@ -40,18 +40,29 @@ class MandrillEmail {
         $toObject->email = $this->to;
         $jsonObject->message->to [] = $toObject;
         $jsonObject->async = true;
-        $jsonObject->message->global_merge_vars = array();
-        foreach ($vars as $key => $value) {
-            $var_content = new ObjectJson();
-            $var_content->name = $key;
-            $var_content->content = $value;
-            $jsonObject->message->global_merge_vars [] = $var_content;
-        }
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($jsonObject));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_exec($ch);
+        $result = curl_exec($ch);
+        if ($result) {
+            $r = json_decode($result);
+            if (property_exists($r, "status") && $r->status == "error") {
+                $this->error = $r->message;
+            } else {
+                foreach ($r as $key=> $response) {
+                    if (property_exists($response, "status") && $response->status != "error") {
+                        return true;
+                    }
+                    if (property_exists($response, "status") && $response->status == "error") {
+                        $this->error = $r->message;
+                    }
+                    break;
+                }
+            }
+        }
         curl_close($ch);
-        return true;
+        return false;
     }
+
 }
+
 ?>

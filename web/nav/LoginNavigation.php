@@ -10,8 +10,6 @@
  */
 
 require_once("nav/AccountNavigation.php");
-require_once("int/ForgotEmail.php");
-require_once("int/NewEmailEmail.php");
 
 class LoginNavigation extends AccountNavigation {
 
@@ -67,8 +65,14 @@ class LoginNavigation extends AccountNavigation {
             $data->data->rollback();
             $this->application->error($this->lang('lang_tokenerror'));
         }
-        $email = new ConfirmationEmail($dbSystemUser, $this);
-        $email->send();
+        //email
+        $result = $this->application->setCustomTemplate("email", "email");
+        $this->application->setHTMLVariableCustomTemplate($result, 'EMAIL-NAME', $dbSystemUser->getName());
+        $this->application->setHTMLVariableCustomTemplate($result, 'EMAIL-TEXT', $this->lang('lang_emailconfirmationtext'));
+        $this->application->setHTMLVariableCustomTemplate($result, 'EMAIL-LINK', $this->application->getAppUrl("home","validate",array(new Param("token", $dbSystemUser->getConfirmemailtoken()))));
+        $html = $this->application->renderCustomTemplate($result);
+        $this->application->sendEmail($dbSystemUser->getEmail(), $this->lang('lang_emailconfirmationsubject'), $html);
+        //finito
         $data->data->commit();
         $this->application->message($this->lang('lang_emailconfirmationresent'));
     }
@@ -109,8 +113,14 @@ class LoginNavigation extends AccountNavigation {
             $data->data->rollback();
             $this->application->error($this->lang('lang_servererror'));
         }
-        $email = new ForgotEmail($dbSystemUser, $this);
-        $email->send();
+        //email
+        $result = $this->application->setCustomTemplate("email", "email");
+        $this->application->setHTMLVariableCustomTemplate($result, 'EMAIL-NAME', $dbSystemUser->getName());
+        $this->application->setHTMLVariableCustomTemplate($result, 'EMAIL-TEXT', $this->lang('lang_emailforgottext'));
+        $this->application->setHTMLVariableCustomTemplate($result, 'EMAIL-LINK', $this->application->getAppUrl("home","forgotValidate",array(new Param("token", $dbSystemUser->getForgottoken()))));
+        $html = $this->application->renderCustomTemplate($result);
+        $this->application->sendEmail($dbSystemUser->getEmail(), $this->lang('lang_emailforgotsubject'), $html);
+        //finito
         $data->data->commit();
         $this->application->message($this->lang('lang_emailforgotsent'));
     }
@@ -273,8 +283,14 @@ class LoginNavigation extends AccountNavigation {
             $data->data->rollback();
             $this->application->error($this->lang('lang_servererror'));
         }
-        $email = new NewEmailEmail($dbSystemUser, $this);
-        $email->send();
+        //email
+        $result = $this->application->setCustomTemplate("email", "email");
+        $this->application->setHTMLVariableCustomTemplate($result, 'EMAIL-NAME', $dbSystemUser->getName());
+        $this->application->setHTMLVariableCustomTemplate($result, 'EMAIL-TEXT', $this->lang('lang_emailchangetext'));
+        $this->application->setHTMLVariableCustomTemplate($result, 'EMAIL-LINK', $this->application->getAppUrl("home","emailValidate",array(new Param("token", $dbSystemUser->getChangeemailtoken()))));
+        $html = $this->application->renderCustomTemplate($result);
+        $this->application->sendEmail($dbSystemUser->getEmail(), $this->lang('lang_emailchangesubject'), $html);
+        //finito
         $data->data->commit();
         $this->application->message($this->lang('lang_emailchangesent'));
     }

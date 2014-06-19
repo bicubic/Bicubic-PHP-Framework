@@ -8,7 +8,7 @@
  * @version 3.0.0
  */
 //base
-require_once("config/config.php");
+require_once("config.php");
 //default php config
 date_default_timezone_set($config['code_time_zone']);
 error_reporting($config['code_error_report']);
