@@ -63,7 +63,7 @@ class ApplicationFactory  {
 
     public static function defaultWebApplication($config, $lang) {
         $application = new Application($config, $lang, null, null);
-        $application->redirect("home", "hello");
+        $application->redirect("home", "home");
     }
 
 }

@@ -35,9 +35,9 @@ class JsonApplication extends Application {
     }
 
     public function error($message) {
-        $this->setMainTemplate("message", "error");
-        $this->setJsonVariableTemplate('MESSAGE-TEXT', $message);
-        $this->render();
+        $jsonObject = new ErrorJson();
+        $jsonObject->error = $message;
+        $this->renderToJson($jsonObject);
     }
 
 }

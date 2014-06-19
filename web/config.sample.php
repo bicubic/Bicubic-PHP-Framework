@@ -36,7 +36,6 @@ $config['email_user'] = "";
 $config['email_password'] = "";
 //Email with Mandrill
 $config['mandrill_key'] = "";
-$config['mandrill_template'] = "";
 //recaptcha
 $config['recaptcha_publickey'] = "";
 $config['recaptcha_privatekey'] = "";
@@ -56,11 +55,8 @@ $config['instagram_secret'] = "";
 $config['bitly_login'] = "";
 $config['bitly_apikey'] = "";
 //Google Cloud Storage
-$config['gs_util'] = "gsutil";
-$config['gs_bucket'] = "gs://mystorage/";
-$config['gs_bucketprivate'] = "gs://mystorageprivate/";
-$config['gs_storage'] = "http://storage.bicubic.cl/";
+$config['mylodon_apikey'] = "";
 //Certificates for ios push notification
-$config['certificate_private'] = "/.../server_certificates_bundle_sandbox.pem";
-$config['certificate_auth'] = "/.../entrust_root_certification_authority.pem";
+$config['certificate_private'] = "";
+$config['certificate_auth'] = "";
 ?>

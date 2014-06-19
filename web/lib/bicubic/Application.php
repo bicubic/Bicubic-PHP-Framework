@@ -132,10 +132,10 @@ class Application {
             }
         }
         if ($type == PropertyTypes::$_FILE && !isset($value)) {
-            $value = $this->uploadGS($name, "$name", $this->createRandomString(32), $force, true);
+            $value = $this->upload($name);
         }
         if ($type == PropertyTypes::$_IMAGE256 && !isset($value)) {
-            $value = $this->uploadGS($name, "$name", $this->createRandomString(32), $force, true, true, 256, 256);
+            $value = $this->uploadPhoto($name, 256, 256);
         }
         if ($force && !isset($value)) {
             $this->error($this->lang('lang_notvalid') . " : " . (array_key_exists($name, $this->lang) ? $this->lang($name) : $name));
@@ -640,7 +640,7 @@ class Application {
      * @return void
      */
     public function error($message) {
-        $this->setMainTemplate("message", "error");
+        $this->setMainTemplate("bicubic", "error");
         $this->setHTMLVariableTemplate('MESSAGE-TEXT', $this->lang($message));
         $this->render();
     }
@@ -651,7 +651,7 @@ class Application {
      * @return void
      */
     public function message($message) {
-        $this->setMainTemplate("message", "message");
+        $this->setMainTemplate("bicubic", "message");
         $this->setHTMLVariableTemplate('MESSAGE-TEXT', $this->lang($message));
         $this->render();
     }
@@ -1003,218 +1003,107 @@ class Application {
         $this->endApp();
     }
 
-    public function download($fileName = null, $filepath = null) {
-        if (!isset($fileName)) {
-            $fileName = $this->getUrlParam($this->config('param_file_name'), PropertyTypes::$_STRING);
-            if (!isset($fileName)) {
-                $this->error($this->lang('lang_filenotfound'));
-            }
-            $filepath = $this->config('server_down_folder') . $fileName;
-        }
-        if (!file_exists($filepath)) {
-            $this->error($this->lang('lang_filenotfound'));
-        }
-        header("Content-Type: application/octet-stream");
-        header("Content-Disposition: attachment; filename=$fileName");
-        header("Content-Type: application/force-download");
-        header("Content-Type: application/vnd.ms-excel");
-        header("Content-Transfer-Encoding: binary");
-        ob_clean();
-        flush();
-        readfile($filepath);
-        $this->endApp();
-    }
-
-    public function upload($fileParam, $destFolder, $override, $destname, $optional = false) {
+    public function upload($fileParam, $optional = false) {
         if (!isset($_FILES[$fileParam])) {
             if (!$optional) {
                 $this->error($this->lang('lang_filenotfound'));
             } else {
-                return;
+                return false;
             }
         }
         if ($_FILES[$fileParam]['error'] == UPLOAD_ERR_INI_SIZE) {
             if (!$optional) {
                 $this->error($this->lang('lang_filesize'));
             } else {
-                return;
+                return false;
             }
         }
         if (!is_uploaded_file($_FILES[$fileParam]['tmp_name'])) {
             if (!$optional) {
                 $this->error($this->lang('lang_filenotuploaded'));
             } else {
-                return;
+                return false;
             }
         }
-        if (!$override && file_exists($destFolder . $destname)) {
-            $this->error($this->lang('lang_fileexist'));
+        $cfile = curl_file_create($_FILES[$fileParam]['tmp_name'], null, 'file');
+        if (!$cfile) {
+            $this->error($this->lang('lang_filecreate'));
         }
-        if (!move_uploaded_file($_FILES[$fileParam]['tmp_name'], $destFolder . $destname)) {
-            $this->error($this->lang('lang_filenotmoved'));
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, "https://api.mylodon.cl/index.php?app=json&nav=upload-file");
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, array('test_file'=>$cfile));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $result = curl_exec($ch);
+        if ($result) {
+            $r = json_decode($result);
+            if ($r->status == "error") {
+                if (!$optional) {
+                    $this->error($this->lang($r->error));
+                } else {
+                    return false;
+                }
+            } else if ($r->status == "sucess") {
+                return $r->secureurl;
+            }
         }
-        return $destFolder . $destname;
+        curl_close($ch);
+        if (!$optional) {
+            $this->error($this->lang('lang_filenotuploaded'));
+        } else {
+            return false;
+        }
     }
 
-    public function uploadGS($fileParam, $destFolder, $destname, $mandatory = false, $public = true, $image = false, $width = 256, $height = 256) {
+    public function uploadPhoto($fileParam, $optional = false, $w = 256, $h = 256) {
         if (!isset($_FILES[$fileParam])) {
-            if ($mandatory) {
+            if (!$optional) {
                 $this->error($this->lang('lang_filenotfound'));
             } else {
-                return null;
+                return false;
             }
         }
         if ($_FILES[$fileParam]['error'] == UPLOAD_ERR_INI_SIZE) {
-            if ($mandatory) {
+            if (!$optional) {
                 $this->error($this->lang('lang_filesize'));
             } else {
-                return null;
+                return false;
             }
         }
         if (!is_uploaded_file($_FILES[$fileParam]['tmp_name'])) {
-            if ($mandatory) {
-                $this->error($this->lang('lang_filenotuploaded') . " " . $_FILES[$fileParam]['error']);
+            if (!$optional) {
+                $this->error($this->lang('lang_filenotuploaded'));
             } else {
-                return null;
+                return false;
             }
         }
-        //validate extensions
-        if ($image) {
-            $localPath = $_FILES[$fileParam]['tmp_name'];
-            if (exif_imagetype($localPath) != IMAGETYPE_PNG) {
-                if (exif_imagetype($localPath) != IMAGETYPE_JPEG) {
-                    if ($mandatory) {
-                        $this->error($this->lang('lang_filenotjpg'));
-                    } else {
-                        return null;
-                    }
+        $cfile = curl_file_create($_FILES[$fileParam]['tmp_name'], null, 'file');
+        if (!$cfile) {
+            $this->error($this->lang('lang_filecreate'));
+        }
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, "https://api.mylodon.cl/index.php?app=json&nav=upload-image");
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, array('test_file'=>$cfile, 'w'=>$w, 'h'=>$h));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $result = curl_exec($ch);
+        if ($result) {
+            $r = json_decode($result);
+            if ($r->status == "error") {
+                if (!$optional) {
+                    $this->error($this->lang($r->error));
+                } else {
+                    return false;
                 }
-            }
-
-            if (isset($width) && isset($height) && $width == $height) {
-                $imageData = getimagesize($localPath);
-                $origin_w = $imageData[0];
-                $origin_h = $imageData[1];
-                if ($origin_w != $width || $origin_h != $height) {
-                    $image_p = imagecreatetruecolor($width, $height);
-                    if (!imagealphablending($image_p, false)) {
-                        $this->error($this->lang('lang_imageblend'));
-                    }
-                    if (!imagesavealpha($image_p, true)) {
-                        $this->error($this->lang('lang_imagealpha'));
-                    }
-                    $originalimage = FALSE;
-                    if (exif_imagetype($localPath) == IMAGETYPE_PNG) {
-                        $originalimage = imagecreatefrompng($localPath);
-                    } else if (exif_imagetype($localPath) == IMAGETYPE_JPEG) {
-                        $originalimage = imagecreatefromjpeg($localPath);
-                    }
-                    if ($originalimage === FALSE) {
-                        $this->error($this->lang('lang_imagecreate'));
-                    }
-                    $bg = imagecolorallocate($image_p, 255, 255, 255);
-                    if ($bg === FALSE) {
-                        $this->error($this->lang('lang_imagecolor'));
-                    }
-                    if (!imagefill($image_p, 0, 0, $bg)) {
-                        $this->error($this->lang('lang_imagefill'));
-                    }
-
-                    $x = 0;
-                    $y = 0;
-                    $w = $width;
-                    $h = $height;
-
-                    if ($origin_w <= $width && $origin_h <= $height) {
-                        $x = ($width - $origin_w) / 2;
-                        $y = ($height - $origin_h) / 2;
-                        $w = $origin_w;
-                        $h = $origin_h;
-                    } else if ($origin_w > $width && $origin_h <= $height) {
-                        $p = ($width) / $origin_w;
-                        $x = 0;
-                        $y = ($height - ($p * $origin_h)) / 2;
-                        $w = $width;
-                        $h = $p * $origin_h;
-                    } else if ($origin_w <= $width && $origin_h > $height) {
-                        $p = ($height) / $origin_h;
-                        $x = ($width - ($p * $origin_w)) / 2;
-                        $y = 0;
-                        $w = $p * $origin_w;
-                        $h = $height;
-                    } else if ($origin_w > $width && $origin_h > $height) {
-                        if ($origin_w == $origin_h) {
-                            $x = 0;
-                            $y = 0;
-                            $w = $width;
-                            $h = $height;
-                        } else if ($origin_w > $origin_h) {
-                            $p = ($width) / $origin_w;
-                            $x = 0;
-                            $y = ($height - ($p * $origin_h)) / 2;
-                            $w = $width;
-                            $h = $p * $origin_h;
-                        } else if ($origin_w < $origin_h) {
-                            $p = ($height) / $origin_h;
-                            $x = ($width - ($p * $origin_w)) / 2;
-                            $y = 0;
-                            $w = $p * $origin_w;
-                            $h = $height;
-                        }
-                    }
-
-                    if (!imagecopyresampled($image_p, $originalimage, $x, $y, 0, 0, $w, $h, $origin_w, $origin_h)) {
-                        $this->error($this->lang('lang_resample'));
-                    }
-                    if (!imagepng($image_p, $localPath, 9)) {
-                        $this->error($this->lang('lang_save'));
-                    }
-                }
+            } else if ($r->status == "sucess") {
+                return $r->secureurl;
             }
         }
-        //save object to GS account
-        $localPath = $_FILES[$fileParam]['tmp_name'];
-        $permission = "";
-        if ($public) {
-            $permission = "-a public-read";
-        }
-        $gspath = $this->config('gs_util') . " cp $permission $localPath " . $this->config('gs_bucket') . $destFolder . $destname;
-        $ouput = 0;
-        $result = 0;
-        exec($gspath, $ouput, $result);
-        if ($result === 0) {
-            return $destFolder . $destname;
+        curl_close($ch);
+        if (!$optional) {
+            $this->error($this->lang('lang_filenotuploaded'));
         } else {
-            return null;
-        }
-    }
-
-    public function uploadLocalGS($localPath, $destFolder, $destname, $public = false) {
-        //save object to GS account
-        $permission = "";
-        if ($public) {
-            $permission = "-a public-read";
-        }
-        $gspath = $this->config('gs_util') . " cp $permission $localPath " . $this->config('gs_bucketprivate') . $destFolder . $destname;
-        $ouput = 0;
-        $result = 0;
-        exec($gspath, $ouput, $result);
-        if ($result === 0) {
-            return $destFolder . $destname;
-        } else {
-            return null;
-        }
-    }
-
-    public function downloadLocalGS($gspathPath, $destFolder, $destname) {
-        $gspath = $this->config('gs_util') . " cp gs://" . $gspathPath . " " . $destFolder . $destname;
-        $ouput = 0;
-        $result = 0;
-        exec($gspath, $ouput, $result);
-        if ($result === 0) {
-            return $destFolder . $destname;
-        } else {
-            return null;
+            return false;
         }
     }
 
@@ -1417,17 +1306,6 @@ class Application {
             return $this->config[$string];
         } else {
             return $string;
-        }
-    }
-
-    public function photoUrl($baseUrl) {
-        if (!isset($baseUrl)) {
-            return null;
-        }
-        if (strstr($baseUrl, "http") === false) {
-            return $this->config('gs_storage') . $baseUrl;
-        } else {
-            return $baseUrl;
         }
     }
 
@@ -1720,6 +1598,14 @@ class Application {
         $sql .= $indexes;
         $sql .= $constraints;
         echo $sql;
+    }
+    
+    public function sendEmail($to, $subject, $html, $text = "") {
+        $mandrillEmail = new MandrillEmail($to, $this->config('web_contact_email'), $this->config('web_contact_name'), $subject);
+        if(!$mandrillEmail->send($this->config('mandrill_key'), $html, $text)) {
+            $this->error($this->lang('lang_erroremail') . " - " . $mandrillEmail->error);
+        }
+    
     }
 
 }

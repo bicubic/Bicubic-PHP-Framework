@@ -8,7 +8,6 @@
  * @license    MIT
  * @version 3.0.0
  */
-require_once("int/ConfirmationEmail.php");
 require_once("lib/google/recaptchalib.php");
 
 class AccountNavigation extends Navigation {
@@ -99,8 +98,14 @@ class AccountNavigation extends Navigation {
             $data->data->rollback();
             $this->application->error($this->lang('lang_servererror'));
         }
-        $email = new ConfirmationEmail($dbSystemUser, $this);
-        $email->send();
+        //email
+        $result = $this->application->setCustomTemplate("email", "email");
+        $this->application->setHTMLVariableCustomTemplate($result, 'EMAIL-NAME', $dbSystemUser->getName());
+        $this->application->setHTMLVariableCustomTemplate($result, 'EMAIL-TEXT', $this->lang('lang_emailconfirmationtext'));
+        $this->application->setHTMLVariableCustomTemplate($result, 'EMAIL-LINK', $this->application->getAppUrl("home","validate",array(new Param("token", $dbSystemUser->getConfirmemailtoken()))));
+        $html = $this->application->renderCustomTemplate($result);
+        $this->application->sendEmail($dbSystemUser->getEmail(), $this->lang('lang_emailconfirmationsubject'), $html);
+        //finito
         $this->loginSet($dbSystemUser);
         $data->data->commit();
         $this->application->redirect($callBackApp, $callBackNav);
