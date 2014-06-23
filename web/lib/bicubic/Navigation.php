@@ -282,7 +282,7 @@ class Navigation {
         return $content;
     }
 
-    public function objectTable(DataObject $object, $callBackParams = array(), $featureParams = array(), LinkParam $loadMore = null, LinkParam $search = null, OrderPAram $oderParam = null) {
+    public function objectTable(DataObject $object, OrderParam $order = null, $actionParams = array(), $featureParams = array(), LinkParam $loadMore = null, LinkParam $search = null, LinkParam $reorder = null) {
         $result = $this->application->setCustomTemplate("bicubic", "table");
         foreach ($featureParams as $featureParam) {
             if (is_a($featureParam, "LinkParam")) {
@@ -299,8 +299,11 @@ class Navigation {
             if ($object->__isChild()) {
                 $properties = array_merge($properties, $object->__getParentProperties());
             }
+            $params = $search->params;
+            $params[]=new Param("property",$order->property);
+            $params[]=new Param("order", $order->order);
             $this->application->setHTMLArrayCustomTemplate($result, [
-                'SEARCH-ACTION'=>$this->application->getAppUrl($search->app, $search->nav, $search->params),
+                'SEARCH-ACTION'=>$this->application->getAppUrl($search->app, $search->nav, $params),
             ]);
             foreach ($properties as $property) {
                 if (!$property["table"]) {
@@ -388,13 +391,13 @@ class Navigation {
             $this->application->parseCustomTemplate($result, "SEARCHLINK");
         }
         if ($loadMore) {
-            $this->application->setVariableCustomTemplate($result, "TABLE-CONTENT", $this->objectTableHeader($object, $callBackParams) . $this->objectTableContentMore($object, $callBackParams, PHP_INT_MAX, $oderParam));
+            $this->application->setVariableCustomTemplate($result, "TABLE-CONTENT", $this->objectTableHeader($object, $actionParams, $reorder, $order) . $this->objectTableContentMore($object, $actionParams, null, $order));
             $this->application->setVariableCustomTemplate($result, "TABLE-LASTID", $this->tableLastId);
             $this->application->setVariableCustomTemplate($result, "TABLE-SIZE", $this->tableSize);
             $this->application->setVariableCustomTemplate($result, "TABLE-MAXSIZE", $this->tableMaxSize);
             $this->application->setVariableCustomTemplate($result, "TABLE-URL", $this->application->getAppUrl($loadMore->app, $loadMore->nav, $loadMore->params));
         } else {
-            $this->application->setVariableCustomTemplate($result, "TABLE-CONTENT", $this->objectTableContent($object, $callBackParams, $oderParam));
+            $this->application->setVariableCustomTemplate($result, "TABLE-CONTENT", $this->objectTableContent($object, $actionParams, $search, $order));
         }
 
         $content = $this->application->renderCustomTemplate($result);
@@ -416,43 +419,48 @@ class Navigation {
         return $object;
     }
 
-    public function objectTableOrder(DataObject $object) {
-
-        return new OrderParam("id", "DESC");
+    public function objectTableOrder() {
+        $order = new OrderParam();
+        $order->property = $this->application->getUrlParam("property", PropertyTypes::$_STRING32, false);
+        $order->order = $this->application->getUrlParam("order", PropertyTypes::$_INT, false);
+        if($order->property && $order->order) {
+            return $order;
+        }
+        return new OrderParam("id", ObjectOrder::$_DESC);
     }
 
-    public function objectTableJson(DataObject $object, $callBackParams, $oderParam = null) {
+    public function objectTableJson(DataObject $object, $actionParams, $oderParam = null) {
         $lastid = $this->application->getFormParam("lastid", PropertyTypes::$_INT);
         $json = new SuccessJson();
-        $json->data = $this->objectTableContentMore($object, $callBackParams, $lastid, $oderParam);
+        $json->data = $this->objectTableContentMore($object, $actionParams, $lastid, $oderParam);
         $json->lastid = $this->tableLastId;
         $json->size = $this->tableSize;
         $this->application->renderToJson($json);
     }
 
-    public function objectTableContent(DataObject $object, $callBackParams = array(), $oderParam = null) {
-        $content = $this->objectTableHeader($object, $callBackParams) . $this->objectTableRows($object, $callBackParams, PHP_INT_MAX, PHP_INT_MAX, $oderParam);
+    public function objectTableContent(DataObject $object, $actionParams = array(), LinkParam $reorder = null, OrderParam $order = null) {
+        $content = $this->objectTableHeader($object, $actionParams, $reorder, $order = null) . $this->objectTableRows($object, $actionParams, null, null, $order);
         return $content;
     }
 
-    public function objectTableContentMore(DataObject $object, $callBackParams = array(), $lastid = PHP_INT_MAX, $oderParam = null) {
-        $content = $this->objectTableRows($object, $callBackParams, $this->tableMaxSize, $lastid, $oderParam);
+    public function objectTableContentMore(DataObject $object, $actionParams = array(), $lastid = null, $oderParam = null) {
+        $content = $this->objectTableRows($object, $actionParams, $this->tableMaxSize, $lastid, $oderParam);
         return $content;
     }
 
-    public function objectTableRows(DataObject $object, $callBackParams = array(), $size = PHP_INT_MAX, $lastid = PHP_INT_MAX, $oderParam = null) {
+    public function objectTableRows(DataObject $object, $actionParams = array(), $size = null, $lastid = null, $oderParam = null) {
         $data = new AtomManager($this->application->data);
         $objects = $data->getAllPaged($object, $oderParam, $size, $lastid);
         $rowscontent = "";
         foreach ($objects as $object) {
             $this->tableLastId = $object->getId();
             $this->tableSize++;
-            $rowscontent .= $this->objectTableRow($object, $callBackParams);
+            $rowscontent .= $this->objectTableRow($object, $actionParams);
         }
         return $rowscontent;
     }
 
-    public function objectTableHeader(DataObject $object, $callBackParams = array()) {
+    public function objectTableHeader(DataObject $object, $actionParams = array(), LinkParam $reorder = null, OrderParam $order = null) {
         $properties = $object->__getProperties();
         if ($object->__isChild()) {
             $properties = array_merge($properties, $object->__getParentProperties());
@@ -462,9 +470,9 @@ class Navigation {
             if (!$property["table"]) {
                 continue;
             }
-            $headercontent .= $this->objectTableHeaderValue($object, $property);
+            $headercontent .= $this->objectTableHeaderValue($object, $property, $reorder, $order);
         }
-        if ($callBackParams) {
+        if ($actionParams) {
             $headercontent .= $this->objectTableHeaderActions();
         }
 
@@ -475,13 +483,16 @@ class Navigation {
         return $content;
     }
 
-    public function objectTableHeaderValue(DataObject $object, $property, LinkParam $search = null, OrderParam $order = null) {
+    public function objectTableHeaderValue(DataObject $object, $property, LinkParam $reorder = null, OrderParam $order = null) {
         $result = $this->application->setCustomTemplate("bicubic", "tableth");
         $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-HEADER", $this->lang($property["lang"]));
-//        if ($search && $order) {
-//            $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-ORDER", $this->lang($property["lang"]));
-//            $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LINK", $searchCallBackUrl);//
-//        }
+        if ($reorder && $order) {
+            $params = $reorder->params;
+            $params[] = new Param("property",$property["name"]);
+            $params[] = new Param("order", ($property["name"] === $order->property) ? $this->item(ObjectOrder::$_OPOSITE, $order->order, ObjectOrder::$_DESC) : ObjectOrder::$_DESC);
+            $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-ORDER", $this->item(ObjectOrder::$_VALUE, $order->order));
+            $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LINK", $this->application->getAppUrl($reorder->app, $reorder->nav,$params));
+        }
         $content = $this->application->renderCustomTemplate($result);
         return $content;
     }
@@ -493,7 +504,7 @@ class Navigation {
         return $content;
     }
 
-    public function objectTableRow(DataObject $object, $callBackParams = array()) {
+    public function objectTableRow(DataObject $object, $actionParams = array()) {
         $properties = $object->__getProperties();
         if ($object->__isChild()) {
             $properties = array_merge($properties, $object->__getParentProperties());
@@ -505,8 +516,8 @@ class Navigation {
             }
             $rowcontent .= $this->objectTableRowValue($object, $property);
         }
-        if ($callBackParams) {
-            $rowcontent .= $this->objectTableRowActions($object, $callBackParams);
+        if ($actionParams) {
+            $rowcontent .= $this->objectTableRowActions($object, $actionParams);
         }
 
 
@@ -523,13 +534,14 @@ class Navigation {
         return $content;
     }
 
-    public function objectTableRowActions(DataObject $object, $callBackParams = array()) {
+    public function objectTableRowActions(DataObject $object, $actionParams = array()) {
         $result = $this->application->setCustomTemplate("bicubic", "tableactions");
-        foreach ($callBackParams as $callBackParam) {
+        foreach ($actionParams as $callBackParam) {
             if (is_a($callBackParam, "LinkParam")) {
-                $callBackParam->params[]=new Param("id", $object->getId());
+                $params = $callBackParam->params;
+                $params[]=new Param("id", $object->getId());
                 $this->application->setHTMLArrayCustomTemplate($result, [
-                    'ACTIONLINK-LINK'=>$this->application->getAppUrl($callBackParam->app, $callBackParam->nav, $callBackParam->params),
+                    'ACTIONLINK-LINK'=>$this->application->getAppUrl($callBackParam->app, $callBackParam->nav, $params),
                     'ACTIONLINK-NAME'=>$this->lang($callBackParam->lang),
                     'ACTIONLINK-CLASS'=>$this->lang($callBackParam->class),
                 ]);
@@ -564,7 +576,7 @@ class Navigation {
         $data = new AtomManager($this->application->data);
         $lastid = 0;
         $items = 500;
-        $objects = $data->getAllPaged($object, new OrderParam("id", "ASC"), $items, $lastid);
+        $objects = $data->getAllPaged($object, new OrderParam("id", ObjectOrder::$_ASC), $items, $lastid);
         $rowNumber = 2;
         while ($objects) {
             foreach ($objects as $object) {
@@ -579,7 +591,7 @@ class Navigation {
                 }
                 $rowNumber++;
             }
-            $objects = $data->getAllPaged($object, new OrderParam("id", "ASC"), $items, $lastid);
+            $objects = $data->getAllPaged($object, new OrderParam("id", ObjectOrder::$_ASC), $items, $lastid);
         }
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment;filename="export.xlsx"');

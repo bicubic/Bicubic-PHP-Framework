@@ -74,7 +74,7 @@ abstract class SQLData extends Data {
         return $id;
     }
 
-    public function select(DataObject $object, OrderParam $orderParam = null, $limit = null, $lastIndex = PHP_INT_MAX) {
+    public function select(DataObject $object, OrderParam $orderParam = null, $limit = null, $lastIndex = null) {
         $class = strtolower(get_class($object));
         $data = array();
         $query = "SELECT * FROM  " . ($class) . " ";
@@ -137,16 +137,24 @@ abstract class SQLData extends Data {
 
         $lastIndex = $this->escapeChars($lastIndex);
         if(!$orderParam) {
-            $orderParam = new OrderParam("id", "DESC");
+            $orderParam = new OrderParam("id",  ObjectOrder::$_DESC);
+        }
+        if(!$lastIndex) {
+            if($orderParam->order == ObjectOrder::$_DESC) {
+                $lastIndex = PHP_INT_MAX;
+            }
+            else {
+                $lastIndex = 0;
+            }
         }
         if ($i == 0) {
-            if ($orderParam->order == "DESC") {
+            if ($orderParam->order ==  ObjectOrder::$_DESC) {
                 $query .= "WHERE $this->idname < $lastIndex ";
             } else {
                 $query .= "WHERE $this->idname > $lastIndex ";
             }
         } else {
-            if ($orderParam->order == "DESC") {
+            if ($orderParam->order ==  ObjectOrder::$_DESC) {
                 $query .= "AND $this->idname < $lastIndex ";
             } else {
                 $query .= "AND $this->idname > $lastIndex ";
@@ -155,7 +163,7 @@ abstract class SQLData extends Data {
         $i++;
         
         
-        $query .= "ORDER BY $orderParam->property $orderParam->order ";
+        $query .= "ORDER BY $orderParam->property  " . ObjectOrder::$_VALUE[$orderParam->order] . " ";
 
         if ($limit) {
             if ($limit < 0) {

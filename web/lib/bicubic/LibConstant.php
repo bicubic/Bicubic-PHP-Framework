@@ -188,4 +188,25 @@ class ObjectBoolean {
 
 }
 
+class ObjectOrder {
+
+    public static $_ASC = 1;
+    public static $_DESC = 2;
+    public static $_ENUM = array(
+        1 => 'lang_asc',
+        2 => 'lang_desc',
+    );
+    
+    public static $_VALUE = array(
+        1 => 'ASC',
+        2 => 'DESC',
+    );
+    
+    public static $_OPOSITE = array(
+        1 => 2,
+        2 => 1,
+    );
+
+}
+
 ?>

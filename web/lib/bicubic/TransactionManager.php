@@ -23,7 +23,7 @@ class TransactionManager {
         return $data;
     }
 
-    public function getAllPaged(DataObject $dataObject, OrderParam $orderParam = null, $itemsPerPage = null, $lastIndex = PHP_INT_MAX) {
+    public function getAllPaged(DataObject $dataObject, OrderParam $orderParam = null, $itemsPerPage = null, $lastIndex = null) {
         $data = $this->data->select($dataObject, $orderParam, $itemsPerPage, $lastIndex);
         return $data;
     }

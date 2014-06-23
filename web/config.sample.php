@@ -12,6 +12,7 @@ $config = array();
 //Config
 $config['maintenance'] = false;
 $config['sslavailable'] = false;
+$config['debugdatabase'] = false;
 //Web  
 $config['web_name'] = "Bicubic PHP Framework";
 $config['web_copyright'] = "©2014 Bicubic Technology - All rights reserved";
