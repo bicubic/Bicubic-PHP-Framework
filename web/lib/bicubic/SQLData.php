@@ -74,7 +74,7 @@ abstract class SQLData extends Data {
         return $id;
     }
 
-    public function select(DataObject $object, $orderIndex = "id", $orderDirection = "DESC", $limit = null, $lastIndex = PHP_INT_MAX, $keyword = null, $keywordfield = null) {
+    public function select(DataObject $object, OrderParam $orderParam = null, $limit = null, $lastIndex = PHP_INT_MAX) {
         $class = strtolower(get_class($object));
         $data = array();
         $query = "SELECT * FROM  " . ($class) . " ";
@@ -91,40 +91,71 @@ abstract class SQLData extends Data {
             if (isset($value)) {
                 $value = $this->escapeChars($value);
                 if ($i == 0) {
-                    $query .= "WHERE $key = '$value' ";
+                    $query .= "WHERE  ";
                 } else {
-                    $query .= "AND $key = '$value' ";
+                    $query .= "AND  ";
+                }
+                switch ($property["type"]) {
+                    case PropertyTypes::$_STRING :
+                    case PropertyTypes::$_STRING1 :
+                    case PropertyTypes::$_STRING2 :
+                    case PropertyTypes::$_STRING4 :
+                    case PropertyTypes::$_STRING8 :
+                    case PropertyTypes::$_STRING16 :
+                    case PropertyTypes::$_STRING24 :
+                    case PropertyTypes::$_STRING32 :
+                    case PropertyTypes::$_STRING64 :
+                    case PropertyTypes::$_STRING128 :
+                    case PropertyTypes::$_STRING256 :
+                    case PropertyTypes::$_STRING512 :
+                    case PropertyTypes::$_STRING1024 :
+                    case PropertyTypes::$_STRING2048 : {
+                            $query .= " $key ~* '.*$value.*' ";
+                            break;
+                        }
+                    case PropertyTypes::$_ALPHANUMERIC :
+                    case PropertyTypes::$_DOUBLE :
+                    case PropertyTypes::$_EMAIL :
+                    case PropertyTypes::$_RUT :
+                    case PropertyTypes::$_INT :
+                    case PropertyTypes::$_LETTERS :
+                    case PropertyTypes::$_LONG :
+                    case PropertyTypes::$_PASSWORD :
+                    case PropertyTypes::$_FILE :
+                    case PropertyTypes::$_IMAGE256 :
+                    case PropertyTypes::$_DATE :
+                    case PropertyTypes::$_BOOLEAN :
+                    case PropertyTypes::$_LIST :
+                    case PropertyTypes::$_SHORTLIST : {
+                            $query .= " $key = '$value' ";
+                            break;
+                        }
                 }
                 $i++;
             }
         }
-        if (isset($keyword) && isset($keywordfield)) {
-            if ($i == 0) {
-                $keyword = $this->escapeChars($keyword);
-                $query .= "WHERE $keywordfield ~* '.*$keyword.*' ";
-            } else {
-                $keyword = $this->escapeChars($keyword);
-                $query .= "AND $keywordfield ~* '.*$keyword.*' ";
-            }
-        }
 
         $lastIndex = $this->escapeChars($lastIndex);
+        if(!$orderParam) {
+            $orderParam = new OrderParam("id", "DESC");
+        }
         if ($i == 0) {
-            if($orderDirection == "DESC") {
-                $query .= "WHERE $this->idname < $lastIndex";
-            }
-            else {
-                $query .= "WHERE $this->idname > $lastIndex";
+            if ($orderParam->order == "DESC") {
+                $query .= "WHERE $this->idname < $lastIndex ";
+            } else {
+                $query .= "WHERE $this->idname > $lastIndex ";
             }
         } else {
-            if($orderDirection == "DESC") {
+            if ($orderParam->order == "DESC") {
                 $query .= "AND $this->idname < $lastIndex ";
-            }
-            else {
+            } else {
                 $query .= "AND $this->idname > $lastIndex ";
             }
         }
-        $query .= "ORDER BY $orderIndex $orderDirection ";
+        $i++;
+        
+        
+        $query .= "ORDER BY $orderParam->property $orderParam->order ";
 
         if ($limit) {
             if ($limit < 0) {

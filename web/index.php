@@ -28,7 +28,7 @@ require_once("lib/bicubic/Navigation.php");
 require_once("lib/bicubic/ObjectParamList.php");
 require_once("lib/bicubic/Param.php");
 require_once("lib/bicubic/LinkParam.php");
-require_once("lib/bicubic/ImageParam.php");
+require_once("lib/bicubic/OrderParam.php");
 require_once("lib/bicubic/SQLData.php");
 require_once("lib/bicubic/PostgreSQLData.php");
 require_once("lib/bicubic/MandrillEmail.php");

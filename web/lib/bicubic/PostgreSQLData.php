@@ -94,7 +94,7 @@ class PostgreSQLData extends SQLData {
         if ($this->debug) {
             var_dump($value);
         }
-        return pg_escape_string($this->connection, $value);
+        return pg_escape_string($this->connection, strval($value));
     }
 
     public function freeMemory($result) {

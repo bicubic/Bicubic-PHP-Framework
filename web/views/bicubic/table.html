@@ -1,18 +1,32 @@
-<ul>
+<ul id="bicubic-table-menu">
     <!-- BEGIN FEATURELINK -->
     <li>
-        <a href="{FEATURELINK-LINK}">
+        <a class="{FEATURELINK-CLASS}" href="{FEATURELINK-LINK}">
             {FEATURELINK-NAME}
         </a>
     </li>
     <!-- END FEATURELINK -->
-    <!-- BEGIN FEATUREIMAGE -->
+    <!-- BEGIN SEARCHLINK -->
     <li>
-        <a href="{FEATUREIMAGE-LINK}">
-            <img src="{FEATUREIMAGE-SRC}" />
-        </a>
+        <form id="bicubic-search-form" action="{SEARCH-ACTION}" method="post">
+            <!-- BEGIN SEARCHLIST -->
+                <label>{SEARCHLIST-LANG}</label>
+                <select id="bicubic-search-{SEARCHLIST-NAME}" name="{SEARCHLIST-NAME}" >
+                    <option value="">{TEXT-ALL}</option>
+                    <!-- BEGIN SEARCHLISTOPTION -->
+                    <option value="{SEARCHLISTOPTION-VALUE}"  data-selected="{SEARCHLISTOPTION-SELECTED}">{SEARCHLISTOPTION-NAME}</option>
+                    <!-- END SEARCHLISTOPTION -->
+                </select>
+            <!-- END SEARCHLIST -->
+            <!-- BEGIN SEARCHSTRING -->
+            <label>{SEARCHSTRING-LANG}</label>
+            <input id="bicubic-search-{SEARCHSTRING-NAME}" type="text" maxlength="256" name="{SEARCHSTRING-NAME}" value="{SEARCHSTRING-VALUE}" />
+            <!-- END SEARCHSTRING -->
+            <button type="submit" id="submit">{TEXT-SEARCH}</button>
+        </form>
     </li>
-    <!-- END FEATUREIMAGE -->
+    <!-- END SEARCHLINK -->
+
 </ul>
 
 <table id="bicubic-table" data-lastid="{TABLE-LASTID}" data-size="{TABLE-SIZE}" data-url="{TABLE-URL}" data-maxsize="{TABLE-MAXSIZE}">
@@ -29,7 +43,7 @@
         document.addEventListener('scroll', function() {
             var lastid = vtable.getAttribute("data-lastid")
             var size = vtable.getAttribute("data-size");
-            if(!url || size < maxSize) {
+            if (!url || size < maxSize) {
                 tableMore = false;
             }
             if (tableMore) {

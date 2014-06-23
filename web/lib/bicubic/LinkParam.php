@@ -8,8 +8,21 @@
  * @license    MIT
  * @version 3.0.0
  */
-class LinkParam  extends Param {
+class LinkParam  {
 
+    public $app;
+    public $nav;
+    public $params;
+    public $lang;
+    public $class;
+
+    function __construct($app, $nav, $params, $lang, $class) {
+        $this->app = $app;
+        $this->nav = $nav;
+        $this->params = $params;
+        $this->lang = $lang;
+        $this->class = $class;
+    }
 
 }
 

@@ -245,7 +245,7 @@ class Navigation {
                         foreach ($items as $item=> $text) {
                             $this->application->setHTMLArrayCustomTemplate($result, array(
                                 "OBJECT-NAME-PROPERTY-NAME"=>$objectName . "_" . $property["name"],
-                                "OBJECT-NAME-PROPERTY-ID"=> "bicubic-" . strtolower($objectName) . "-" . strtolower($property["name"] . "-" . $text),
+                                "OBJECT-NAME-PROPERTY-ID"=>"bicubic-" . strtolower($objectName) . "-" . strtolower($property["name"] . "-" . $text),
                                 "OPTION-VALUE"=>$item,
                                 "OPTION-NAME"=>$this->lang($text),
                                 "OPTION-SELECTED"=>($item == $value) ? "checked" : "",
@@ -282,59 +282,167 @@ class Navigation {
         return $content;
     }
 
-    public function objectTable(DataObject $object, $callBackParams = array(), $featureParams = array(), $loadMoreCallBackUrl = null) {
+    public function objectTable(DataObject $object, $callBackParams = array(), $featureParams = array(), LinkParam $loadMore = null, LinkParam $search = null, OrderPAram $oderParam = null) {
         $result = $this->application->setCustomTemplate("bicubic", "table");
         foreach ($featureParams as $featureParam) {
             if (is_a($featureParam, "LinkParam")) {
                 $this->application->setHTMLArrayCustomTemplate($result, [
-                    'FEATURELINK-LINK'=>$this->application->getAppUrl($this->application->name, $featureParam->name),
-                    'FEATURELINK-NAME'=>$this->lang($featureParam->value),
+                    'FEATURELINK-LINK'=>$this->application->getAppUrl($featureParam->app, $featureParam->nav, $featureParam->params),
+                    'FEATURELINK-NAME'=>$this->lang($featureParam->lang),
+                    'FEATURELINK-CLASS'=>$this->lang($featureParam->class),
                 ]);
                 $this->application->parseCustomTemplate($result, "FEATURELINK");
-            } else if (is_a($featureParam, "ImageParam")) {
-                $this->application->setHTMLArrayCustomTemplate($result, [
-                    'FEATUREIMAGE-LINK'=>$this->application->getAppUrl($this->application->name, $featureParam->name),
-                    'FEATUREIMAGE-SRC'=>$featureParam->value,
-                ]);
-                $this->application->parseCustomTemplate($result, "FEATUREIMAGE");
             }
         }
-        if ($loadMoreCallBackUrl) {
-            $this->application->setVariableCustomTemplate($result, "TABLE-CONTENT", $this->objectTableHeader($object, $callBackParams) . $this->objectTableContentMore($object, $callBackParams));
+        if ($search) {
+            $properties = $object->__getProperties();
+            if ($object->__isChild()) {
+                $properties = array_merge($properties, $object->__getParentProperties());
+            }
+            $this->application->setHTMLArrayCustomTemplate($result, [
+                'SEARCH-ACTION'=>$this->application->getAppUrl($search->app, $search->nav, $search->params),
+            ]);
+            foreach ($properties as $property) {
+                if (!$property["table"]) {
+                    continue;
+                }
+                switch ($property["type"]) {
+                    case PropertyTypes::$_STRING :
+                    case PropertyTypes::$_STRING1 :
+                    case PropertyTypes::$_STRING2 :
+                    case PropertyTypes::$_STRING4 :
+                    case PropertyTypes::$_STRING8 :
+                    case PropertyTypes::$_STRING16 :
+                    case PropertyTypes::$_STRING24 :
+                    case PropertyTypes::$_STRING32 :
+                    case PropertyTypes::$_STRING64 :
+                    case PropertyTypes::$_STRING128 :
+                    case PropertyTypes::$_STRING256 :
+                    case PropertyTypes::$_STRING512 :
+                    case PropertyTypes::$_STRING1024 :
+                    case PropertyTypes::$_STRING2048 : {
+                            $getter = "get" . strtoupper(substr($property["name"], 0, 1)) . substr($property["name"], 1);
+                            $val = $object->$getter();
+                            $this->application->setHTMLArrayCustomTemplate($result, [
+                                'SEARCHSTRING-NAME'=>$property["name"],
+                                'SEARCHSTRING-LANG'=>$this->lang($property["lang"]),
+                                'SEARCHSTRING-VALUE'=>$val,
+                            ]);
+                            $this->application->parseCustomTemplate($result, "SEARCHSTRING");
+                            break;
+                        }
+                    case PropertyTypes::$_BOOLEAN : {
+                            $this->application->setHTMLArrayCustomTemplate($result, [
+                                'SEARCHLIST-NAME'=>$property["name"],
+                                'SEARCHLIST-LANG'=>$this->lang($property["lang"]),
+                            ]);
+                            $enum = ObjectBoolean::$_ENUM;
+                            $getter = "get" . strtoupper(substr($property["name"], 0, 1)) . substr($property["name"], 1);
+                            $val = $object->$getter();
+                            foreach ($enum as $key => $value) {
+                                $this->application->setHTMLArrayCustomTemplate($result, [
+                                    'SEARCHLISTOPTION-VALUE'=>$key,
+                                    'SEARCHLISTOPTION-SELECTED'=>($key === $val ? "selected" : ""),
+                                    'SEARCHLISTOPTION-NAME'=>$this->lang($value),
+                                ]);
+                                $this->application->parseCustomTemplate($result, "SEARCHLISTOPTION");
+                            }
+                            $this->application->parseCustomTemplate($result, "SEARCHLIST");
+                            break;
+                        }
+                    case PropertyTypes::$_LIST :
+                    case PropertyTypes::$_SHORTLIST : {
+                            $this->application->setHTMLArrayCustomTemplate($result, [
+                                'SEARCHLIST-NAME'=>$property["name"],
+                                'SEARCHLIST-LANG'=>$this->lang($property["lang"]),
+                            ]);
+                            $enum = $object->__getList($property["name"], $this->application);
+                            $getter = "get" . strtoupper(substr($property["name"], 0, 1)) . substr($property["name"], 1);
+                            $val = $object->$getter();
+                            foreach ($enum as $key=> $value) {
+                                $this->application->setHTMLArrayCustomTemplate($result, [
+                                    'SEARCHLISTOPTION-VALUE'=>$key,
+                                    'SEARCHLISTOPTION-SELECTED'=>($key === $val ? "selected" : ""),
+                                    'SEARCHLISTOPTION-NAME'=>$this->lang($value),
+                                ]);
+                                $this->application->parseCustomTemplate($result, "SEARCHLISTOPTION");
+                            }
+                            $this->application->parseCustomTemplate($result, "SEARCHLIST");
+                            break;
+                        }
+                    case PropertyTypes::$_ALPHANUMERIC :
+                    case PropertyTypes::$_DOUBLE :
+                    case PropertyTypes::$_EMAIL :
+                    case PropertyTypes::$_RUT :
+                    case PropertyTypes::$_INT :
+                    case PropertyTypes::$_LETTERS :
+                    case PropertyTypes::$_LONG :
+                    case PropertyTypes::$_PASSWORD :
+                    case PropertyTypes::$_FILE :
+                    case PropertyTypes::$_IMAGE256 :
+                    case PropertyTypes::$_DATE : {
+                            break;
+                        }
+                }
+            }
+            $this->application->parseCustomTemplate($result, "SEARCHLINK");
+        }
+        if ($loadMore) {
+            $this->application->setVariableCustomTemplate($result, "TABLE-CONTENT", $this->objectTableHeader($object, $callBackParams) . $this->objectTableContentMore($object, $callBackParams, PHP_INT_MAX, $oderParam));
             $this->application->setVariableCustomTemplate($result, "TABLE-LASTID", $this->tableLastId);
             $this->application->setVariableCustomTemplate($result, "TABLE-SIZE", $this->tableSize);
             $this->application->setVariableCustomTemplate($result, "TABLE-MAXSIZE", $this->tableMaxSize);
-            $this->application->setVariableCustomTemplate($result, "TABLE-URL", $loadMoreCallBackUrl);
+            $this->application->setVariableCustomTemplate($result, "TABLE-URL", $this->application->getAppUrl($loadMore->app, $loadMore->nav, $loadMore->params));
         } else {
-            $this->application->setVariableCustomTemplate($result, "TABLE-CONTENT", $this->objectTableContent($object, $callBackParams));
+            $this->application->setVariableCustomTemplate($result, "TABLE-CONTENT", $this->objectTableContent($object, $callBackParams, $oderParam));
         }
 
         $content = $this->application->renderCustomTemplate($result);
         return $content;
     }
 
-    public function objectTableJson(DataObject $object, $callBackParams) {
+    public function objectTableFilter(DataObject $object) {
+        $properties = $object->__getProperties();
+        if ($object->__isChild()) {
+            $properties = array_merge($properties, $object->__getParentProperties());
+        }
+        foreach ($properties as $property) {
+            if (!$property["table"]) {
+                continue;
+            }
+            $setter = "set" . strtoupper(substr($property["name"], 0, 1)) . substr($property["name"], 1);
+            $object->$setter($this->application->getFormParam($property["name"], $property["type"], false));
+        }
+        return $object;
+    }
+
+    public function objectTableOrder(DataObject $object) {
+
+        return new OrderParam("id", "DESC");
+    }
+
+    public function objectTableJson(DataObject $object, $callBackParams, $oderParam = null) {
         $lastid = $this->application->getFormParam("lastid", PropertyTypes::$_INT);
         $json = new SuccessJson();
-        $json->data = $this->objectTableContentMore($object, $callBackParams, $lastid);
+        $json->data = $this->objectTableContentMore($object, $callBackParams, $lastid, $oderParam);
         $json->lastid = $this->tableLastId;
         $json->size = $this->tableSize;
         $this->application->renderToJson($json);
     }
 
-    public function objectTableContent(DataObject $object, $callBackParams = array()) {
-        $content = $this->objectTableHeader($object, $callBackParams) . $this->objectTableRows($object, $callBackParams);
+    public function objectTableContent(DataObject $object, $callBackParams = array(), $oderParam = null) {
+        $content = $this->objectTableHeader($object, $callBackParams) . $this->objectTableRows($object, $callBackParams, PHP_INT_MAX, PHP_INT_MAX, $oderParam);
         return $content;
     }
 
-    public function objectTableContentMore(DataObject $object, $callBackParams = array(), $lastid = PHP_INT_MAX) {
-        $content = $this->objectTableRows($object, $callBackParams, $this->tableMaxSize, $lastid);
+    public function objectTableContentMore(DataObject $object, $callBackParams = array(), $lastid = PHP_INT_MAX, $oderParam = null) {
+        $content = $this->objectTableRows($object, $callBackParams, $this->tableMaxSize, $lastid, $oderParam);
         return $content;
     }
 
-    public function objectTableRows(DataObject $object, $callBackParams = array(), $size = PHP_INT_MAX, $lastid = PHP_INT_MAX) {
+    public function objectTableRows(DataObject $object, $callBackParams = array(), $size = PHP_INT_MAX, $lastid = PHP_INT_MAX, $oderParam = null) {
         $data = new AtomManager($this->application->data);
-        $objects = $data->getAllPaged($object, "id", "DESC", $size, $lastid);
+        $objects = $data->getAllPaged($object, $oderParam, $size, $lastid);
         $rowscontent = "";
         foreach ($objects as $object) {
             $this->tableLastId = $object->getId();
@@ -367,16 +475,20 @@ class Navigation {
         return $content;
     }
 
-    public function objectTableHeaderValue(DataObject $object, $property) {
+    public function objectTableHeaderValue(DataObject $object, $property, LinkParam $search = null, OrderParam $order = null) {
         $result = $this->application->setCustomTemplate("bicubic", "tableth");
         $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-HEADER", $this->lang($property["lang"]));
+//        if ($search && $order) {
+//            $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-ORDER", $this->lang($property["lang"]));
+//            $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LINK", $searchCallBackUrl);//
+//        }
         $content = $this->application->renderCustomTemplate($result);
         return $content;
     }
 
     public function objectTableHeaderActions() {
         $result = $this->application->setCustomTemplate("bicubic", "tableth");
-        $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-HEADER", $this->lang("lang_actions"));
+        $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-HEADER", $this->lang('lang_actions'));
         $content = $this->application->renderCustomTemplate($result);
         return $content;
     }
@@ -415,17 +527,13 @@ class Navigation {
         $result = $this->application->setCustomTemplate("bicubic", "tableactions");
         foreach ($callBackParams as $callBackParam) {
             if (is_a($callBackParam, "LinkParam")) {
+                $callBackParam->params[]=new Param("id", $object->getId());
                 $this->application->setHTMLArrayCustomTemplate($result, [
-                    'ACTIONLINK-LINK'=>$this->application->getAppUrl($this->application->name, $callBackParam->name, [new Param("id", $object->getId())]),
-                    'ACTIONLINK-NAME'=>$this->lang($callBackParam->value),
+                    'ACTIONLINK-LINK'=>$this->application->getAppUrl($callBackParam->app, $callBackParam->nav, $callBackParam->params),
+                    'ACTIONLINK-NAME'=>$this->lang($callBackParam->lang),
+                    'ACTIONLINK-CLASS'=>$this->lang($callBackParam->class),
                 ]);
                 $this->application->parseCustomTemplate($result, "ACTIONLINK");
-            } else if (is_a($callBackParam, "ImageParam")) {
-                $this->application->setHTMLArrayCustomTemplate($result, [
-                    'ACTIONIMAGE-LINK'=>$this->application->getAppUrl($this->application->name, $callBackParam->name, [new Param("id", $object->getId())]),
-                    'ACTIONIMAGE-SRC'=>$callBackParam->value,
-                ]);
-                $this->application->parseCustomTemplate($result, "ACTIONIMAGE");
             }
         }
         $content = $this->application->renderCustomTemplate($result);
@@ -455,8 +563,8 @@ class Navigation {
         }
         $data = new AtomManager($this->application->data);
         $lastid = 0;
-        $items = 100;
-        $objects = $data->getAllPaged($object, "id", "ASC", $items, $lastid);
+        $items = 500;
+        $objects = $data->getAllPaged($object, new OrderParam("id", "ASC"), $items, $lastid);
         $rowNumber = 2;
         while ($objects) {
             foreach ($objects as $object) {
@@ -471,7 +579,7 @@ class Navigation {
                 }
                 $rowNumber++;
             }
-            $objects = $data->getAllPaged($object, "id", "ASC", $items, $lastid);
+            $objects = $data->getAllPaged($object, new OrderParam("id", "ASC"), $items, $lastid);
         }
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment;filename="export.xlsx"');
@@ -489,5 +597,4 @@ class Navigation {
     }
 
 }
-
 ?>

@@ -230,7 +230,7 @@ class Application {
             case PropertyTypes::$_LIST :
             case PropertyTypes::$_SHORTLIST :
             case PropertyTypes::$_LONG : {
-                    if ($value !== "" && $value >= 0) {
+                    if ($value !== "" && $value >= -1) {
                         $vals = array("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "-", "+", ".", ",");
                         $trimed = str_replace($vals, "", $value);
                         if (is_numeric($value) && $trimed === "") {
@@ -485,7 +485,7 @@ class Application {
                         $vals = array("f", "t", "0", "1");
                         $trimed = str_replace($vals, "", $value);
                         if (empty($trimed)) {
-                            return substr($value, 0, 1);
+                            return intval(substr($value, 0, 1));
                         }
                     }
                     break;
@@ -1605,7 +1605,6 @@ class Application {
         if(!$mandrillEmail->send($this->config('mandrill_key'), $html, $text)) {
             $this->error($this->lang('lang_erroremail') . " - " . $mandrillEmail->error);
         }
-    
     }
 
 }

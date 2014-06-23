@@ -8,8 +8,15 @@
  * @license    MIT
  * @version 3.0.0
  */
-class ImageParam  extends Param {
+class OrderParam  {
 
+    public $order;
+    public $property;
+
+    function __construct($property, $order) {
+        $this->property = $property;
+        $this->order = $order;
+    }
 
 }
 
