@@ -1551,62 +1551,244 @@ class Application {
         return $langs;
     }
 
-    protected function script_generateDB() {
-        $sql = "\n\n\n\n\n";
-        $indexes = "";
-        $constraints = "";
+    protected function script_generateDB($out = true) {
+        $tablequery = "";
+        $indexquery = "";
+        $constraintquery = "";
+        $dropquery = "";
+        $tables = array();
+        $data = new PostgreSQLData($this->config);
+        $query = "SELECT table_name FROM information_schema.tables WHERE table_schema='public'";
+        $result = $data->performRead($query);
+        while ($row = $data->readNext($result)) {
+            $class = $row['table_name'];
+            $tables [] = $class;
+        }
+        //get existing bean names
+        $beans = array();
         foreach (get_declared_classes() as $classname) {
-//            echo $classname . "\n";
             if (is_subclass_of($classname, "DataObject")) {
                 $tablename = strtolower($classname);
-                $object = new $classname();
-                $sql .= "CREATE TABLE $tablename ( \n";
+                $beans[] = $tablename;
+            }
+        }
+        //go
+        foreach ($beans as $bean) {
+            //check if table exist to create new
+            $existbean = false;
+            foreach ($tables as $table) {
+                if ($table == $bean) {
+                    $existbean = true;
+                    break;
+                }
+            }
+            if (!$existbean) {
+                $tablequery .= $this->script_createTable($bean);
+                $tablequery .= $this->script_createColumns($bean);
+                $indexquery .= $this->script_createIndexes($bean);
+                $constraintquery .= $this->script_createCosntraints($bean);
+            } else {
+                $columns = array();
+                //get existing columns
+                $query = "SELECT column_name, ordinal_position FROM information_schema.columns WHERE table_name = '$bean'";
+                $result = $data->performRead($query);
+                while ($row = $data->readNext($result)) {
+                    $columns [] = $row;
+                }
+                //get object properties
+                $object = new $bean();
                 $properties = $object->__getProperties();
                 foreach ($properties as $property) {
                     if (!$property["serializable"]) {
                         continue;
                     }
-                    $name = $property["name"];
-                    if ($name == "id" && !$object->__isChild()) {
-                        $sql .= "id serial NOT NULL";
-                        $constraints.= "ALTER TABLE ONLY $tablename ADD CONSTRAINT $tablename" . "_pk PRIMARY KEY (id); \n";
-                    } else if ($name == "id" && $object->__isChild()) {
-                        $sql .= "id bigint NOT NULL";
-                        $constraints.= "ALTER TABLE ONLY $tablename ADD CONSTRAINT $tablename" . "_pk PRIMARY KEY (id); \n";
-                    } else {
-                        $type = PropertyTypes::$_POSTGRESQLTYPES[$property["type"]];
-                        $notnull = $property["required"] ? "NOT NULL" : "";
-                        $default = $property["default"] ? "DEFAULT " . $property["default"] : "";
-                        $sql .= ",\n";
-                        $sql .= "$name $type $notnull $default";
-                    }
-                    if ($property["index"]) {
-                        if (array_key_exists("unique", $property) && $property["unique"]) {
-                            $indexes.= "CREATE UNIQUE INDEX $tablename" . "_" . "$name" . "_index ON $tablename USING btree ($name); \n";
-                        } else {
-                            $indexes.= "CREATE INDEX $tablename" . "_" . "$name" . "_index ON $tablename USING btree ($name); \n";
+                    $existcol = false;
+                    $colposition = 0;
+                    foreach ($columns as $column) {
+
+                        if ($column['column_name'] == $property["name"]) {
+                            $existcol = true;
+                            $colposition = $column['ordinal_position'];
+                            break;
                         }
                     }
-                    if ($property["reference"] !== null) {
-                        $constraints.= "ALTER TABLE ONLY $tablename ADD CONSTRAINT $tablename" . "_" . $property["reference"] . "_fkey FOREIGN KEY (" . $property["name"] . ") REFERENCES " . $property["reference"] . "(id) MATCH FULL ON DELETE CASCADE; \n";
+                    if (!$existcol) {
+
+                        $tablequery .= $this->script_createColumn($object, $property);
+                        $indexquery .= $this->script_createColumnIndex($object, $property);
+                        $constraintquery .= $this->script_createColumnConstraint($object, $property);
+                    } else {
+                        $name = $property["name"];
+                        $query = "select description from pg_catalog.pg_description where objoid = (select c.oid from pg_catalog.pg_class c where c.relname = '$bean') and objsubid = $colposition;";
+                        $result = $data->performRead($query);
+                        $description = "";
+                        $row = $data->readNext($result);
+                        if ($row) {
+                            $description = $row["description"];
+                        }
+                        if ($description != $this->script_createColumnComment($object, $property)) {
+                            $tablequery .= "ALTER TABLE $bean DROP COLUMN $name;";
+                            $tablequery .= $this->script_createColumn($object, $property);
+                            $indexquery .= $this->script_createColumnIndex($object, $property);
+                            $constraintquery .= $this->script_createColumnConstraint($object, $property);
+                        }
                     }
                 }
-                $sql .= "\n";
-                $sql .= "); \n";
+                //look for columns to delete
+                foreach ($columns as $column) {
+                    $existcolumn = false;
+                    foreach ($properties as $property) {
+                        if ($column['column_name'] == $property["name"]) {
+                            $existcolumn = true;
+                            break;
+                        }
+                    }
+                    if (!$existcolumn) {
+                        $columnname = $column['column_name'];
+                        $dropquery .= "ALTER TABLE $bean DROP COLUMN $columnname;";
+                    }
+                }
             }
         }
-        $sql .= $indexes;
-        $sql .= $constraints;
-        echo $sql;
+        foreach ($tables as $table) {
+            $existtable = false;
+            foreach ($beans as $bean) {
+                if ($table == $bean) {
+                    $existtable = true;
+                    break;
+                }
+            }
+            if (!$existtable) {
+                $columnname = $column['column_name'];
+                $dropquery .= "DROP TABLE $bean;";
+            }
+        }
+
+        $sql = trim($tablequery . $indexquery . $constraintquery);
+        if ($out) {
+            echo "$sql\n";
+        } else {
+            if ($sql) {
+                $result = $data->performWrite($sql);
+                if ($result) {
+                    echo "ok\n";
+                } else {
+                    echo "fail\n";
+                }
+            } else {
+                echo "no update\n";
+            }
+        }
     }
-    
+
+    private function script_createTable($beanname) {
+        $sql = "CREATE TABLE $beanname ();";
+        return $sql;
+    }
+
+    private function script_createColumns($beanname) {
+        $object = new $beanname();
+        $sql = "";
+        $properties = $object->__getProperties();
+        foreach ($properties as $property) {
+            if (!$property["serializable"]) {
+                continue;
+            }
+            $sql .= $this->script_createColumn($object, $property);
+        }
+        return $sql;
+    }
+
+    private function script_createIndexes($beanname) {
+        $object = new $beanname();
+        $sql = "";
+        $properties = $object->__getProperties();
+        foreach ($properties as $property) {
+            if (!$property["serializable"]) {
+                continue;
+            }
+            $sql .= $this->script_createColumnIndex($object, $property);
+        }
+        return $sql;
+    }
+
+    private function script_createCosntraints($beanname) {
+        $object = new $beanname();
+        $sql = "";
+        $properties = $object->__getProperties();
+        foreach ($properties as $property) {
+            if (!$property["serializable"]) {
+                continue;
+            }
+            $sql .= $this->script_createColumnConstraint($object, $property);
+        }
+
+        return $sql;
+    }
+
+    private function script_createColumn(DataObject $object, $property) {
+        $class = strtolower(get_class($object));
+        $sql = "";
+        $name = $property["name"];
+        $type = PropertyTypes::$_POSTGRESQLTYPES[$property["type"]];
+        $notnull = $property["required"] ? "NOT NULL" : "";
+        $default = $property["default"] ? "DEFAULT " . $property["default"] : "";
+        if ($name == "id" && !$object->__isChild()) {
+            $sql .= "ALTER TABLE $class ADD COLUMN id serial NOT NULL;";
+        } else if ($name == "id" && $object->__isChild()) {
+            $sql .= "ALTER TABLE $class ADD COLUMN id bigint NOT NULL;";
+        } else {
+            $sql .= "ALTER TABLE $class ADD COLUMN $name $type $notnull $default;";
+        }
+
+        $sql .= "COMMENT ON COLUMN $class.$name is '" . $this->script_createColumnComment($object, $property) . "';";
+
+        return $sql;
+    }
+
+    private function script_createColumnComment(DataObject $object, $property) {
+        $name = $property["name"];
+        $type = PropertyTypes::$_POSTGRESQLTYPES[$property["type"]];
+        $notnull = $property["required"] ? "NOT NULL" : "";
+        $default = $property["default"] ? "DEFAULT " . $property["default"] : "";
+        return trim("$name $type $notnull $default");
+    }
+
+    private function script_createColumnIndex(DataObject $object, $property) {
+        $class = strtolower(get_class($object));
+        $sql = "";
+        $name = $property["name"];
+        if ($property["index"]) {
+            if (array_key_exists("unique", $property) && $property["unique"]) {
+                $sql.= "CREATE UNIQUE INDEX $class" . "_" . "$name" . "_index ON $class USING btree ($name);";
+            } else {
+                $sql.= "CREATE INDEX $class" . "_" . "$name" . "_index ON $class USING btree ($name);";
+            }
+        }
+        return $sql;
+    }
+
+    private function script_createColumnConstraint(DataObject $object, $property) {
+        $class = strtolower(get_class($object));
+        $sql = "";
+        $name = $property["name"];
+        if ($name == "id" && !$object->__isChild()) {
+            $sql.= "ALTER TABLE ONLY $class ADD CONSTRAINT $class" . "_pk PRIMARY KEY (id);";
+        } else if ($name == "id" && $object->__isChild()) {
+            $sql.= "ALTER TABLE ONLY $class ADD CONSTRAINT $class" . "_pk PRIMARY KEY (id);";
+        }
+        if ($property["reference"] !== null) {
+            $sql.= "ALTER TABLE ONLY $class ADD CONSTRAINT $class" . "_" . $property["reference"] . "_fkey FOREIGN KEY (" . $property["name"] . ") REFERENCES " . $property["reference"] . "(id) MATCH FULL ON DELETE CASCADE;";
+        }
+        return $sql;
+    }
+
     public function sendEmail($to, $subject, $html, $text = "") {
         $mandrillEmail = new MandrillEmail($to, $this->config('web_contact_email'), $this->config('web_contact_name'), $subject);
-        if(!$mandrillEmail->send($this->config('mandrill_key'), $html, $text)) {
+        if (!$mandrillEmail->send($this->config('mandrill_key'), $html, $text)) {
             $this->error($this->lang('lang_erroremail') . " - " . $mandrillEmail->error);
         }
     }
 
 }
-
 ?>

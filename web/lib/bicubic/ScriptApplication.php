@@ -22,7 +22,11 @@ class ScriptApplication extends Application {
         $this->navigation = $this->getUrlParam($this->config('param_navigation'), PropertyTypes::$_LETTERS, false);
         switch ($this->navigation) {
             case "data" : {
-                    $this->script_generateDB();
+                    $this->script_generateDB(true);
+                    break;
+                }
+            case "db" : {
+                    $this->script_generateDB(false);
                     break;
                 }
             case "password" : {

@@ -25,13 +25,6 @@ class ApplicationFactory  {
 
     public static function makeScriptApplication($app, $config, $lang) {
         $application = null;
-        switch ($app) {
-            case "script": {
-                    require_once("app/ScriptApplication.php");
-                    $application = new ScriptApplication($config, $lang);
-                    break;
-                }
-        }
         return $application;
     }
 

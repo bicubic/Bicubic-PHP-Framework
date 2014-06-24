@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Bicubic PHP Framework
  *
@@ -22,6 +23,7 @@ require_once("lib/ext/thread/singleton.class.php");
 //bicubic
 require_once("lib/bicubic/LibConstant.php");
 require_once("lib/bicubic/Application.php");
+require_once("lib/bicubic/ScriptApplication.php");
 require_once("lib/bicubic/Data.php");
 require_once("lib/bicubic/DataObject.php");
 require_once("lib/bicubic/Navigation.php");
@@ -74,10 +76,9 @@ if (!array_key_exists($langfile, Lang::$_LANGKEY)) {
     $langfile = Lang::$_LANGVALUE[Lang::$_DEFAULT];
 }
 //Lang reload
-if(file_exists("lang/lang.$langfile.php")) {
+if (file_exists("lang/lang.$langfile.php")) {
     require_once("lang/lang.$langfile.php");
-}
-else {
+} else {
     $langfile = Lang::$_LANGVALUE[Lang::$_DEFAULT];
     require_once("lang/lang.$langfile.php");
 }
@@ -87,18 +88,21 @@ $config["lang"] = $langfile;
 $config['server_temp_folder'] = sys_get_temp_dir() . "/";
 //set working foler
 $url = array_key_exists('REQUEST_URI', $_SERVER) ? $_SERVER['REQUEST_URI'] : ""; //returns the current URL
-$parts = explode('/',$url);
-$dir =  array_key_exists('SERVER_NAME', $_SERVER) ? $_SERVER['SERVER_NAME'] : "";
+$port = array_key_exists('SERVER_PORT', $_SERVER) ? $_SERVER['SERVER_PORT'] : 80; //returns the current port
+$parts = explode('/', $url);
+$dir = array_key_exists('SERVER_NAME', $_SERVER) ? $_SERVER['SERVER_NAME'] : "";
+if ($port != 80 && $port != 443) {
+    $dir .= ":$port";
+}
 for ($i = 0; $i < count($parts) - 1; $i++) {
- $dir .= $parts[$i] . "/";
+    $dir .= $parts[$i] . "/";
 }
 $dir = rtrim($dir, "/");
 $protocol = ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') || (array_key_exists('SERVER_PORT', $_SERVER) ? $_SERVER['SERVER_PORT'] == 443 : false)) ? "https" : "http";
 $config['web_folder'] = "$protocol://$dir/";
-if($config['sslavailable']) {
+if ($config['sslavailable']) {
     $config['web_secure_url'] = "https://$dir/index.php";
-}
-else {
+} else {
     $config['web_secure_url'] = "http://$dir/index.php";
 }
 //Set Input Data into GET
@@ -108,20 +112,27 @@ if (isset($argv)) {
         $_GET[$request[0]] = $request[1];
     }
     $app = $application->getUrlParam($config['param_app'], PropertyTypes::$_LETTERS);
-    $application = ApplicationFactory::makeScriptApplication($app, $config, $lang);
-    if($application) {
-        $application->execute();
-    }
-    else {
-        ApplicationFactory::defaultScriptApplication($config, $lang);
+    switch ($app) {
+        case "script": {
+                $application = new ScriptApplication($config, $lang);
+                $application->execute();
+                break;
+            }
+        default : {
+                $application = ApplicationFactory::makeScriptApplication($app, $config, $lang);
+                if ($application) {
+                    $application->execute();
+                } else {
+                    ApplicationFactory::defaultScriptApplication($config, $lang);
+                }
+            }
     }
 } else {
     $app = $application->getUrlParam($config['param_app'], PropertyTypes::$_LETTERS, false);
     $application = ApplicationFactory::makeWebApplication($app, $config, $lang);
-    if($application) {
+    if ($application) {
         $application->execute();
-    }
-    else {
+    } else {
         ApplicationFactory::defaultWebApplication($config, $lang);
     }
 }
