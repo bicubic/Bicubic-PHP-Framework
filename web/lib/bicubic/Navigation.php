@@ -153,6 +153,7 @@ class Navigation {
             switch ($property["type"]) {
                 case PropertyTypes::$_ALPHANUMERIC :
                 case PropertyTypes::$_DOUBLE :
+                case PropertyTypes::$_URL :    
                 case PropertyTypes::$_EMAIL :
                 case PropertyTypes::$_RUT :
                 case PropertyTypes::$_INT :
@@ -205,18 +206,28 @@ class Navigation {
                         $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-REQUIRED", $property["required"] ? "required" : "");
                         return $this->application->renderCustomTemplate($result);
                     }
+                case PropertyTypes::$_TIME : {
+                        $result = $this->application->setCustomTemplate("bicubic", $property["type"]);
+                        $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LABEL", $this->lang($property["lang"])); //date('d/m/Y', $date)
+                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-NAME-HOUR", $objectName . "_" . $property["name"] . "-hour");
+                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-ID-HOUR", "bicubic-" . strtolower($objectName) . "-" . strtolower($property["name"]) . "-hour");
+                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-VALUE-HOUR", ($value ? date('H', $value) : ""));
+                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-NAME-MINUTES", $objectName . "_" . $property["name"] . "-minutes");
+                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-ID-MINUTES", "bicubic-" . strtolower($objectName) . "-" . strtolower($property["name"]) . "-minutes");
+                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-VALUE-MINUTES", ($value ? date('i', $value) : ""));
+                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-REQUIRED", $property["required"] ? "required" : "");
+                        return $this->application->renderCustomTemplate($result);
+                    }
                 case PropertyTypes::$_BOOLEAN : {
                         $result = $this->application->setCustomTemplate("bicubic", $property["type"]);
                         $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LABEL", $this->lang($property["lang"]));
                         $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-NAME", $objectName . "_" . $property["name"]);
-                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-ID-GENERAL", "bicubic-" . strtolower($objectName) . "-" . strtolower($property["name"]));
-                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-ID-YES", "bicubic-" . strtolower($objectName) . "-" . strtolower($property["name"]) . "-yes");
-                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-ID-NO", "bicubic-" . strtolower($objectName) . "-" . strtolower($property["name"]) . "-no");
-                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-REQUIRED", $property["required"] ? "required" : "");
+                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-VALUE", ObjectBoolean::$_YES);
+                        $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-ID", "bicubic-" . strtolower($objectName) . "-" . strtolower($property["name"]));
                         if ($value) {
-                            $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-SELECTED-YES", "selected");
+                            $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-SELECTED", "checked");
                         } else {
-                            $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-SELECTED-NO", "selected");
+                            $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-SELECTED", "");
                         }
                         return $this->application->renderCustomTemplate($result);
                     }
@@ -375,6 +386,7 @@ class Navigation {
                         }
                     case PropertyTypes::$_ALPHANUMERIC :
                     case PropertyTypes::$_DOUBLE :
+                    case PropertyTypes::$_URL :    
                     case PropertyTypes::$_EMAIL :
                     case PropertyTypes::$_RUT :
                     case PropertyTypes::$_INT :
@@ -383,6 +395,7 @@ class Navigation {
                     case PropertyTypes::$_PASSWORD :
                     case PropertyTypes::$_FILE :
                     case PropertyTypes::$_IMAGE256 :
+                    case PropertyTypes::$_TIME :
                     case PropertyTypes::$_DATE : {
                             break;
                         }

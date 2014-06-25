@@ -115,6 +115,7 @@ abstract class SQLData extends Data {
                         }
                     case PropertyTypes::$_ALPHANUMERIC :
                     case PropertyTypes::$_DOUBLE :
+                    case PropertyTypes::$_URL :
                     case PropertyTypes::$_EMAIL :
                     case PropertyTypes::$_RUT :
                     case PropertyTypes::$_INT :
@@ -124,6 +125,7 @@ abstract class SQLData extends Data {
                     case PropertyTypes::$_FILE :
                     case PropertyTypes::$_IMAGE256 :
                     case PropertyTypes::$_DATE :
+                    case PropertyTypes::$_TIME :
                     case PropertyTypes::$_BOOLEAN :
                     case PropertyTypes::$_LIST :
                     case PropertyTypes::$_SHORTLIST : {

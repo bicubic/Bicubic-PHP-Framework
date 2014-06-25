@@ -15,6 +15,7 @@ class PropertyTypes {
     public static $_SHORTLIST = "shortlist";
     public static $_LONG = "long";
     public static $_DOUBLE = "double";
+    public static $_URL = "url";
     public static $_EMAIL = "email";
     public static $_PASSWORD = "password";
     public static $_STRING = "string";
@@ -35,6 +36,7 @@ class PropertyTypes {
     public static $_LETTERS = "letters";
     public static $_ALPHANUMERIC = "alphanumeric";
     public static $_DATE = "date";
+    public static $_TIME = "time";
     public static $_BOOLEAN = "boolean";
     public static $_INTARRAY = "int-array";
     public static $_DOUBLEARRAY = "double-array";
@@ -50,6 +52,7 @@ class PropertyTypes {
         "shortlist" => 'integer',
         "long" => 'bigint',
         "double" => 'double precision',
+        "url" => 'character varying(1024)',
         "email" => 'character varying(256)',
         "password" => 'character varying(1024)',
         "string" => 'character varying',
@@ -68,6 +71,7 @@ class PropertyTypes {
         "letters" => 'character varying',
         "alphanumeric" => 'character varying',
         "date" => 'bigint',
+        "time" => 'bigint',
         "boolean" => 'integer',
         "int-array" => 'character varying',
         "double-array" => 'character varying',

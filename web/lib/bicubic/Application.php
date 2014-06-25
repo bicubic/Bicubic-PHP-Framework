@@ -131,6 +131,14 @@ class Application {
                 $value = $this->filter($value, PropertyTypes::$_DATE);
             }
         }
+        if ($type == PropertyTypes::$_TIME && !isset($value)) {
+            $hour = $this->getFormParam("$name-hour", PropertyTypes::$_INT, false);
+            $minutes = $this->getFormParam("$name-minutes", PropertyTypes::$_INT, false);
+            if (isset($hour) && isset($minutes)) {
+                $value = "$hour:$minutes";
+                $value = $this->filter($value, PropertyTypes::$_TIME);
+            }
+        }
         if ($type == PropertyTypes::$_FILE && !isset($value)) {
             $value = $this->upload($name);
         }
@@ -255,6 +263,12 @@ class Application {
                             $value = str_replace(array(","), ".", $value);
                             return doubleval($value);
                         }
+                    }
+                    break;
+                }
+            case PropertyTypes::$_URL : {
+                    if (filter_var($value, FILTER_VALIDATE_URL)) {
+                        return $value;
                     }
                     break;
                 }
@@ -480,13 +494,24 @@ class Application {
                     }
                     break;
                 }
-            case PropertyTypes::$_BOOLEAN : {
+            case PropertyTypes::$_TIME : {
                     if ($value !== "") {
-                        $vals = array("f", "t", "0", "1");
-                        $trimed = str_replace($vals, "", $value);
-                        if (empty($trimed)) {
-                            return intval(substr($value, 0, 1));
+                        $numbers = explode(":", $value);
+                        if (count($numbers) == 2) {
+                            $time = strtotime("$numbers[0]:$numbers[1]:00");
+                            if ($time) {
+                                return $time;
+                            }
                         }
+                    }
+                    break;
+                }
+            case PropertyTypes::$_BOOLEAN : {
+                    if ($value) {
+                        return ObjectBoolean::$_YES;
+                    }
+                    else {
+                        return ObjectBoolean::$_NO;
                     }
                     break;
                 }
@@ -776,7 +801,7 @@ class Application {
                     $this->setHTMLArrayTemplate(array(
                         "$formName-LISTVALUE-$objectFormName-$paramName"=>$this->utf8tohtml(strval($item), true),
                         "$formName-LISTTEXT-$objectFormName-$paramName"=>$this->lang($text),
-                        "$formName-LISTSELECTED-$objectFormName-$paramName"=>($item == $value) ? "selected" : ""
+                        "$formName-LISTSELECTED-$objectFormName-$paramName"=>($item === $value) ? "selected" : ""
                     ));
                     $this->parseTemplate($paramName);
                 }
@@ -787,18 +812,51 @@ class Application {
                     $this->setHTMLArrayTemplate(array(
                         "$formName-LISTVALUE-$objectFormName-$paramName"=>$this->utf8tohtml(strval($item), true),
                         "$formName-LISTTEXT-$objectFormName-$paramName"=>$this->lang($text),
-                        "$formName-LISTSELECTED-$objectFormName-$paramName"=>($item == $value) ? "checked" : ""
+                        "$formName-LISTSELECTED-$objectFormName-$paramName"=>($item === $value) ? "checked" : ""
                     ));
                     $this->parseTemplate($paramName);
+                }
+            } else if ($property["type"] == PropertyTypes::$_BOOLEAN) {
+                $this->setVariableTemplate("$formName-NAME-$objectFormName-$paramName", "$objectName" . "_" . $property["name"]);
+                $this->setVariableTemplate("$formName-VALUE-$objectFormName-$paramName", ObjectBoolean::$_YES);
+                if ($value) {
+                    $this->setVariableTemplate("$formName-SELECTED-$objectFormName-$paramName", "checked");
+                } else {
+                    $this->setVariableTemplate("$formName-SELECTED-$objectFormName-$paramName", "");
                 }
             } else {
                 $this->setVariableTemplate("$formName-NAME-$objectFormName-$paramName", "$objectName" . "_" . $property["name"]);
                 if ($property["type"] == PropertyTypes::$_DATE) {
                     $value = $this->formatWiredDate($value);
+                } else if ($property["type"] == PropertyTypes::$_TIME) {
+                    $value = $this->formatWiredTime($value);
                 } else {
                     $value = $this->utf8tohtml(strval($value), true);
                 }
                 $this->setVariableTemplate("$formName-VALUE-$objectFormName-$paramName", $value);
+            }
+        }
+    }
+    
+    public function setViewObject(DataObject $object) {
+        $properties = $object->__getProperties();
+        if ($object->__isChild()) {
+            $properties = array_merge($properties, $object->__getParentProperties());
+        }
+        $objectName = get_class($object);
+        $objectFormName = strtoupper($objectName);
+        foreach ($properties as $property) {
+            $paramName = strtoupper($property["name"]);
+            $getter = "get" . strtoupper(substr($property["name"], 0, 1)) . substr($property["name"], 1);
+            $value = $object->$getter();
+            if ($property["type"] == PropertyTypes::$_LIST) {
+                $items = $object->__getList($property["name"], $this);
+                $this->setVariableTemplate("$objectFormName-$paramName", $this->lang($this->item($items, $value)));
+            } else if ($property["type"] == PropertyTypes::$_SHORTLIST) {
+                $items = $object->__getList($property["name"], $this);
+                $this->setVariableTemplate("$objectFormName-$paramName", $this->lang($this->item($items, $value)));
+            } else {
+                $this->setVariableTemplate("$objectFormName-$paramName", $this->formatProperty($object, $property));
             }
         }
     }
@@ -947,26 +1005,26 @@ class Application {
         $this->endApp();
     }
 
-    public function renderToPdf() {
+    public function renderToPdf($creator, $author,$margin = 1, $scale = 1,$font = "helvetica", $fontsize = "12", $orientation = "P", $unit = "mm", $format = "LETTER") {
         $this->tpl->touchBlock($this->name);
         $html = $this->tpl->get();
-        $pdf = new TCPDF($this->config('pdf_page_orientation'), $this->config('pdf_unite'), $this->config('pdf_page_format'), true, 'UTF-8', false);
-        $pdf->SetCreator($this->config('pdf_creator'));
-        $pdf->SetAuthor($this->config('pdf_author'));
+        $pdf = new TCPDF($orientation, $unit, $format, true, 'UTF-8', false);
+        $pdf->SetCreator($creator);
+        $pdf->SetAuthor($author);
         $pdf->SetHeaderData(/* logo */ '', /* ancho logo */ '', /* título */ $this->lang('lang_title'), '');
-        $pdf->setHeaderFont(Array($this->config('pdf_font_name_main'), '', $this->config('pdf_font_size_main')));
-        $pdf->setFooterFont(Array($this->config('pdf_font_name_data'), '', $this->config('pdf_font_size_data')));
-        $pdf->SetDefaultMonospacedFont($this->config('pdf_font_monospace'));
-        $pdf->SetMargins($this->config('pdf_margin_left'), $this->config('pdf_margin_top'), $this->config('pdf_margin_right'));
-        $pdf->SetHeaderMargin($this->config('pdf_margin_header'));
-        $pdf->SetFooterMargin($this->config('pdf_margin_footer'));
-        $pdf->SetAutoPageBreak(TRUE, $this->config('pdf_margin_bottom'));
-        $pdf->setImageScale($this->config('pdf_image_scale_ratio'));
+        $pdf->setHeaderFont(Array($font, '', $fontsize));
+        $pdf->setFooterFont(Array($font, '', $fontsize));
+        $pdf->SetDefaultMonospacedFont($font);
+        $pdf->SetMargins($margin, $margin, $margin);
+        $pdf->SetHeaderMargin($margin);
+        $pdf->SetFooterMargin($margin);
+        $pdf->SetAutoPageBreak(TRUE, $margin);
+        $pdf->setImageScale($scale);
         $pdf->setFontSubsetting(true);
-        $pdf->SetFont($this->config('pdf_font_name_data'), '', $this->config('pdf_font_size_data'), '', true);
+        $pdf->SetFont($font, '', $fontsize, '', true);
         $pdf->AddPage();
         $pdf->writeHTMLCell(0, 0, '', '', $html, 0, 1, 0, true, '', true);
-        $pdf->Output($this->lang('lang_file'), 'I');
+        $pdf->Output("file", 'I');
         $this->endApp();
     }
 
@@ -1143,6 +1201,7 @@ class Application {
             case PropertyTypes::$_SHORTLIST : {
                     return $this->lang($this->item($object->__getList($property["name"], $this), $value));
                 }
+            case PropertyTypes::$_URL :
             case PropertyTypes::$_EMAIL :
             case PropertyTypes::$_RUT :
             case PropertyTypes::$_STRING :
@@ -1178,6 +1237,9 @@ class Application {
             case PropertyTypes::$_DOUBLEARRAY :
             case PropertyTypes::$_INTARRAY : {
                     return strval($value);
+                }
+            case PropertyTypes::$_TIME : {
+                    return $this->formatTime($value);
                 }
             case PropertyTypes::$_DATE : {
                     return $this->formatDate($value);
@@ -1243,9 +1305,25 @@ class Application {
         }
     }
 
+    public function formatTime($date) {
+        if (isset($date) && $date != "") {
+            return date('H:i', $date);
+        } else {
+            return '';
+        }
+    }
+
     public function formatWiredDate($date) {
         if (isset($date) && $date != "") {
             return date('Y-m-d', $date);
+        } else {
+            return '';
+        }
+    }
+
+    public function formatWiredTime($date) {
+        if (isset($date) && $date != "") {
+            return date('H:i', $date);
         } else {
             return '';
         }
@@ -1751,7 +1829,10 @@ class Application {
         $type = PropertyTypes::$_POSTGRESQLTYPES[$property["type"]];
         $notnull = $property["required"] ? "NOT NULL" : "";
         $default = $property["default"] ? "DEFAULT " . $property["default"] : "";
-        return trim("$name $type $notnull $default");
+        $index = $property["index"] ? "index" : "";
+        $unique = $property["unique"] ? "unique" : "";
+        $references = $property["reference"] ? $property["reference"] : "";
+        return trim("$name $type $notnull $default $index $unique $references");
     }
 
     private function script_createColumnIndex(DataObject $object, $property) {
@@ -1791,4 +1872,5 @@ class Application {
     }
 
 }
+
 ?>
