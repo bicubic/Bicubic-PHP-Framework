@@ -1859,7 +1859,7 @@ class Application {
             $sql.= "ALTER TABLE ONLY $class ADD CONSTRAINT $class" . "_pk PRIMARY KEY (id);";
         }
         if ($property["reference"] !== null) {
-            $sql.= "ALTER TABLE ONLY $class ADD CONSTRAINT $class" . "_" . $property["reference"] . "_fkey FOREIGN KEY (" . $property["name"] . ") REFERENCES " . $property["reference"] . "(id) MATCH FULL ON DELETE CASCADE;";
+            $sql.= "ALTER TABLE ONLY $class ADD CONSTRAINT $class" . "_" . $property["name"] . "_fkey FOREIGN KEY (" . $property["name"] . ") REFERENCES " . $property["reference"] . "(id) MATCH FULL ON DELETE CASCADE;";
         }
         return $sql;
     }

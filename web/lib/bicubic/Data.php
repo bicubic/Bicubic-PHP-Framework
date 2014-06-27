@@ -36,7 +36,7 @@ abstract class Data {
 
     public abstract function lastInsertId($table);
 
-    public abstract function select(DataObject $object, OrderParam $orderParam = null, $limit = null, $lastIndex = PHP_INT_MAX);
+    public abstract function select(DataObject $object, OrderParam $orderParam = null, $limit = null, $lastIndex = null);
 
     public abstract function selectOne(DataObject $object);
 

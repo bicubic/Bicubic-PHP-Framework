@@ -62,6 +62,7 @@ class PropertyTypes {
         "string256" => 'character varying(256)',
         "string128" => 'character varying(128)',
         "string64" => 'character varying(64)',
+        "string32" => 'character varying(32)',
         "string16" => 'character varying(16)',
         "string8" => 'character varying(8)',
         "string4" => 'character varying(4)',
