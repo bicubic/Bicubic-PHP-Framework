@@ -464,7 +464,7 @@ class Navigation {
     }
 
     public function objectTableRows(DataObject $object, $actionParams = array(), $size = null, $lastid = null, $oderParam = null) {
-        $data = new AtomManager($this->application->data);
+        $data = new TransactionManager($this->application->data);
         $objects = $data->getAllPaged($object, $oderParam, $size, $lastid);
         $rowscontent = "";
         foreach ($objects as $object) {
@@ -588,7 +588,7 @@ class Navigation {
             $excel->getActiveSheet()->setCellValue($column . $rowNumber, $this->lang($property["lang"]));
             $column++;
         }
-        $data = new AtomManager($this->application->data);
+        $data = new TransactionManager($this->application->data);
         $lastid = 0;
         $items = 500;
         $objects = $data->getAllPaged($object, new OrderParam("id", ObjectOrder::$_ASC), $items, $lastid);

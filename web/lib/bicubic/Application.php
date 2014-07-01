@@ -1056,7 +1056,7 @@ class Application {
         $this->endApp();
     }
 
-    public function upload($fileParam, $optional = false, $full = true, $secure = true) {
+    public function upload($fileParam, $optional = false, $full = true, $secure = true, $bucket = null) {
         if (!isset($_FILES[$fileParam])) {
             if (!$optional) {
                 $this->error($this->lang('lang_filenotfound'));
@@ -1085,7 +1085,11 @@ class Application {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, "https://api.mylodon.cl/index.php?app=json&nav=upload-file");
         curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, array('test_file'=>$cfile));
+        $post = array('file'=>$cfile, 'appsecret'=>$this->config('mylodon_apikey'));
+        if($bucket) {
+            $post['bucket']=$bucket;
+        }
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $result = curl_exec($ch);
         if ($result) {
@@ -1096,7 +1100,7 @@ class Application {
                 } else {
                     return false;
                 }
-            } else if ($r->status == "sucess") {
+            } else if ($r->status == "success") {
                 if($full) {
                     if($secure) {
                         return $r->secureurl;
@@ -1112,13 +1116,13 @@ class Application {
         }
         curl_close($ch);
         if (!$optional) {
-            $this->error($this->lang('lang_filenotuploaded'));
+            $this->error($this->lang('lang_mylodonerror'));
         } else {
             return false;
         }
     }
 
-    public function uploadPhoto($fileParam, $optional = false, $w = 256, $h = 256, $full = true, $secure = true) {
+    public function uploadPhoto($fileParam, $optional = false, $w = 256, $h = 256, $full = true, $secure = true, $bucket = null) {
         if (!isset($_FILES[$fileParam])) {
             if (!$optional) {
                 $this->error($this->lang('lang_filenotfound'));
@@ -1147,7 +1151,11 @@ class Application {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, "https://api.mylodon.cl/index.php?app=json&nav=upload-image");
         curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, array('test_file'=>$cfile, 'w'=>$w, 'h'=>$h));
+        $post = array('image'=>$cfile, 'appsecret'=>$this->config('mylodon_apikey'), 'w'=>$w, 'h'=>$h);
+        if($bucket) {
+            $post['bucket']=$bucket;
+        }
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $result = curl_exec($ch);
         if ($result) {
@@ -1158,7 +1166,7 @@ class Application {
                 } else {
                     return false;
                 }
-            } else if ($r->status == "sucess") {
+            } else if ($r->status == "success") {
                 if($full) {
                     if($secure) {
                         return $r->secureurl;
@@ -1174,7 +1182,7 @@ class Application {
         }
         curl_close($ch);
         if (!$optional) {
-            $this->error($this->lang('lang_filenotuploaded'));
+            $this->error($this->lang('lang_mylodonerror'));
         } else {
             return false;
         }
@@ -1371,6 +1379,7 @@ class Application {
     }
 
     public function lang($string, $langstr = null) {
+        $string = strval($string);
         if ($langstr && !array_key_exists($langstr, Lang::$_ENUM)) {
             $langstr = Lang::$_DEFAULT;
         }

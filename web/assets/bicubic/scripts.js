@@ -69,8 +69,4 @@ document.addEventListener('DOMContentLoaded', function() {
             datacheckeds[i].checked = true;
         }
     }
-    var requireds = getAllElementsWithAttribute("required");
-    for (var i = 0, n = requireds.length; i < n; i++) {
-        requireds[i].addEventListener('blur', checkEmpty);
-    }
 });
