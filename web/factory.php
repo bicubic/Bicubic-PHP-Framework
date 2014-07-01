@@ -18,6 +18,10 @@ class LangFactory {
     public static function getAvailableLangList() {
         return array("es", "en", "pt");
     }
+    
+    public static function getDefaultLang() {
+        return "es";
+    }
 }
 
 //manage applications here, do not rename this class or functions

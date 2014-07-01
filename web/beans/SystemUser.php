@@ -39,8 +39,8 @@ class SystemUser extends DataObject {
             "forgottoken" =>        ["name" => "forgottoken",       "lang" => 'lang_forgottoken',       "type" => PropertyTypes::$_STRING1024,  "required" => false,    "default" => null,  "serializable" => true, "index" => true,    "reference" => null, "updatenull" => true, "hidden" => false,   "private" => true,  "unique" => false,   "table" => false],
             "changeemailtoken" =>   ["name" => "changeemailtoken",  "lang" => 'lang_changeemailtoken',  "type" => PropertyTypes::$_STRING1024,  "required" => false,    "default" => null,  "serializable" => true, "index" => true,    "reference" => null, "updatenull" => true, "hidden" => false,   "private" => true,  "unique" => false,   "table" => false],
             "newemail" =>           ["name" => "newemail",          "lang" => 'lang_newemail',          "type" => PropertyTypes::$_STRING256,   "required" => false,    "default" => null,  "serializable" => true, "index" => true,    "reference" => null, "updatenull" => true, "hidden" => false,   "private" => false, "unique" => false,   "table" => false],
-            "usercountry" =>        ["name" => "usercountry",       "lang" => 'lang_usercountry',       "type" => PropertyTypes::$_LIST,        "required" => false,    "default" => null,  "serializable" => true, "index" => true,    "reference" => null, "updatenull" => true, "hidden" => false,   "private" => false, "unique" => false,   "table" => false],
-            "userlang" =>           ["name" => "userlang",          "lang" => 'lang_userlang',          "type" => PropertyTypes::$_LIST,        "required" => false,    "default" => null,  "serializable" => true, "index" => true,    "reference" => null, "updatenull" => true, "hidden" => false,   "private" => false, "unique" => false,   "table" => false],
+            "usercountry" =>        ["name" => "usercountry",       "lang" => 'lang_usercountry',       "type" => PropertyTypes::$_STRINGLIST,        "required" => false,    "default" => null,  "serializable" => true, "index" => true,    "reference" => null, "updatenull" => true, "hidden" => false,   "private" => false, "unique" => false,   "table" => false],
+            "userlang" =>           ["name" => "userlang",          "lang" => 'lang_userlang',          "type" => PropertyTypes::$_STRINGLIST,        "required" => false,    "default" => null,  "serializable" => true, "index" => true,    "reference" => null, "updatenull" => true, "hidden" => false,   "private" => false, "unique" => false,   "table" => false],
         );
     }
 
@@ -49,8 +49,8 @@ class SystemUser extends DataObject {
         switch ($paramname) {
             case "usercountry" : {
                     $navigation = new Navigation($application);
-                    Country::$_ENUM = $navigation->sortByLang(Country::$_ENUM);
-                    return Country::$_ENUM;
+                    $countries = $navigation->sortByLang($navigation->item(Country::$_ENUM, $navigation->config('lang')));
+                    return $countries;
                 }
             case "userlang" : {
                     $navigation = new Navigation($application);

@@ -22,6 +22,7 @@ require_once("lib/ext/pear/Mail.php");
 require_once("lib/ext/thread/singleton.class.php");
 //bicubic
 require_once("lib/bicubic/LibConstant.php");
+require_once("lib/bicubic/Country.php");
 require_once("lib/bicubic/Application.php");
 require_once("lib/bicubic/ScriptApplication.php");
 require_once("lib/bicubic/Data.php");
@@ -53,8 +54,16 @@ $config['folder_template'] = "templates/";
 $config['folder_navigation'] = "views/";
 $config['folder_uploads'] = "uploads/";
 $config['folder_images'] = "images/";
+//filter langs
+$allLangs = Lang::$_ENUM;
+$filterLangs = array();
+foreach(LangFactory::getAvailableLangList() as $key => $value) {
+    $filterLangs [$value] = $allLangs[$value];
+}
+Lang::$_ENUM = $filterLangs;
+Lang::$_DEFAULT = LangFactory::getDefaultLang();
 //set languaje
-$langfile = Lang::$_LANGVALUE[Lang::$_DEFAULT];
+$langfile = Lang::$_DEFAULT;
 require_once("lang/lang.$langfile.php");
 $application = new Application($config, $lang, null, null);
 //Lang from browser
@@ -72,14 +81,14 @@ if (isset($fblocale)) {
     $langfile = substr($fblocale, 0, 2);
 }
 //Check Lang
-if (!array_key_exists($langfile, Lang::$_LANGKEY)) {
-    $langfile = Lang::$_LANGVALUE[Lang::$_DEFAULT];
+if (!array_key_exists($langfile, Lang::$_ENUM)) {
+    $langfile = Lang::$_DEFAULT;
 }
 //Lang reload
 if (file_exists("lang/lang.$langfile.php")) {
     require_once("lang/lang.$langfile.php");
 } else {
-    $langfile = Lang::$_LANGVALUE[Lang::$_DEFAULT];
+    $langfile = Lang::$_DEFAULT;
     require_once("lang/lang.$langfile.php");
 }
 

@@ -30,8 +30,8 @@ class AccountNavigation extends Navigation {
         $this->application->setHTMLVariableCustomTemplate($result, "SIGNUP-NAME-SYSTEMUSER-USERCOUNTRY", "SystemUser_usercountry");
         $this->application->setHTMLVariableCustomTemplate($result, "SIGNUP-NAME-SYSTEMUSER-USERLANG", "SystemUser_userlang");
         $this->application->setVariableCustomTemplate($result, "HTML-RECAPTCHA", recaptcha_get_html($this->config('recaptcha_publickey')), null, $this->config('sslavailable'));
-        uasort(Country::$_ENUM, array("Navigation", "compareLangStrings"));
-        foreach (Country::$_ENUM as $key=> $value) {
+        $countries = $this->sortByLang($this->item(Country::$_ENUM, $this->config('lang')));
+        foreach ($countries as $key=> $value) {
             $this->application->setHTMLArrayCustomTemplate($result, [
                 "USERCOUNTRY-NAME"=>$value,
                 "USERCOUNTRY-VALUE"=>$key,
@@ -199,7 +199,7 @@ class AccountNavigation extends Navigation {
                 $this->application->error($this->lang('lang_servererror'));
             }
             $data->data->commit();
-            $this->application->alterLang($this->item(Lang::$_LANGVALUE, $dbUser->getUserlang()));
+            $this->application->alterLang( $dbUser->getUserlang());
             return $dbUser;
         }
         $data->data->rollback();

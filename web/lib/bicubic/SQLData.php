@@ -128,6 +128,7 @@ abstract class SQLData extends Data {
                     case PropertyTypes::$_TIME :
                     case PropertyTypes::$_BOOLEAN :
                     case PropertyTypes::$_LIST :
+                    case PropertyTypes::$_STRINGLIST :
                     case PropertyTypes::$_SHORTLIST : {
                             $query .= " $key = '$value' ";
                             break;

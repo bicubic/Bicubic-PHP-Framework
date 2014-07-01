@@ -228,7 +228,7 @@ class LoginNavigation extends AccountNavigation {
             $this->application->error($this->lang('lang_servererror'));
         }
         $data->data->commit();
-        $this->application->alterLang($this->item(Lang::$_LANGVALUE, $dbSystemUser->getUserlang()));
+        $this->application->alterLang($dbSystemUser->getUserlang());
         $this->application->message($this->lang('lang_profilesuccess'));
     }
     

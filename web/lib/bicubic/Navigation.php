@@ -231,7 +231,8 @@ class Navigation {
                         }
                         return $this->application->renderCustomTemplate($result);
                     }
-                case PropertyTypes::$_LIST : {
+                case PropertyTypes::$_LIST : 
+                case PropertyTypes::$_STRINGLIST : {
                         $result = $this->application->setCustomTemplate("bicubic", "list");
                         $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LABEL", $this->lang($property["lang"]));
                         $this->application->setHTMLVariableCustomTemplate($result, "OBJECT-NAME-PROPERTY-NAME", $objectName . "_" . $property["name"]);
@@ -365,6 +366,7 @@ class Navigation {
                             break;
                         }
                     case PropertyTypes::$_LIST :
+                    case PropertyTypes::$_STRINGLIST :
                     case PropertyTypes::$_SHORTLIST : {
                             $this->application->setHTMLArrayCustomTemplate($result, [
                                 'SEARCHLIST-NAME'=>$property["name"],

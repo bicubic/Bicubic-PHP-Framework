@@ -314,7 +314,8 @@ class Application {
                     }
                     break;
                 }
-            case PropertyTypes::$_STRING2 : {
+            case PropertyTypes::$_STRING2 : 
+            case PropertyTypes::$_STRINGLIST : {
                     if ($value) {
                         $value = trim($value);
                         $value = (substr($value, 0, 2));
@@ -509,8 +510,7 @@ class Application {
             case PropertyTypes::$_BOOLEAN : {
                     if ($value) {
                         return ObjectBoolean::$_YES;
-                    }
-                    else {
+                    } else {
                         return ObjectBoolean::$_NO;
                     }
                     break;
@@ -690,17 +690,12 @@ class Application {
             $this->setHTMLVariableTemplate("TEMPLATE-LANG", $this->config('lang'));
             $this->setHTMLVariableTemplate("TEMPLATE-TITLE", $title);
             $this->setHTMLVariableTemplate("TEMPLATE-COPY", $this->config('web_copyright'));
-            $langs = LangFactory::getAvailableLangList();
-            foreach ($langs as $langKey) {
-                $lang = $this->item(Lang::$_LANGKEY, $langKey);
-                if ($lang) {
-                    $langname = $this->item(Lang::$_ENUM, $lang);
-                    $this->setHtmlArrayTemplate(array(
-                        'LANG-LINK'=>$this->getAppUrl($this->name, $this->navigation, array(new Param($this->config('param_lang'), $this->item(Lang::$_LANGVALUE, $lang)))),
-                        'LANG-TEXT'=>$this->lang($langname),
-                    ));
-                    $this->parseTemplate('LANGS');
-                }
+            foreach (Lang::$_ENUM as $langKey=> $langname) {
+                $this->setHtmlArrayTemplate(array(
+                    'LANG-LINK'=>$this->getAppUrl($this->name, $this->navigation, array(new Param($this->config('param_lang'), $langKey))),
+                    'LANG-TEXT'=>$this->lang($langname),
+                ));
+                $this->parseTemplate('LANGS');
             }
         }
     }
@@ -794,7 +789,7 @@ class Application {
             $paramName = strtoupper($property["name"]);
             $getter = "get" . strtoupper(substr($property["name"], 0, 1)) . substr($property["name"], 1);
             $value = $object->$getter();
-            if ($property["type"] == PropertyTypes::$_LIST) {
+            if ($property["type"] == PropertyTypes::$_LIST || $property["type"] == PropertyTypes::$_STRINGLIST) {
                 $this->setVariableTemplate("$formName-NAME-$objectFormName-$paramName", "$objectName" . "_" . $property["name"]);
                 $items = $object->__getList($property["name"], $this);
                 foreach ($items as $item=> $text) {
@@ -837,7 +832,7 @@ class Application {
             }
         }
     }
-    
+
     public function setViewObject(DataObject $object) {
         $properties = $object->__getProperties();
         if ($object->__isChild()) {
@@ -849,7 +844,7 @@ class Application {
             $paramName = strtoupper($property["name"]);
             $getter = "get" . strtoupper(substr($property["name"], 0, 1)) . substr($property["name"], 1);
             $value = $object->$getter();
-            if ($property["type"] == PropertyTypes::$_LIST) {
+            if ($property["type"] == PropertyTypes::$_LIST || $property["type"] == PropertyTypes::$_STRINGLIST) {
                 $items = $object->__getList($property["name"], $this);
                 $this->setVariableTemplate("$objectFormName-$paramName", $this->lang($this->item($items, $value)));
             } else if ($property["type"] == PropertyTypes::$_SHORTLIST) {
@@ -1005,7 +1000,7 @@ class Application {
         $this->endApp();
     }
 
-    public function renderToPdf($creator, $author,$margin = 1, $scale = 1,$font = "helvetica", $fontsize = "12", $orientation = "P", $unit = "mm", $format = "LETTER") {
+    public function renderToPdf($creator, $author, $margin = 1, $scale = 1, $font = "helvetica", $fontsize = "12", $orientation = "P", $unit = "mm", $format = "LETTER") {
         $this->tpl->touchBlock($this->name);
         $html = $this->tpl->get();
         $pdf = new TCPDF($orientation, $unit, $format, true, 'UTF-8', false);
@@ -1061,7 +1056,7 @@ class Application {
         $this->endApp();
     }
 
-    public function upload($fileParam, $optional = false) {
+    public function upload($fileParam, $optional = false, $full = true, $secure = true) {
         if (!isset($_FILES[$fileParam])) {
             if (!$optional) {
                 $this->error($this->lang('lang_filenotfound'));
@@ -1102,7 +1097,17 @@ class Application {
                     return false;
                 }
             } else if ($r->status == "sucess") {
-                return $r->secureurl;
+                if($full) {
+                    if($secure) {
+                        return $r->secureurl;
+                    }
+                    else {
+                        return $r->fullurl;
+                    }
+                }
+                else {
+                    return $r->url;
+                }
             }
         }
         curl_close($ch);
@@ -1113,7 +1118,7 @@ class Application {
         }
     }
 
-    public function uploadPhoto($fileParam, $optional = false, $w = 256, $h = 256) {
+    public function uploadPhoto($fileParam, $optional = false, $w = 256, $h = 256, $full = true, $secure = true) {
         if (!isset($_FILES[$fileParam])) {
             if (!$optional) {
                 $this->error($this->lang('lang_filenotfound'));
@@ -1154,7 +1159,17 @@ class Application {
                     return false;
                 }
             } else if ($r->status == "sucess") {
-                return $r->secureurl;
+                if($full) {
+                    if($secure) {
+                        return $r->secureurl;
+                    }
+                    else {
+                        return $r->fullurl;
+                    }
+                }
+                else {
+                    return $r->url;
+                }
             }
         }
         curl_close($ch);
@@ -1198,6 +1213,7 @@ class Application {
                 }
             case PropertyTypes::$_INT :
             case PropertyTypes::$_LIST :
+            case PropertyTypes::$_STRINGLIST :
             case PropertyTypes::$_SHORTLIST : {
                     return $this->lang($this->item($object->__getList($property["name"], $this), $value));
                 }
@@ -1355,8 +1371,8 @@ class Application {
     }
 
     public function lang($string, $langstr = null) {
-        if ($langstr && !array_key_exists($langstr, Lang::$_LANGKEY)) {
-            $langstr = $this->item(Lang::$_LANGVALUE, Lang::$_DEFAULT);
+        if ($langstr && !array_key_exists($langstr, Lang::$_ENUM)) {
+            $langstr = Lang::$_DEFAULT;
         }
         if ($langstr && $langstr != $this->config('lang')) {
             $lang = null;
@@ -1433,8 +1449,8 @@ class Application {
     }
 
     public function alterLang($langstr) {
-        if ($langstr && !array_key_exists($langstr, Lang::$_LANGKEY)) {
-            $langstr = $this->item(Lang::$_LANGVALUE, Lang::$_DEFAULT);
+        if ($langstr && !array_key_exists($langstr, Lang::$_ENUM)) {
+            $langstr = Lang::$_DEFAULT;
         }
         if ($langstr && $langstr != $this->config('lang')) {
             if (@require("lang/lang.$langstr.php")) {
@@ -1498,9 +1514,7 @@ class Application {
 
         $navigation = new Navigation($this);
         $langs = $navigation->sortByValue($langs);
-
-//        echo $str;
-        foreach (Lang::$_LANGVALUE as $valueVal) {
+        foreach (Lang::$_ENUM as $valueVal => $langName) {
             if (!file_exists("./lang/lang.$valueVal.php")) {
                 $str = "<?php\n";
                 $str .= "\$lang = array();\n";
@@ -1810,7 +1824,7 @@ class Application {
         $name = $property["name"];
         $type = PropertyTypes::$_POSTGRESQLTYPES[$property["type"]];
         $notnull = $property["required"] ? "NOT NULL" : "";
-        $default = $property["default"] ? "DEFAULT " . $property["default"] : "";
+        $default = $property["default"] ? "DEFAULT '" . $property["default"] . "' " : "";
         if ($name == "id" && !$object->__isChild()) {
             $sql .= "ALTER TABLE $class ADD COLUMN id serial NOT NULL;";
         } else if ($name == "id" && $object->__isChild()) {
