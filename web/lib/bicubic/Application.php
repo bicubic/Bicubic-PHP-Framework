@@ -140,10 +140,10 @@ class Application {
             }
         }
         if ($type == PropertyTypes::$_FILE && !isset($value)) {
-            $value = $this->upload($name);
+            $value = $this->upload($name, true);
         }
         if ($type == PropertyTypes::$_IMAGE256 && !isset($value)) {
-            $value = $this->uploadPhoto($name, 256, 256);
+            $value = $this->uploadPhoto($name, true, 256, 256);
         }
         if ($force && !isset($value)) {
             $this->error($this->lang('lang_notvalid') . " : " . (array_key_exists($name, $this->lang) ? $this->lang($name) : $name));
@@ -1061,21 +1061,21 @@ class Application {
             if (!$optional) {
                 $this->error($this->lang('lang_filenotfound'));
             } else {
-                return false;
+                return null;
             }
         }
         if ($_FILES[$fileParam]['error'] == UPLOAD_ERR_INI_SIZE) {
             if (!$optional) {
                 $this->error($this->lang('lang_filesize'));
             } else {
-                return false;
+                return null;
             }
         }
         if (!is_uploaded_file($_FILES[$fileParam]['tmp_name'])) {
             if (!$optional) {
                 $this->error($this->lang('lang_filenotuploaded'));
             } else {
-                return false;
+                return null;
             }
         }
         $cfile = curl_file_create($_FILES[$fileParam]['tmp_name'], null, 'file');
@@ -1098,7 +1098,7 @@ class Application {
                 if (!$optional) {
                     $this->error($this->lang($r->error));
                 } else {
-                    return false;
+                    return null;
                 }
             } else if ($r->status == "success") {
                 if($full) {
@@ -1118,7 +1118,7 @@ class Application {
         if (!$optional) {
             $this->error($this->lang('lang_mylodonerror'));
         } else {
-            return false;
+            return null;
         }
     }
 
@@ -1127,21 +1127,21 @@ class Application {
             if (!$optional) {
                 $this->error($this->lang('lang_filenotfound'));
             } else {
-                return false;
+                return null;
             }
         }
         if ($_FILES[$fileParam]['error'] == UPLOAD_ERR_INI_SIZE) {
             if (!$optional) {
                 $this->error($this->lang('lang_filesize'));
             } else {
-                return false;
+                return null;
             }
         }
         if (!is_uploaded_file($_FILES[$fileParam]['tmp_name'])) {
             if (!$optional) {
                 $this->error($this->lang('lang_filenotuploaded'));
             } else {
-                return false;
+                return null;
             }
         }
         $cfile = curl_file_create($_FILES[$fileParam]['tmp_name'], null, 'file');
@@ -1164,7 +1164,7 @@ class Application {
                 if (!$optional) {
                     $this->error($this->lang($r->error));
                 } else {
-                    return false;
+                    return null;
                 }
             } else if ($r->status == "success") {
                 if($full) {
@@ -1184,7 +1184,7 @@ class Application {
         if (!$optional) {
             $this->error($this->lang('lang_mylodonerror'));
         } else {
-            return false;
+            return null;
         }
     }
 
