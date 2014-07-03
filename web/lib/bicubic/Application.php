@@ -1893,6 +1893,22 @@ class Application {
             $this->error($this->lang('lang_erroremail') . " - " . $mandrillEmail->error);
         }
     }
+    
+    public function getLocationFromIP() {
+        if(array_key_exists('REMOTE_ADDR', $_SERVER)) {
+            $ip = $_SERVER['REMOTE_ADDR'];
+            if($ip) {
+                $details = json_decode(file_get_contents("http://ipinfo.io/{$ip}/json"));
+                if ($details && property_exists($details, "loc")) {
+                    $latlong = explode(",", $details->loc);
+                    if (count($latlong) == 2) {
+                        return $latlong;
+                    }
+                }
+            }
+        }
+        return array(0, 0);
+    }
 
 }
 
