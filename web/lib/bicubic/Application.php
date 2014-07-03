@@ -58,33 +58,71 @@ class Application {
      * @return String the corresponding URL
      */
     public function getAppUrl($app, $navigation, $params = null) {
-        $link = $this->config('web_secure_url') . "?" . $this->config('param_app') . "=" . $app;
-        $link .= "&" . $this->config('param_navigation') . "=" . $navigation;
-        $hasLang = false;
-        if ($params) {
-            foreach ($params as $param) {
-                $link .= "&" . $param->name . "=" . $param->value;
+        if ($this->config('urlforms')) {
+            return $this->getAppFlatUrl($this->config('urlbase'), $app, $navigation, $params);
+        } else {
+            $link = $this->config('web_secure_url') . "?" . $this->config('param_app') . "=" . $app;
+            $link .= "&" . $this->config('param_navigation') . "=" . $navigation;
+            $hasLang = false;
+            if ($params) {
+                foreach ($params as $param) {
+                    $link .= "&" . $param->name . "=" . $param->value;
+                    if ($param->name == $this->config('param_lang')) {
+                        $hasLang = true;
+                    }
+                }
             }
-            if ($param->name == $this->config('param_lang')) {
-                $hasLang = true;
+            if (!$hasLang) {
+                $link .= "&" . $this->config('param_lang') . "=" . $this->config('lang');
             }
+            return $link;
         }
-        if (!$hasLang) {
-            $link .= "&" . $this->config('param_lang') . "=" . $this->config('lang');
-        }
-        return $link;
     }
 
-    /**
-     * Builds a secure app URL in flat mode. Apache needs to be configured properly
-     * @param string $app <p>The application to send</p>
-     * @param string $navigation <p>The application to send</p>
-     * @param string $id <p>the id ob the object to look</p>
-     * @return String the corresponding URL
-     */
-    public function getAppFlatUrl($app, $navigation, $id) {
-        $link = $this->config('web_folder') . "$app/$navigation/$id";
-        return $link;
+    public function getAppFlatUrl($urlbase, $app, $nav, $params) {
+        $id = "";
+        $lang = false;
+        $linkParams = array();
+        if ($params) {
+            foreach ($params as $param) {
+                if ($param->name == $this->config('param_id')) {
+                    $id = $param->value;
+                } else {
+                    if ($param->name == $this->config('param_lang')) {
+                        $lang = true;
+                    }
+                    $linkParams [] = "$param->name=$param->value";
+                }
+            }
+        }
+        if (!$lang) {
+            $linkParams [] = $this->config('param_lang') . "=" . $this->config('lang');
+        }
+        if ($app && $nav) {
+            return $urlbase . "$app/$nav/$id?" . implode("&", $linkParams);
+        } else if ($nav) {
+            return $urlbase . "$nav/$id?" . implode("&", $linkParams);
+        } else {
+            return $urlbase . "$id?" . implode("&", $linkParams);
+        }
+    }
+
+    public function getHomeUrl() {
+        $linkParams = array();
+        if($this->config('lang') != LangFactory::getDefaultLang()) {
+            $linkParams [] = $this->config('param_lang') . "=" . $this->config('lang');
+        }
+        if ($this->config('urlforms')) {
+            if ($linkParams) {
+                return $this->config('urlbase') . "?" . implode("&", $linkParams);
+            }
+            return $this->config('urlbase');
+        } else {
+            if ($linkParams) {
+                return $this->config('web_secure_url') . "?" . implode("&", $linkParams);
+            }
+            return $this->config('web_secure_url');
+        }
     }
 
     /**
@@ -314,7 +352,7 @@ class Application {
                     }
                     break;
                 }
-            case PropertyTypes::$_STRING2 : 
+            case PropertyTypes::$_STRING2 :
             case PropertyTypes::$_STRINGLIST : {
                     if ($value) {
                         $value = trim($value);
@@ -690,9 +728,28 @@ class Application {
             $this->setHTMLVariableTemplate("TEMPLATE-LANG", $this->config('lang'));
             $this->setHTMLVariableTemplate("TEMPLATE-TITLE", $title);
             $this->setHTMLVariableTemplate("TEMPLATE-COPY", $this->config('web_copyright'));
+            $params = array();
+            $app = "";
+            $nav = "";
+            foreach ($_GET as $key=> $value) {
+                if ($key == $this->config('param_lang')) {
+                    continue;
+                }
+                if ($key == $this->config('param_app')) {
+                    $app = $value;
+                    continue;
+                }
+                if ($key == $this->config('param_navigation')) {
+                    $nav = $value;
+                    continue;
+                }
+                $params [] = new Param($key, $value);
+            }
             foreach (Lang::$_ENUM as $langKey=> $langname) {
+                $langparams = $params;
+                $langparams [] = new Param($this->config('param_lang'), $langKey);
                 $this->setHtmlArrayTemplate(array(
-                    'LANG-LINK'=>$this->getAppUrl($this->name, $this->navigation, array(new Param($this->config('param_lang'), $langKey))),
+                    'LANG-LINK'=>$this->getAppUrl($app, $nav, $langparams),
                     'LANG-TEXT'=>$this->lang($langname),
                 ));
                 $this->parseTemplate('LANGS');
@@ -1086,8 +1143,8 @@ class Application {
         curl_setopt($ch, CURLOPT_URL, "https://api.mylodon.cl/index.php?app=json&nav=upload-file");
         curl_setopt($ch, CURLOPT_POST, 1);
         $post = array('file'=>$cfile, 'appsecret'=>$this->config('mylodon_apikey'));
-        if($bucket) {
-            $post['bucket']=$bucket;
+        if ($bucket) {
+            $post['bucket'] = $bucket;
         }
         curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -1101,15 +1158,13 @@ class Application {
                     return null;
                 }
             } else if ($r->status == "success") {
-                if($full) {
-                    if($secure) {
+                if ($full) {
+                    if ($secure) {
                         return $r->secureurl;
-                    }
-                    else {
+                    } else {
                         return $r->fullurl;
                     }
-                }
-                else {
+                } else {
                     return $r->url;
                 }
             }
@@ -1152,8 +1207,8 @@ class Application {
         curl_setopt($ch, CURLOPT_URL, "https://api.mylodon.cl/index.php?app=json&nav=upload-image");
         curl_setopt($ch, CURLOPT_POST, 1);
         $post = array('image'=>$cfile, 'appsecret'=>$this->config('mylodon_apikey'), 'w'=>$w, 'h'=>$h);
-        if($bucket) {
-            $post['bucket']=$bucket;
+        if ($bucket) {
+            $post['bucket'] = $bucket;
         }
         curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -1167,15 +1222,13 @@ class Application {
                     return null;
                 }
             } else if ($r->status == "success") {
-                if($full) {
-                    if($secure) {
+                if ($full) {
+                    if ($secure) {
                         return $r->secureurl;
-                    }
-                    else {
+                    } else {
                         return $r->fullurl;
                     }
-                }
-                else {
+                } else {
                     return $r->url;
                 }
             }
@@ -1523,7 +1576,7 @@ class Application {
 
         $navigation = new Navigation($this);
         $langs = $navigation->sortByValue($langs);
-        foreach (Lang::$_ENUM as $valueVal => $langName) {
+        foreach (Lang::$_ENUM as $valueVal=> $langName) {
             if (!file_exists("./lang/lang.$valueVal.php")) {
                 $str = "<?php\n";
                 $str .= "\$lang = array();\n";

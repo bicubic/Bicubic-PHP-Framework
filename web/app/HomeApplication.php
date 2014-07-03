@@ -24,14 +24,10 @@ class HomeApplication extends LoginApplication {
         parent::execute();
         $this->navigation = $this->getUrlParam($this->config('param_navigation'), PropertyTypes::$_LETTERS, false);
         switch ($this->navigation) {
-            case "home" : {
+            default : {
                     require_once('nav/HelloNavigation.php');
                     $navigation = new HelloNavigation($this);
                     $navigation->hello();
-                    break;
-                }
-            default : {
-                    $this->redirect($this->name, "home");
                     break;
                 }
         }

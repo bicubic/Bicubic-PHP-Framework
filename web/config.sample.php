@@ -13,6 +13,18 @@ $config = array();
 $config['maintenance'] = false;
 $config['sslavailable'] = false;
 $config['debugdatabase'] = false;
+$config['urlforms'] = false;
+$config['urlbase'] = "https://www.bicubic.cl/";
+/* URL BASE Apache
+    RewriteEngine On
+    RewriteCond %{REQUEST_URI} !/assets
+    RewriteRule /([a-zA-Z0-9.]+)/([a-zA-Z0-9.]+)/([a-zA-Z0-9.]+)?(.*) /index.php?app=$1&nav=$2&id=$3 [QSA]
+    RewriteCond %{REQUEST_URI} !/assets
+    RewriteRule /([a-zA-Z0-9.]+)/([a-zA-Z0-9.]+)?(.*) /index.php?app=&nav=$1&id=$2 [QSA]
+    RewriteRule /([a-zA-Z0-9.]+)/([a-zA-Z0-9.]+)/assets/(.*) /assets/$3
+    RewriteRule /([a-zA-Z0-9.]+)/assets/(.*) /assets/$2
+  */
+
 //Web  
 $config['web_name'] = "Bicubic PHP Framework";
 $config['web_copyright'] = "©2014 Bicubic Technology - All rights reserved";
@@ -23,7 +35,7 @@ $config['web_table_size'] = 100;
 //Code
 $config['code_time_out'] = 300;
 $config['code_time_zone'] = 'America/Santiago';
-$config['code_error_report'] =  E_ALL & ~E_STRICT;//E_ERROR | E_PARSE | E_NOTICE | E_USER_ERROR | E_USER_WARNING | E_USER_NOTICE
+$config['code_error_report'] =  E_ALL & ~(E_STRICT | E_DEPRECATED);
 //Data Base values
 $config['database_host'] = "localhost";
 $config['database_database'] = "bicubic";

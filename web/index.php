@@ -22,6 +22,7 @@ require_once("lib/ext/pear/Mail.php");
 require_once("lib/ext/thread/singleton.class.php");
 //bicubic
 require_once("lib/bicubic/LibConstant.php");
+require_once("lib/bicubic/Lang.php");
 require_once("lib/bicubic/Country.php");
 require_once("lib/bicubic/Application.php");
 require_once("lib/bicubic/ScriptApplication.php");

@@ -20,11 +20,10 @@ abstract class DataObject {
                 $getter = "get$pname";
                 $setter = "set$pname";
                 $value = $this->$getter();
-                if($value === null) {
-                    if($property["default"] !== null) {
+                if ($value === null) {
+                    if ($property["default"] !== null) {
                         $this->$setter($property["default"]);
-                    }
-                    else {
+                    } else {
                         return false;
                     }
                 }
@@ -36,7 +35,7 @@ abstract class DataObject {
     public function __isChild() {
         return false;
     }
-    
+
     public function __getList($paramname, Application $application = null) {
         return [];
     }
@@ -67,12 +66,21 @@ abstract class DataObject {
     public function fillFromDB(array $row) {
         $class = strtolower(get_class($this));
         $properties = $this->__getProperties();
+        $this->setObjectProperties($properties, $class, $row);
+        if ($this->__isChild()) {
+            $parantClass = strtolower(get_parent_class($this));
+            $parentProperties = $this->__getParentProperties();
+            $this->setObjectProperties($parentProperties, $parantClass, $row);
+        }
+    }
+    
+    private function setObjectProperties($properties, $classname, $row) {
         foreach ($properties as $property) {
             $key = $property["name"];
             $cammel = strtoupper(substr($key, 0, 1)) . substr($key, 1);
             $setter = "set$cammel";
             $dbprop1 = $key;
-            $dbprop2 = $class . $key;
+            $dbprop2 = $classname . $key;
             $dbprop3 = $key . "id";
             if (array_key_exists($dbprop1, $row)) {
                 $this->$setter($row[$dbprop1]);

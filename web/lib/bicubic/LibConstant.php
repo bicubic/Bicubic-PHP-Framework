@@ -86,17 +86,6 @@ class PropertyTypes {
 
 }
 
-class Lang {
-
-    public static $_ENUM = array(
-        "es"=>'lang_espanol',
-        "en"=>'lang_english',
-        "pt"=>'lang_portuges',
-    );
-    
-    public static $_DEFAULT = "en";
-}
-
 class Gender {
 
     public static $_NONE = 1;
