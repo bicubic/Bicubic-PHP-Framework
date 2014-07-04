@@ -1199,7 +1199,7 @@ class Application {
                 return null;
             }
         }
-        $cfile = curl_file_create($_FILES[$fileParam]['tmp_name'], null, 'file');
+        $cfile = curl_file_create($_FILES[$fileParam]['tmp_name'], null, 'image');
         if (!$cfile) {
             $this->error($this->lang('lang_filecreate'));
         }
@@ -1818,7 +1818,7 @@ class Application {
             }
         }
 
-        $sql = trim($tablequery . $indexquery . $constraintquery);
+        $sql = trim($dropquery . $tablequery . $indexquery . $constraintquery);
         if ($out) {
             echo "$sql\n";
         } else {
@@ -1955,12 +1955,12 @@ class Application {
                 if ($details && property_exists($details, "loc")) {
                     $latlong = explode(",", $details->loc);
                     if (count($latlong) == 2) {
-                        return $latlong;
+                        return array("latitude" => $latlong[0], "longitude" => $latlong[1]);
                     }
                 }
             }
         }
-        return array(0, 0);
+        return array("latitude" => 0, "longitude" => 0);
     }
 
 }
