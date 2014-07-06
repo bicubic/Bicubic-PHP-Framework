@@ -1955,12 +1955,12 @@ class Application {
                 if ($details && property_exists($details, "loc")) {
                     $latlong = explode(",", $details->loc);
                     if (count($latlong) == 2) {
-                        return array("latitude" => $latlong[0], "longitude" => $latlong[1]);
+                        return array("latitude" => doubleval($latlong[0]), "longitude" => doubleval($latlong[1]));
                     }
                 }
             }
         }
-        return array("latitude" => 0, "longitude" => 0);
+        return array("latitude" => doubleval(0), "longitude" => doubleval(0));
     }
 
 }

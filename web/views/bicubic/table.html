@@ -6,28 +6,32 @@
         </a>
     </li>
     <!-- END FEATURELINK -->
-    <!-- BEGIN SEARCHLINK -->
-    <li>
-        <form id="bicubic-search-form" action="{SEARCH-ACTION}" method="post">
-            <!-- BEGIN SEARCHLIST -->
-                <label>{SEARCHLIST-LANG}</label>
-                <select id="bicubic-search-{SEARCHLIST-NAME}" name="{SEARCHLIST-NAME}" >
-                    <option value="">{TEXT-ALL}</option>
-                    <!-- BEGIN SEARCHLISTOPTION -->
-                    <option value="{SEARCHLISTOPTION-VALUE}"  data-selected="{SEARCHLISTOPTION-SELECTED}">{SEARCHLISTOPTION-NAME}</option>
-                    <!-- END SEARCHLISTOPTION -->
-                </select>
+</ul>
+
+<!-- BEGIN SEARCHLINK -->
+<form id="bicubic-search-form" action="{SEARCH-ACTION}" method="post">
+    <ul id="bicubic-table-search">
+        <!-- BEGIN SEARCHLIST -->
+        <li>
+            <label>{SEARCHLIST-LANG}</label>
+            <select id="bicubic-search-{SEARCHLIST-NAME}" name="{SEARCHLIST-NAME}" >
+                <option value="">{TEXT-ALL}</option>
+                <!-- BEGIN SEARCHLISTOPTION -->
+                <option value="{SEARCHLISTOPTION-VALUE}"  data-selected="{SEARCHLISTOPTION-SELECTED}">{SEARCHLISTOPTION-NAME}</option>
+                <!-- END SEARCHLISTOPTION -->
+            </select>
+
             <!-- END SEARCHLIST -->
             <!-- BEGIN SEARCHSTRING -->
+        <li>
             <label>{SEARCHSTRING-LANG}</label>
             <input id="bicubic-search-{SEARCHSTRING-NAME}" type="text" maxlength="256" name="{SEARCHSTRING-NAME}" value="{SEARCHSTRING-VALUE}" />
-            <!-- END SEARCHSTRING -->
-            <button type="submit" id="submit">{TEXT-SEARCH}</button>
-        </form>
-    </li>
-    <!-- END SEARCHLINK -->
-
-</ul>
+        </li>
+        <!-- END SEARCHSTRING -->
+    </ul>
+    <button type="submit" id="submit">{TEXT-SEARCH}</button>
+</form>
+<!-- END SEARCHLINK -->
 
 <table id="bicubic-table" data-lastid="{TABLE-LASTID}" data-size="{TABLE-SIZE}" data-url="{TABLE-URL}" data-maxsize="{TABLE-MAXSIZE}">
     {TABLE-CONTENT}
