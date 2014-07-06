@@ -1,0 +1,60 @@
+<form name="{EDITPROFILE-ID}" method="post" action="{EDITPROFILE-ACTION}">
+    <fieldset>
+        <legend>{LANG-EDITPROFILE}</legend>
+        <label>
+            {LANG-NAME}:
+        </label>
+        <input id="systemuser-name" type="name" title="{LANG-NAME}" name="{EDITPROFILE-NAME-SYSTEMUSER-NAME}" value="{EDITPROFILE-VALUE-SYSTEMUSER-NAME}" required="required" maxlength="256" data-langempty="{LANG-EMPTYNAME}"/>
+        <label>
+            {LANG-USERCOUNTRY}
+        </label>
+        <select id="systemuser-usercountry" name="{EDITPROFILE-NAME-SYSTEMUSER-USERCOUNTRY}" required="required" data-langempty="{LANG-EMPTYUSERCOUNTRY}">
+            <option value="">{LANG-PLEASESELECT}</option>
+            <!-- BEGIN USERCOUNTRY -->
+            <option value="{EDITPROFILE-LISTVALUE-SYSTEMUSER-USERCOUNTRY}" data-selected="{EDITPROFILE-LISTSELECTED-SYSTEMUSER-USERCOUNTRY}"> {EDITPROFILE-LISTTEXT-SYSTEMUSER-USERCOUNTRY}</option>
+            <!-- END USERCOUNTRY -->
+        </select>
+        <label>
+            {LANG-USERLANG}
+        </label>
+        <select id="systemuser-userlang" name="{EDITPROFILE-NAME-SYSTEMUSER-USERLANG}" required="required" data-langempty="{LANG-EMPTYUSERLANG}">
+            <option value="">{LANG-PLEASESELECT}</option>
+            <!-- BEGIN USERLANG -->
+            <option value="{EDITPROFILE-LISTVALUE-SYSTEMUSER-USERLANG}" data-selected="{EDITPROFILE-LISTSELECTED-SYSTEMUSER-USERLANG}"> {EDITPROFILE-LISTTEXT-SYSTEMUSER-USERLANG}</option>
+            <!-- END USERLANG -->
+        </select>
+    </fieldset>
+    <button type="submit">{LANG-SUBMIT}</button> 
+</form>
+
+<form name="{EDITEMAIL-ID}" method="post" action="{EDITEMAIL-ACTION}">
+    <fieldset>
+        <legend>{LANG-EDITEMAIL}</legend>
+        <label>
+            {LANG-EMAIL}:
+        </label>
+        <input id="systemuser-newemail" type="email" title="{LANG-EMAIL}" name="{EDITEMAIL-NAME-EMAIL}" value="{EDITEMAIL-VALUE-EMAIL}" required="required" maxlength="256" data-langempty="{LANG-EMPTYEMAIL}"/>
+    </fieldset>
+    <button type="submit">{LANG-SUBMIT}</button> 
+</form>
+
+<form name="{EDITPASSWORD-ID}" method="post" action="{EDITPASSWORD-ACTION}">
+    <fieldset>
+        <legend>{LANG-EDITPASSWORD}</legend>
+        <label>
+            {LANG-CURRENTPASSWORD}:
+        </label>
+        <input id="systemuser-currentpassword" type="password" title="{LANG-PASSWORD}" name="{EDITPASSWORD-NAME-CURRENTPASSWORD}" required="required" maxlength="2048" data-langempty="{LANG-EMPTYPASSWORD}"/>
+        <label>
+            {LANG-NEWPASSWORD}:
+        </label>
+        <input id="systemuser-newpassword" type="password" title="{LANG-PASSWORD}" name="{EDITPASSWORD-NAME-NEWPASSWORD}" required="required" maxlength="2048" data-langempty="{LANG-EMPTYPASSWORD}"/>
+        <label>
+            {LANG-CONFIRMNEWPASSWORD}:
+        </label>
+        <input id="systemuser-confirmnewpassword" type="password" title="{LANG-CONFIRMPASSWORD}" name="{EDITPASSWORD-NAME-CONFIRMPASSWORD}" required="required" maxlength="2048" data-langempty="{LANG-EMPTYCONFIRMPASSWORD}" data-langnotequal="{LANG-NOTEQUALPASSWORD}"/>
+    </fieldset>
+    <button type="submit">{LANG-SUBMIT}</button> 
+</form>
+
+

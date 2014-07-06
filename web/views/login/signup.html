@@ -1,0 +1,44 @@
+<form name="{SIGNUP-ID}" method="post" action="{SIGNUP-ACTION}">
+    <fieldset>
+        <legend>{LANG-SIGNUP}</legend>
+        <label>
+            {LANG-NAME}:
+        </label>
+        <input id="systemuser-name" type="name" title="{LANG-NAME}" name="{SIGNUP-NAME-SYSTEMUSER-NAME}" required="required" maxlength="256" data-langempty="{LANG-EMPTYNAME}"/>
+        <label>
+            {LANG-EMAIL}:
+        </label>
+        <input id="systemuser-newemail" type="email" title="{LANG-EMAIL}" name="{SIGNUP-NAME-SYSTEMUSER-EMAIL}" required="required" maxlength="32" data-langempty="{LANG-EMPTYEMAIL}"/>
+        <label>
+            {LANG-PASSWORD}:
+        </label>
+        <input id="systemuser-newpassword" type="password" title="{LANG-PASSWORD}" name="{SIGNUP-NAME-SYSTEMUSER-PASSWORD}" required="required" maxlength="2048" data-langempty="{LANG-EMPTYPASSWORD}"/>
+        <label>
+            {LANG-CONFIRMPASSWORD}:
+        </label>
+        <input id="systemuser-confirmnewpassword" type="password" title="{LANG-CONFIRMPASSWORD}" name="{SIGNUP-NAME-CONFIRMPASSWORD}" required="required" maxlength="2048" data-langempty="{LANG-EMPTYCONFIRMPASSWORD}" data-langnotequal="{LANG-NOTEQUALPASSWORD}"/>
+        <label>
+            {LANG-USERCOUNTRY}
+        </label>
+        <select id="systemuser-usercountry" name="{SIGNUP-NAME-SYSTEMUSER-USERCOUNTRY}" required="required" data-langempty="{LANG-EMPTYUSERCOUNTRY}">
+            <option value="">{LANG-PLEASESELECT}</option>
+            <!-- BEGIN USERCOUNTRIES -->
+            <option value="{USERCOUNTRY-VALUE}">{USERCOUNTRY-NAME}</option>
+            <!-- END USERCOUNTRIES -->
+        </select>
+        <label>
+            {LANG-USERLANG}
+        </label>
+        <select id="systemuser-userlang" name="{SIGNUP-NAME-SYSTEMUSER-USERLANG}" required="required" data-langempty="{LANG-EMPTYUSERLANG}">
+            <option value="">{LANG-PLEASESELECT}</option>
+            <!-- BEGIN USERLANGS -->
+            <option value="{USERLANG-VALUE}">{USERLANG-NAME}</option>
+            <!-- END USERLANGS -->
+        </select>
+        <label>
+            {LANG-HUMAN}:
+        </label>
+        {HTML-RECAPTCHA}
+    </fieldset>
+    <button type="submit">{LANG-SIGNUP}</button> 
+</form>

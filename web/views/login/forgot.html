@@ -1,0 +1,11 @@
+<form name="{FORGOT-ID}" method="post" action="{FORGOT-ACTION}">
+    <fieldset>
+        <legend>{LANG-FORGOTFORM}</legend>
+        <label>
+            {LANG-EMAIL}:
+        </label>
+        <input id="systemuser-email" type="email" title="{LANG-EMAIL}" name="{FORGOT-NAME-SYSTEMUSER-EMAIL}" required="required" maxlength="32" />
+    </fieldset>
+    <input type="hidden" name="{FORGOT-NAME-FORGOTTOKEN}" value="{FORGOT-VALUE-FORGOTTOKEN}" />
+    <button type="submit">{LANG-VALIDATE}</button>
+</form>
