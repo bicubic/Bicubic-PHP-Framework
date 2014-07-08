@@ -357,7 +357,7 @@ class Navigation {
                             foreach ($enum as $key => $value) {
                                 $this->application->setHTMLArrayCustomTemplate($result, [
                                     'SEARCHLISTOPTION-VALUE'=>$key,
-                                    'SEARCHLISTOPTION-SELECTED'=>($key === $val ? "selected" : ""),
+                                    'SEARCHLISTOPTION-SELECTED'=>(strval($key) === strval($val) ? "selected" : ""),
                                     'SEARCHLISTOPTION-NAME'=>$this->lang($value),
                                 ]);
                                 $this->application->parseCustomTemplate($result, "SEARCHLISTOPTION");
@@ -378,7 +378,7 @@ class Navigation {
                             foreach ($enum as $key=> $value) {
                                 $this->application->setHTMLArrayCustomTemplate($result, [
                                     'SEARCHLISTOPTION-VALUE'=>$key,
-                                    'SEARCHLISTOPTION-SELECTED'=>($key === $val ? "selected" : ""),
+                                    'SEARCHLISTOPTION-SELECTED'=>($key == $val ? "selected" : ""),
                                     'SEARCHLISTOPTION-NAME'=>$this->lang($value),
                                 ]);
                                 $this->application->parseCustomTemplate($result, "SEARCHLISTOPTION");

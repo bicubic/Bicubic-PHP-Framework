@@ -29,6 +29,7 @@ require_once("lib/bicubic/ScriptApplication.php");
 require_once("lib/bicubic/Data.php");
 require_once("lib/bicubic/DataObject.php");
 require_once("lib/bicubic/Navigation.php");
+require_once("lib/bicubic/MaintainerNavigation.php");
 require_once("lib/bicubic/ObjectParamList.php");
 require_once("lib/bicubic/Param.php");
 require_once("lib/bicubic/LinkParam.php");

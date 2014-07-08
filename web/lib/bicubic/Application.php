@@ -853,7 +853,7 @@ class Application {
                     $this->setHTMLArrayTemplate(array(
                         "$formName-LISTVALUE-$objectFormName-$paramName"=>$this->utf8tohtml(strval($item), true),
                         "$formName-LISTTEXT-$objectFormName-$paramName"=>$this->lang($text),
-                        "$formName-LISTSELECTED-$objectFormName-$paramName"=>($item === $value) ? "selected" : ""
+                        "$formName-LISTSELECTED-$objectFormName-$paramName"=>($item == $value) ? "selected" : ""
                     ));
                     $this->parseTemplate($paramName);
                 }
@@ -864,7 +864,7 @@ class Application {
                     $this->setHTMLArrayTemplate(array(
                         "$formName-LISTVALUE-$objectFormName-$paramName"=>$this->utf8tohtml(strval($item), true),
                         "$formName-LISTTEXT-$objectFormName-$paramName"=>$this->lang($text),
-                        "$formName-LISTSELECTED-$objectFormName-$paramName"=>($item === $value) ? "checked" : ""
+                        "$formName-LISTSELECTED-$objectFormName-$paramName"=>($item == $value) ? "checked" : ""
                     ));
                     $this->parseTemplate($paramName);
                 }
@@ -1922,7 +1922,7 @@ class Application {
             $sql.= "ALTER TABLE ONLY $class ADD CONSTRAINT $class" . "_pk PRIMARY KEY (id);";
         }
         if ($property["reference"] !== null) {
-            $sql.= "ALTER TABLE ONLY $class ADD CONSTRAINT $class" . "_" . $property["name"] . "_fkey FOREIGN KEY (" . $property["name"] . ") REFERENCES " . $property["reference"] . "(id) MATCH FULL ON DELETE CASCADE;";
+            $sql.= "ALTER TABLE ONLY $class ADD CONSTRAINT $class" . "_" . $property["name"] . "_fkey FOREIGN KEY (" . $property["name"] . ") REFERENCES " . $property["reference"] . "(id) MATCH FULL;";
         }
         return $sql;
     }
@@ -1948,6 +1948,67 @@ class Application {
             }
         }
         return array("latitude"=>doubleval(0), "longitude"=>doubleval(0));
+    }
+
+    public function maintainers(array $navigations) {
+        foreach ($navigations as $className) {
+            switch ($this->navigation) {
+                case "bicubic-$className" : {
+                        require_once("nav/$className.php");
+                        $navigation = new $className($this);
+                        $navigation->records();
+                        break;
+                    }
+                case "bicubic-$className-search" : {
+                        require_once("nav/$className.php");
+                        $navigation = new $className($this);
+                        $navigation->search();
+                        break;
+                    }
+                case "bicubic-$className-reorder" : {
+                         require_once("nav/$className.php");
+                        $navigation = new $className($this);
+                        $navigation->reorder();
+                        break;
+                    }
+                case "bicubic-$className-json" : {
+                        require_once("nav/$className.php");
+                        $navigation = new $className($this);
+                        $navigation->json();
+                        break;
+                    }
+                case "bicubic-$className-add" : {
+                         require_once("nav/$className.php");
+                        $navigation = new $className($this);
+                        $navigation->add();
+                        break;
+                    }
+                case "bicubic-$className-addSubmit" : {
+                        require_once("nav/$className.php");
+                        $navigation = new $className($this);
+                        $navigation->addSubmit();
+                        break;
+                    }
+                case "bicubic-$className-edit" : {
+                        require_once("nav/$className.php");
+                        $navigation = new $className($this);
+                        $navigation->edit();
+                        break;
+                    }
+                case "bicubic-$className-editSubmit" : {
+                         require_once("nav/$className.php");
+                        $navigation = new $className($this);
+                        $navigation->editSubmit();
+                        break;
+                    }
+                case "bicubic-$className-delete" : {
+                        require_once("nav/$className.php");
+                        $navigation = new $className($this);
+                        $navigation->delete();
+                        break;
+                    }
+            }
+        }
     }
 
 }

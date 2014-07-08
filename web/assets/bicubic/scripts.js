@@ -53,20 +53,65 @@ function getAllElementsWithAttribute(attribute)
 document.addEventListener('DOMContentLoaded', function() {
     var datarequireds = getAllElementsWithAttribute(DATA_REQUIRED);
     for (var i = 0, n = datarequireds.length; i < n; i++) {
-        if(datarequireds[i].getAttribute(DATA_REQUIRED) === "required") {
+        if (datarequireds[i].getAttribute(DATA_REQUIRED) === "required") {
             datarequireds[i].required = true;
         }
     }
     var dataselecteds = getAllElementsWithAttribute(DATA_SELECTED);
     for (var i = 0, n = dataselecteds.length; i < n; i++) {
-        if(dataselecteds[i].getAttribute(DATA_SELECTED) === "selected") {
+        if (dataselecteds[i].getAttribute(DATA_SELECTED) === "selected") {
             dataselecteds[i].selected = true;
         }
     }
     var datacheckeds = getAllElementsWithAttribute(DATA_CHECKED);
     for (var i = 0, n = datacheckeds.length; i < n; i++) {
-        if(datacheckeds[i].getAttribute(DATA_CHECKED) === "checked") {
+        if (datacheckeds[i].getAttribute(DATA_CHECKED) === "checked") {
             datacheckeds[i].checked = true;
         }
+    }
+});
+
+//Bicubic Table
+document.addEventListener('DOMContentLoaded', function() {
+    var bicubictable = document.getElementById('bicubic-table');
+    if (bicubictable) {
+        var bicubictableRequest = new XMLHttpRequest();
+        var bicubictableUrl = bicubictable.getAttribute("data-url");
+        var bicubictableMaxSize = bicubictable.getAttribute("data-maxsize");
+        var bicubictableMore = true;
+        function loadBicubicTableData() {
+            if (bicubictableRequest.readyState === 4 || bicubictableRequest.readyState === 0) {
+                bicubictableRequest.open("POST", bicubictableUrl);
+                bicubictableRequest.onreadystatechange = function() {
+                    if (bicubictableRequest.readyState === 4 && bicubictableRequest.status === 200) {
+                        var response = JSON.parse(this.responseText);
+                        if (response.status === 'success') {
+                            if (response.data) {
+                                bicubictable.innerHTML = bicubictable.innerHTML + response.data;
+                            }
+                            bicubictable.setAttribute("data-lastid", response.lastid);
+                            if (response.size < bicubictableMaxSize) {
+                                bicubictableMore = false;
+                            }
+                            else {
+                                if (document.body.scrollHeight < window.innerHeight) {
+                                    loadContacsData();
+                                }
+                            }
+                        }
+                    }
+                };
+                bicubictableRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                bicubictableRequest.send("lastid=" + bicubictable.getAttribute("data-lastid"));
+            }
+        }
+        loadBicubicTableData();
+        document.addEventListener('scroll', function() {
+            if (bicubictableMore) {
+                if ((document.body.scrollHeight / window.innerHeight) * 100 > 80) {
+                    loadContacsData();
+                }
+            }
+        });
     }
 });
