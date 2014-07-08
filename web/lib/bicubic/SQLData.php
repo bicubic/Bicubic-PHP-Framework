@@ -139,34 +139,15 @@ abstract class SQLData extends Data {
         }
 
         $lastIndex = $this->escapeChars($lastIndex);
-        if(!$orderParam) {
-            $orderParam = new OrderParam("id",  ObjectOrder::$_DESC);
+        if (!$orderParam) {
+            $orderParam = new OrderParam("id", ObjectOrder::$_DESC);
         }
-        if(!$lastIndex) {
-            if($orderParam->order == ObjectOrder::$_DESC) {
-                $lastIndex = PHP_INT_MAX;
-            }
-            else {
-                $lastIndex = 0;
-            }
+        if (!$lastIndex) {
+            $lastIndex = 0;
         }
-        if ($i == 0) {
-            if ($orderParam->order ==  ObjectOrder::$_DESC) {
-                $query .= "WHERE $this->idname < $lastIndex ";
-            } else {
-                $query .= "WHERE $this->idname > $lastIndex ";
-            }
-        } else {
-            if ($orderParam->order ==  ObjectOrder::$_DESC) {
-                $query .= "AND $this->idname < $lastIndex ";
-            } else {
-                $query .= "AND $this->idname > $lastIndex ";
-            }
-        }
-        $i++;
-        
-        
+
         $query .= "ORDER BY $orderParam->property  " . ObjectOrder::$_VALUE[$orderParam->order] . " ";
+        $query .= "OFFSET $lastIndex ";
 
         if ($limit) {
             if ($limit < 0) {

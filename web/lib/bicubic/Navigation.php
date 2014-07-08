@@ -17,7 +17,7 @@ class Navigation {
 
     function __construct(Application $application) {
         $this->application = $application;
-        $this->tableLastId = PHP_INT_MAX;
+        $this->tableLastId = 0;
         $this->tableMaxSize = $this->config('web_table_size');
         $this->tableSize = 0;
     }
@@ -467,8 +467,9 @@ class Navigation {
         $data = new TransactionManager($this->application->data);
         $objects = $data->getAllPaged($object, $oderParam, $size, $lastid);
         $rowscontent = "";
+        $this->tableLastId = $lastid;
         foreach ($objects as $object) {
-            $this->tableLastId = $object->getId();
+            $this->tableLastId++;
             $this->tableSize++;
             $rowscontent .= $this->objectTableRow($object, $actionParams);
         }
@@ -505,7 +506,9 @@ class Navigation {
             $params = $reorder->params;
             $params[] = new Param("property",$property["name"]);
             $params[] = new Param("order", ($property["name"] === $order->property) ? $this->item(ObjectOrder::$_OPOSITE, $order->order, ObjectOrder::$_DESC) : ObjectOrder::$_DESC);
-            $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-ORDER", $this->item(ObjectOrder::$_VALUE, $order->order));
+            if($property["name"] === $order->property) {
+                $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-ORDER", $this->item(ObjectOrder::$_VALUE, $order->order));
+            }
             $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LINK", $this->application->getAppUrl($reorder->app, $reorder->nav,$params));
         }
         $content = $this->application->renderCustomTemplate($result);
@@ -595,7 +598,7 @@ class Navigation {
         $rowNumber = 2;
         while ($objects) {
             foreach ($objects as $object) {
-                $lastid = $object->getId();
+                $lastid++;
                 $column = "A";
                 foreach ($properties as $property) {
                     if (!$property["table"]) {

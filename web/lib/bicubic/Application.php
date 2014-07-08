@@ -109,7 +109,7 @@ class Application {
 
     public function getHomeUrl() {
         $linkParams = array();
-        if($this->config('lang') != LangFactory::getDefaultLang()) {
+        if ($this->config('lang') != LangFactory::getDefaultLang()) {
             $linkParams [] = $this->config('param_lang') . "=" . $this->config('lang');
         }
         if ($this->config('urlforms')) {
@@ -546,9 +546,9 @@ class Application {
                     break;
                 }
             case PropertyTypes::$_BOOLEAN : {
-                    if ($value) {
+                    if (strval($value) === "1") {
                         return ObjectBoolean::$_YES;
-                    } else {
+                    } else if (strval($value) === "0") {
                         return ObjectBoolean::$_NO;
                     }
                     break;
@@ -1043,21 +1043,8 @@ class Application {
         return $object;
     }
 
-    public function renderToCss() {
-        $this->tpl->touchBlock($this->name);
-        header('Content-type: text/css');
-        $this->tpl->show();
-        $this->endApp();
-    }
-
-    public function renderToJavascript() {
-        $this->tpl->touchBlock($this->name);
-        header('Content-type: text/javascript');
-        $this->tpl->show();
-        $this->endApp();
-    }
-
     public function renderToPdf($creator, $author, $margin = 1, $scale = 1, $font = "helvetica", $fontsize = "12", $orientation = "P", $unit = "mm", $format = "LETTER") {
+        $this->setLangItems($this->name);
         $this->tpl->touchBlock($this->name);
         $html = $this->tpl->get();
         $pdf = new TCPDF($orientation, $unit, $format, true, 'UTF-8', false);
@@ -1946,21 +1933,21 @@ class Application {
             $this->error($this->lang('lang_erroremail') . " - " . $mandrillEmail->error);
         }
     }
-    
+
     public function getLocationFromIP() {
-        if(array_key_exists('REMOTE_ADDR', $_SERVER)) {
+        if (array_key_exists('REMOTE_ADDR', $_SERVER)) {
             $ip = $_SERVER['REMOTE_ADDR'];
-            if($ip) {
+            if ($ip) {
                 $details = json_decode(file_get_contents("http://ipinfo.io/{$ip}/json"));
                 if ($details && property_exists($details, "loc")) {
                     $latlong = explode(",", $details->loc);
                     if (count($latlong) == 2) {
-                        return array("latitude" => doubleval($latlong[0]), "longitude" => doubleval($latlong[1]));
+                        return array("latitude"=>doubleval($latlong[0]), "longitude"=>doubleval($latlong[1]));
                     }
                 }
             }
         }
-        return array("latitude" => doubleval(0), "longitude" => doubleval(0));
+        return array("latitude"=>doubleval(0), "longitude"=>doubleval(0));
     }
 
 }

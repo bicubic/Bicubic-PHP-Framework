@@ -10,9 +10,9 @@
 
 <!-- BEGIN SEARCHLINK -->
 <form id="bicubic-search-form" action="{SEARCH-ACTION}" method="post">
-    <ul id="bicubic-table-search">
+    <div id="bicubic-table-search">
         <!-- BEGIN SEARCHLIST -->
-        <li>
+        <div>
             <label>{SEARCHLIST-LANG}</label>
             <select id="bicubic-search-{SEARCHLIST-NAME}" name="{SEARCHLIST-NAME}" >
                 <option value="">{TEXT-ALL}</option>
@@ -20,16 +20,16 @@
                 <option value="{SEARCHLISTOPTION-VALUE}"  data-selected="{SEARCHLISTOPTION-SELECTED}">{SEARCHLISTOPTION-NAME}</option>
                 <!-- END SEARCHLISTOPTION -->
             </select>
-
+        </div>    
             <!-- END SEARCHLIST -->
             <!-- BEGIN SEARCHSTRING -->
-        <li>
+        <div>
             <label>{SEARCHSTRING-LANG}</label>
             <input id="bicubic-search-{SEARCHSTRING-NAME}" type="text" maxlength="256" name="{SEARCHSTRING-NAME}" value="{SEARCHSTRING-VALUE}" />
-        </li>
+        </div>    
         <!-- END SEARCHSTRING -->
-    </ul>
-    <button type="submit" id="submit">{TEXT-SEARCH}</button>
+        <button type="submit" id="submit">{TEXT-SEARCH}</button>
+    </div>    
 </form>
 <!-- END SEARCHLINK -->
 
