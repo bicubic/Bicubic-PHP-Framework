@@ -262,4 +262,3 @@ abstract class SQLData extends Data {
 
 }
 
-?>

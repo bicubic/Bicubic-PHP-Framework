@@ -1043,18 +1043,17 @@ class Application {
         return $object;
     }
 
-    public function renderToPdf($creator, $author, $margin = 1, $scale = 1, $font = "helvetica", $fontsize = "12", $orientation = "P", $unit = "mm", $format = "LETTER") {
+    public function renderToPdf($creator, $author, $margin = 10, $scale = 1, $font = "helvetica", $fontsize = "12", $orientation = "P", $unit = "mm", $format = "LETTER") {
         $this->setLangItems($this->name);
         $this->tpl->touchBlock($this->name);
         $html = $this->tpl->get();
         $pdf = new TCPDF($orientation, $unit, $format, true, 'UTF-8', false);
         $pdf->SetCreator($creator);
         $pdf->SetAuthor($author);
-        $pdf->SetHeaderData(/* logo */ '', /* ancho logo */ '', /* título */ $this->lang('lang_title'), '');
         $pdf->setHeaderFont(Array($font, '', $fontsize));
         $pdf->setFooterFont(Array($font, '', $fontsize));
         $pdf->SetDefaultMonospacedFont($font);
-        $pdf->SetMargins($margin, $margin, $margin);
+        $pdf->SetMargins($margin, $margin, $margin, true);
         $pdf->SetHeaderMargin($margin);
         $pdf->SetFooterMargin($margin);
         $pdf->SetAutoPageBreak(TRUE, $margin);
@@ -1570,7 +1569,7 @@ class Application {
                 foreach ($langs as $key=> $value) {
                     $str .= "\$lang['$value'] = '$value';\n";
                 }
-                $str .= "?>\n";
+                $str .= "\n";
                 file_put_contents("./lang/lang.$valueVal.php", $str);
             } else {
                 include("lang/lang.$valueVal.php");
@@ -1593,7 +1592,7 @@ class Application {
                         $str .= "\$lang['$key'] = '$value';\n";
                     }
                 }
-                $str .= "?>\n";
+                $str .= "\n";
                 file_put_contents("./lang/lang.$valueVal.php", $str);
             }
         }
@@ -2012,5 +2011,3 @@ class Application {
     }
 
 }
-
-?>

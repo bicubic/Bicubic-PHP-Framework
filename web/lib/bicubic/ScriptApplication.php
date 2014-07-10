@@ -50,4 +50,3 @@ class ScriptApplication extends Application {
     }
 
 }
-?>

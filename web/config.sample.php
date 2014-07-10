@@ -72,4 +72,3 @@ $config['mylodon_apikey'] = "";
 //Certificates for ios push notification
 $config['certificate_private'] = "";
 $config['certificate_auth'] = "";
-?>

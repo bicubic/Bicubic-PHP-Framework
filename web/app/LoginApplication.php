@@ -92,4 +92,3 @@ class LoginApplication extends Application {
 
 }
 
-?>

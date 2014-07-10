@@ -38,4 +38,3 @@ class HelloNavigation extends AccountNavigation {
 
 }
 
-?>

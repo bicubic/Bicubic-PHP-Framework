@@ -147,4 +147,3 @@ if (isset($argv)) {
         ApplicationFactory::defaultWebApplication($config, $lang);
     }
 }
-?>

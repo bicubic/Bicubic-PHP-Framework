@@ -244,4 +244,3 @@ class SystemUserLog extends DataObject {
 
 }
 
-?>

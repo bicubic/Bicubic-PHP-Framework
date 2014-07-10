@@ -117,4 +117,3 @@ class PostgreSQLData extends SQLData {
 
 }
 
-?>

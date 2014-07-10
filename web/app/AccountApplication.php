@@ -70,4 +70,3 @@ class AccountApplication extends Application {
 
 }
 
-?>

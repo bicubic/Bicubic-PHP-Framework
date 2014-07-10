@@ -50,4 +50,3 @@ class PrivateApplication extends AccountApplication {
 
 }
 
-?>

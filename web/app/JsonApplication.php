@@ -42,4 +42,3 @@ class JsonApplication extends Application {
 
 }
 
-?>

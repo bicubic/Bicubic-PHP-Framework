@@ -548,6 +548,18 @@ class Navigation {
     public function objectTableRowValue(DataObject $object, $property) {
         $result = $this->application->setCustomTemplate("bicubic", "tabletd");
         $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-VALUE", $this->application->formatProperty($object, $property));
+        if($property["type"] == PropertyTypes::$_BOOLEAN) {
+            $getter = "get" . strtoupper(substr($property["name"], 0, 1)) . substr($property["name"], 1);
+            $value = $object->$getter();
+            $data = "";
+            if(intval($value) == 1) {
+                $data = "yes";
+            }
+            else if(intval($value) == 0) {
+                $data = "no";
+            }
+            $this->application->setVariableCustomTemplate($result, "PROPERTY-BOOLEAN", $data);
+        }
         $content = $this->application->renderCustomTemplate($result);
         return $content;
     }
@@ -627,4 +639,3 @@ class Navigation {
     }
 
 }
-?>

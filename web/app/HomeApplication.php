@@ -40,4 +40,3 @@ class HomeApplication extends LoginApplication {
 
 }
 
-?>

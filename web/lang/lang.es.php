@@ -100,4 +100,3 @@ $lang['lang_userlang'] = 'lang_userlang';
 $lang['lang_userlangerror'] = 'lang_userlangerror';
 $lang['lang_validate'] = 'lang_validate';
 $lang['lang_yes'] = 'lang_yes';
-?>

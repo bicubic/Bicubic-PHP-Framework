@@ -47,4 +47,3 @@ abstract class Data {
     public abstract function delete(DataObject $object);
 }
 
-?>
