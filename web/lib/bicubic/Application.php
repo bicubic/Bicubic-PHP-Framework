@@ -1251,19 +1251,18 @@ class Application {
         $getter = "get" . strtoupper(substr($property["name"], 0, 1)) . substr($property["name"], 1);
         $value = $object->$getter();
         switch ($property["type"]) {
-            case PropertyTypes::$_INT :
             case PropertyTypes::$_LONG : {
                     return $this->formatInteger($value);
                 }
             case PropertyTypes::$_DOUBLE : {
                     return $this->formatDouble($value);
                 }
-            case PropertyTypes::$_INT :
             case PropertyTypes::$_LIST :
             case PropertyTypes::$_STRINGLIST :
             case PropertyTypes::$_SHORTLIST : {
                     return $this->lang($this->item($object->__getList($property["name"], $this), $value));
                 }
+            case PropertyTypes::$_INT :
             case PropertyTypes::$_URL :
             case PropertyTypes::$_EMAIL :
             case PropertyTypes::$_RUT :
@@ -1289,9 +1288,24 @@ class Application {
                     return "";
                 }
             case PropertyTypes::$_FILE : {
+                    if ($value) {
+                        $result = $this->setCustomTemplate("bicubic", "formatfile");
+                        $this->setHTMLVariableCustomTemplate($result, "PROPERTY-VALUE", $value);
+                        $this->setHTMLVariableCustomTemplate($result, "PROPERTY-LANG", $this->lang($property["lang"]));
+                        $content = $this->renderCustomTemplate($result);
+                        return $content;
+                    }
                     return "";
                 }
+
             case PropertyTypes::$_IMAGE256 : {
+                    if ($value) {
+                        $result = $this->setCustomTemplate("bicubic", "formatimg");
+                        $this->setHTMLVariableCustomTemplate($result, "PROPERTY-VALUE", $value);
+                        $this->setHTMLVariableCustomTemplate($result, "PROPERTY-LANG", $this->lang($property["lang"]));
+                        $content = $this->renderCustomTemplate($result);
+                        return $content;
+                    }
                     return "";
                 }
             case PropertyTypes::$_FLAT :
@@ -1965,7 +1979,7 @@ class Application {
                         break;
                     }
                 case "bicubic-$className-reorder" : {
-                         require_once("nav/$className.php");
+                        require_once("nav/$className.php");
                         $navigation = new $className($this);
                         $navigation->reorder();
                         break;
@@ -1977,7 +1991,7 @@ class Application {
                         break;
                     }
                 case "bicubic-$className-add" : {
-                         require_once("nav/$className.php");
+                        require_once("nav/$className.php");
                         $navigation = new $className($this);
                         $navigation->add();
                         break;
@@ -1995,7 +2009,7 @@ class Application {
                         break;
                     }
                 case "bicubic-$className-editSubmit" : {
-                         require_once("nav/$className.php");
+                        require_once("nav/$className.php");
                         $navigation = new $className($this);
                         $navigation->editSubmit();
                         break;

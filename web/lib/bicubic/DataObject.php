@@ -39,6 +39,14 @@ abstract class DataObject {
     public function __getList($paramname, Application $application = null) {
         return [];
     }
+    
+    public function __getProperty($key) {
+        $properties = $this->__getProperties();
+        if(array_key_exists($key, $properties)) {
+            return $properties[$key];
+        }
+        return null;
+    }
 
     public function __getParentProperties() {
         if ($this->__isChild()) {

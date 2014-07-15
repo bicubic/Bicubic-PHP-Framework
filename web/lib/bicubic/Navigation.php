@@ -153,7 +153,7 @@ class Navigation {
             switch ($property["type"]) {
                 case PropertyTypes::$_ALPHANUMERIC :
                 case PropertyTypes::$_DOUBLE :
-                case PropertyTypes::$_URL :    
+                case PropertyTypes::$_URL :
                 case PropertyTypes::$_EMAIL :
                 case PropertyTypes::$_RUT :
                 case PropertyTypes::$_INT :
@@ -231,7 +231,7 @@ class Navigation {
                         }
                         return $this->application->renderCustomTemplate($result);
                     }
-                case PropertyTypes::$_LIST : 
+                case PropertyTypes::$_LIST :
                 case PropertyTypes::$_STRINGLIST : {
                         $result = $this->application->setCustomTemplate("bicubic", "list");
                         $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LABEL", $this->lang($property["lang"]));
@@ -312,8 +312,8 @@ class Navigation {
                 $properties = array_merge($properties, $object->__getParentProperties());
             }
             $params = $search->params;
-            $params[]=new Param("property",$order->property);
-            $params[]=new Param("order", $order->order);
+            $params[] = new Param("property", $order->property);
+            $params[] = new Param("order", $order->order);
             $this->application->setHTMLArrayCustomTemplate($result, [
                 'SEARCH-ACTION'=>$this->application->getAppUrl($search->app, $search->nav, $params),
             ]);
@@ -354,7 +354,7 @@ class Navigation {
                             $enum = ObjectBoolean::$_ENUM;
                             $getter = "get" . strtoupper(substr($property["name"], 0, 1)) . substr($property["name"], 1);
                             $val = $object->$getter();
-                            foreach ($enum as $key => $value) {
+                            foreach ($enum as $key=> $value) {
                                 $this->application->setHTMLArrayCustomTemplate($result, [
                                     'SEARCHLISTOPTION-VALUE'=>$key,
                                     'SEARCHLISTOPTION-SELECTED'=>(strval($key) === strval($val) ? "selected" : ""),
@@ -388,7 +388,7 @@ class Navigation {
                         }
                     case PropertyTypes::$_ALPHANUMERIC :
                     case PropertyTypes::$_DOUBLE :
-                    case PropertyTypes::$_URL :    
+                    case PropertyTypes::$_URL :
                     case PropertyTypes::$_EMAIL :
                     case PropertyTypes::$_RUT :
                     case PropertyTypes::$_INT :
@@ -438,7 +438,7 @@ class Navigation {
         $order = new OrderParam();
         $order->property = $this->application->getUrlParam("property", PropertyTypes::$_STRING32, false);
         $order->order = $this->application->getUrlParam("order", PropertyTypes::$_INT, false);
-        if($order->property && $order->order) {
+        if ($order->property && $order->order) {
             return $order;
         }
         return new OrderParam("id", ObjectOrder::$_DESC);
@@ -500,19 +500,24 @@ class Navigation {
     }
 
     public function objectTableHeaderValue(DataObject $object, $property, LinkParam $reorder = null, OrderParam $order = null) {
-        $result = $this->application->setCustomTemplate("bicubic", "tableth");
-        $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-HEADER", $this->lang($property["lang"]));
         if ($reorder && $order) {
+            $result = $this->application->setCustomTemplate("bicubic", "tabletha");
+            $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-HEADER", $this->lang($property["lang"]));
             $params = $reorder->params;
-            $params[] = new Param("property",$property["name"]);
+            $params[] = new Param("property", $property["name"]);
             $params[] = new Param("order", ($property["name"] === $order->property) ? $this->item(ObjectOrder::$_OPOSITE, $order->order, ObjectOrder::$_DESC) : ObjectOrder::$_DESC);
-            if($property["name"] === $order->property) {
+            if ($property["name"] === $order->property) {
                 $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-ORDER", $this->item(ObjectOrder::$_VALUE, $order->order));
             }
-            $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LINK", $this->application->getAppUrl($reorder->app, $reorder->nav,$params));
+            $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-LINK", $this->application->getAppUrl($reorder->app, $reorder->nav, $params));
+            $content = $this->application->renderCustomTemplate($result);
+            return $content;
+        } else {
+            $result = $this->application->setCustomTemplate("bicubic", "tableth");
+            $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-HEADER", $this->lang($property["lang"]));
+            $content = $this->application->renderCustomTemplate($result);
+            return $content;
         }
-        $content = $this->application->renderCustomTemplate($result);
-        return $content;
     }
 
     public function objectTableHeaderActions() {
@@ -547,15 +552,14 @@ class Navigation {
 
     public function objectTableRowValue(DataObject $object, $property) {
         $result = $this->application->setCustomTemplate("bicubic", "tabletd");
-        $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-VALUE", $this->application->formatProperty($object, $property));
-        if($property["type"] == PropertyTypes::$_BOOLEAN) {
+        $this->application->setVariableCustomTemplate($result, "PROPERTY-VALUE", $this->application->formatProperty($object, $property));
+        if ($property["type"] == PropertyTypes::$_BOOLEAN) {
             $getter = "get" . strtoupper(substr($property["name"], 0, 1)) . substr($property["name"], 1);
             $value = $object->$getter();
             $data = "";
-            if(intval($value) == 1) {
+            if (intval($value) == 1) {
                 $data = "yes";
-            }
-            else if(intval($value) == 0) {
+            } else if (intval($value) == 0) {
                 $data = "no";
             }
             $this->application->setVariableCustomTemplate($result, "PROPERTY-BOOLEAN", $data);
@@ -569,7 +573,7 @@ class Navigation {
         foreach ($actionParams as $callBackParam) {
             if (is_a($callBackParam, "LinkParam")) {
                 $params = $callBackParam->params;
-                $params[]=new Param("id", $object->getId());
+                $params[] = new Param("id", $object->getId());
                 $this->application->setHTMLArrayCustomTemplate($result, [
                     'ACTIONLINK-LINK'=>$this->application->getAppUrl($callBackParam->app, $callBackParam->nav, $params),
                     'ACTIONLINK-NAME'=>$this->lang($callBackParam->lang),
@@ -637,5 +641,43 @@ class Navigation {
     public function objectImportSubmit(DataObject $object, $callBack) {
         
     }
+
+    public function objectView(DataObject $object) {
+        $result = $this->application->setCustomTemplate("bicubic", "view");
+        $this->application->setVariableCustomTemplate($result, "VIEW-CONTENT", $this->objectViewContent($object));
+        $content = $this->application->renderCustomTemplate($result);
+        return $content;
+    }
+
+    public function objectViewContent(DataObject $object) {
+        $properties = $object->__getProperties();
+        if ($object->__isChild()) {
+            $properties = array_merge($properties, $object->__getParentProperties());
+        }
+        $content = "";
+        foreach ($properties as $property) {
+            if (!$property["table"]) {
+                continue;
+            }
+            $content .= $this->objectViewTitle($object, $property) . $this->objectViewData($object, $property);
+        }
+        return $content;
+    }
+
+    public function objectViewTitle(DataObject $object, $property) {
+        $result = $this->application->setCustomTemplate("bicubic", "viewtitle");
+        $this->application->setHTMLVariableCustomTemplate($result, "VIEW-TITLE", $this->lang($property["lang"]));
+        $content = $this->application->renderCustomTemplate($result);
+        return $content;
+    }
+    
+    public function objectViewData(DataObject $object, $property) {
+        $result = $this->application->setCustomTemplate("bicubic", "viewdata");
+        $this->application->setVariableCustomTemplate($result, "VIEW-DATA", $this->application->formatProperty($object, $property));
+        $content = $this->application->renderCustomTemplate($result);
+        return $content;
+    }
+    
+    
 
 }

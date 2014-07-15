@@ -16,7 +16,7 @@ class LinkParam  {
     public $lang;
     public $class;
 
-    function __construct($app, $nav, $params, $lang, $class) {
+    function __construct($app, $nav, $params = array(), $lang = null, $class = null) {
         $this->app = $app;
         $this->nav = $nav;
         $this->params = $params;

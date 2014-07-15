@@ -95,7 +95,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             }
                             else {
                                 if (document.body.scrollHeight < window.innerHeight) {
-                                    loadContacsData();
+                                    loadBicubicTableData();
                                 }
                             }
                         }
@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.addEventListener('scroll', function() {
             if (bicubictableMore) {
                 if ((document.body.scrollHeight / window.innerHeight) * 100 > 80) {
-                    loadContacsData();
+                    loadBicubicTableData();
                 }
             }
         });

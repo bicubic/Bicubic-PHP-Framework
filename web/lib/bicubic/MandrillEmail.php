@@ -42,26 +42,30 @@ class MandrillEmail {
         $jsonObject->async = true;
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($jsonObject));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $result = curl_exec($ch);
-        if ($result) {
-            $r = json_decode($result);
-            if (property_exists($r, "status") && $r->status == "error") {
-                $this->error = $r->message;
-            } else {
-                foreach ($r as $key=> $response) {
-                    if (property_exists($response, "status") && $response->status != "error") {
-                        return true;
-                    }
-                    if (property_exists($response, "status") && $response->status == "error") {
-                        $this->error = $r->message;
-                    }
-                    break;
-                }
-            }
-        }
+//        $result = curl_exec($ch);
+//        if ($result) {
+//            $r = json_decode($result);
+//            if ($r) {
+//                if (property_exists($r, "status") && $r->status == "error") {
+//                    $this->error = $r->message;
+//                } else {
+//                    foreach ($r as $key=> $response) {
+//                        if (property_exists($response, "status") && $response->status != "error") {
+//                            return true;
+//                        }
+//                        if (property_exists($response, "status") && $response->status == "error") {
+//                            $this->error = $r->message;
+//                        }
+//                        break;
+//                    }
+//                }
+//            }
+//        }
+//        curl_close($ch);
+//        return false;
+        curl_exec($ch);
         curl_close($ch);
-        return false;
+        return true;
     }
 
 }
-
