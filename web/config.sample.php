@@ -18,11 +18,13 @@ $config['urlbase'] = "https://www.bicubic.cl/";
 /* URL BASE Apache
     RewriteEngine On
     RewriteCond %{REQUEST_URI} !/assets
-    RewriteRule /([a-zA-Z0-9.]+)/([a-zA-Z0-9.]+)/([a-zA-Z0-9.]+)?(.*) /index.php?app=$1&nav=$2&id=$3 [QSA]
+    RewriteRule /([a-zA-Z0-9\-.]+)/([a-zA-Z0-9\-.]+)/([a-zA-Z0-9\-.]+)?(.*) /index.php?app=$1&nav=$2&id=$3 [QSA]
     RewriteCond %{REQUEST_URI} !/assets
-    RewriteRule /([a-zA-Z0-9.]+)/([a-zA-Z0-9.]+)?(.*) /index.php?app=&nav=$1&id=$2 [QSA]
-    RewriteRule /([a-zA-Z0-9.]+)/([a-zA-Z0-9.]+)/assets/(.*) /assets/$3
-    RewriteRule /([a-zA-Z0-9.]+)/assets/(.*) /assets/$2
+    RewriteRule /([a-zA-Z0-9\-.]+)/([a-zA-Z0-9\-.]+)?(.*) /index.php?app=&nav=$1&id=$2 [QSA]
+    RewriteCond %{REQUEST_URI} !/assets
+    RewriteRule /([a-zA-Z0-9\-.]+)?(.*) /index.php?app=&nav=$1 [QSA]
+    RewriteRule /([a-zA-Z0-9\-.]+)/([a-zA-Z0-9\-.]+)/assets/(.*) /assets/$3
+    RewriteRule /([a-zA-Z0-9\-.]+)/assets/(.*) /assets/$2
   */
 
 //Web  

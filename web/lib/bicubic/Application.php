@@ -80,6 +80,7 @@ class Application {
     }
 
     public function getAppFlatUrl($urlbase, $app, $nav, $params) {
+        $urlbase = rtrim($urlbase, '/');
         $id = "";
         $lang = false;
         $linkParams = array();
@@ -95,16 +96,36 @@ class Application {
                 }
             }
         }
-        if (!$lang) {
+        if (!$lang && $this->getUrlParam($this->config('param_lang'), PropertyTypes::$_STRING2, false)) {
             $linkParams [] = $this->config('param_lang') . "=" . $this->config('lang');
         }
         if ($app && $nav) {
-            return $urlbase . "$app/$nav/$id?" . implode("&", $linkParams);
+            if ($id) {
+                if (count($linkParams)) {
+                    return $urlbase . "/$app/$nav/$id?" . implode("&", $linkParams);
+                }
+                return $urlbase . "/$app/$nav/$id";
+            }
+            if (count($linkParams)) {
+                return $urlbase . "/$app/$nav?" . implode("&", $linkParams);
+            }
+            return $urlbase . "/$app/$nav";
         } else if ($nav) {
-            return $urlbase . "$nav/$id?" . implode("&", $linkParams);
-        } else {
-            return $urlbase . "$id?" . implode("&", $linkParams);
+            if ($id) {
+                if (count($linkParams)) {
+                    return $urlbase . "/$nav/$id?" . implode("&", $linkParams);
+                }
+                return $urlbase . "/$nav/$id";
+            }
+            if (count($linkParams)) {
+                return $urlbase . "/$nav?" . implode("&", $linkParams);
+            }
+            return $urlbase . "/$nav";
         }
+        if (count($linkParams)) {
+            return $urlbase . "/?" . implode("&", $linkParams);
+        }
+        return $urlbase;
     }
 
     public function getHomeUrl() {
@@ -113,10 +134,11 @@ class Application {
             $linkParams [] = $this->config('param_lang') . "=" . $this->config('lang');
         }
         if ($this->config('urlforms')) {
+            $urlbase = rtrim($this->config('urlbase'), '/');
             if ($linkParams) {
-                return $this->config('urlbase') . "?" . implode("&", $linkParams);
+                return $urlbase . "/?" . implode("&", $linkParams);
             }
-            return $this->config('urlbase');
+            return $urlbase;
         } else {
             if ($linkParams) {
                 return $this->config('web_secure_url') . "?" . implode("&", $linkParams);
