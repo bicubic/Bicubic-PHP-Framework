@@ -107,9 +107,9 @@ class Application {
                 return $urlbase . "/$app/$nav/$id";
             }
             if (count($linkParams)) {
-                return $urlbase . "/$app/$nav?" . implode("&", $linkParams);
+                return $urlbase . "/$app/$nav/?" . implode("&", $linkParams);
             }
-            return $urlbase . "/$app/$nav";
+            return $urlbase . "/$app/$nav/";
         } else if ($nav) {
             if ($id) {
                 if (count($linkParams)) {
