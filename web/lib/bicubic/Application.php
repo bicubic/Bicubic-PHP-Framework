@@ -1910,7 +1910,7 @@ class Application {
         $notnull = $property["required"] ? "NOT NULL" : "";
         $default = $property["default"] ? "DEFAULT '" . $property["default"] . "' " : "";
         if ($name == "id" && !$object->__isChild()) {
-            $sql .= "ALTER TABLE $class ADD COLUMN id serial NOT NULL;";
+            $sql .= "ALTER TABLE $class ADD COLUMN id bigserial NOT NULL;";
         } else if ($name == "id" && $object->__isChild()) {
             $sql .= "ALTER TABLE $class ADD COLUMN id bigint NOT NULL;";
         } else {

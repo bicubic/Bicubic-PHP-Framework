@@ -1,6 +1,6 @@
 <?php
 $lang = array();
-$lang['lang_account'] = 'Cuenta';
+$lang['lang_account'] = 'lang_account';
 $lang['lang_argentina'] = 'lang_argentina';
 $lang['lang_australia'] = 'lang_australia';
 $lang['lang_brazil'] = 'lang_brazil';
