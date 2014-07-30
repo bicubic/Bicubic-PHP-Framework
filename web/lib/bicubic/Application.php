@@ -22,6 +22,8 @@ class Application {
     public $tpl;
     //navigation
     public $navigation;
+    //title of stage
+    public $title;
 
     /**
      * generates a new application with HTLM parser
@@ -747,6 +749,7 @@ class Application {
             if (!$title) {
                 $title = $this->config('web_name');
             }
+            $this->title = $title;
             $this->setHTMLVariableTemplate("TEMPLATE-LANG", $this->config('lang'));
             $this->setHTMLVariableTemplate("TEMPLATE-TITLE", $title);
             $this->setHTMLVariableTemplate("TEMPLATE-COPY", $this->config('web_copyright'));
@@ -1084,7 +1087,7 @@ class Application {
         $pdf->SetFont($font, '', $fontsize, '', true);
         $pdf->AddPage();
         $pdf->writeHTMLCell(0, 0, '', '', $html, 0, 1, 0, true, '', true);
-        $pdf->Output("file", 'I');
+        $pdf->Output($this->title, 'I');
         $this->endApp();
     }
 

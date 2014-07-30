@@ -16,17 +16,17 @@ class MaintainerNavigation extends Navigation {
     private $object;
     private $title;
     private $singleTitle;
-    public  $name;
+    public $name;
 
     function __construct(Application $application, DataObject $object, $name, $title, $singleTitle) {
         parent::__construct($application);
-        $this->order = $this->application->getSessionParam(SESSION_ORDER);
+        $this->object = $this->application->getSessionParam(SESSION_OBJECT);
+        if (!$this->object || get_class($this->object) != get_class($object)) {
+            $this->object = $object;
+            $this->order = $this->application->getSessionParam(SESSION_ORDER);
+        }
         if (!$this->order) {
             $this->order = new OrderParam("id", ObjectOrder::$_DESC);
-        }
-        $this->object = $this->application->getSessionParam(SESSION_OBJECT);
-        if (!$this->object) {
-            $this->object = $object;
         }
         $this->title = $title;
         $this->singleTitle = $singleTitle;
@@ -61,47 +61,47 @@ class MaintainerNavigation extends Navigation {
         $this->application->setVariableTemplate("NAVIGATION-CONTENT", $this->objectForm(new $className(), "bicubic-$this->name-addSubmit"));
         $this->application->render();
     }
-    
+
     public function addSubmit() {
         $className = get_class($this->object);
         $object = $this->application->getFormObject(new $className());
         $data = new TransactionManager($this->application->data);
         $data->data->begin();
-        if(!$data->insertRecord($object)) {
+        if (!$data->insertRecord($object)) {
             $data->data->rollback();
             $this->error('lang_servererror');
         }
         $data->data->commit();
         $this->application->redirect($this->application->name, "bicubic-$this->name");
     }
-    
+
     public function edit() {
         $id = $this->application->getUrlParam("id", PropertyTypes::$_INT);
         $className = get_class($this->object);
         $object = (new $className($id));
         $data = new TransactionManager($this->application->data);
         $object = $data->getRecord($object);
-        if(!$object) {
+        if (!$object) {
             $this->error("lang_idnotvalid");
         }
         $this->application->setMainTemplate("bicubic", "empty", $this->singleTitle);
         $this->application->setVariableTemplate("NAVIGATION-CONTENT", $this->objectForm($object, "bicubic-$this->name-editSubmit"));
         $this->application->render();
     }
-    
+
     public function editSubmit() {
         $className = get_class($this->object);
         $object = $this->application->getFormObject(new $className());
         $data = new TransactionManager($this->application->data);
         $data->data->begin();
-        if(!$data->updateRecord($object)) {
+        if (!$data->updateRecord($object)) {
             $data->data->rollback();
             $this->error('lang_servererror');
         }
         $data->data->commit();
         $this->application->redirect($this->application->name, "bicubic-$this->name");
     }
-    
+
     public function delete() {
         $id = $this->application->getUrlParam("id", PropertyTypes::$_INT);
         $className = get_class($this->object);
@@ -109,15 +109,16 @@ class MaintainerNavigation extends Navigation {
         $data = new TransactionManager($this->application->data);
         $data->data->begin();
         $object = $data->getRecord($object);
-        if(!$object) {
+        if (!$object) {
             $data->data->rollback();
             $this->error("lang_idnotvalid");
         }
-        if(!$data->deleteRecord($object)) {
+        if (!$data->deleteRecord($object)) {
             $data->data->rollback();
             $this->error('lang_servererror');
         }
         $data->data->commit();
         $this->application->redirect($this->application->name, "bicubic-$this->name");
     }
+
 }
