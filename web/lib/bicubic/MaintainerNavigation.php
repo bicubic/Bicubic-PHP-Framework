@@ -82,7 +82,7 @@ class MaintainerNavigation extends Navigation {
         $data = new TransactionManager($this->application->data);
         $object = $data->getRecord($object);
         if (!$object) {
-            $this->error("lang_idnotvalid");
+            $this->error('lang_idnotvalid');
         }
         $this->application->setMainTemplate("bicubic", "empty", $this->singleTitle);
         $this->application->setVariableTemplate("NAVIGATION-CONTENT", $this->objectForm($object, "bicubic-$this->name-editSubmit"));
@@ -111,7 +111,7 @@ class MaintainerNavigation extends Navigation {
         $object = $data->getRecord($object);
         if (!$object) {
             $data->data->rollback();
-            $this->error("lang_idnotvalid");
+            $this->error('lang_idnotvalid');
         }
         if (!$data->deleteRecord($object)) {
             $data->data->rollback();
