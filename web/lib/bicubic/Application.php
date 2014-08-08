@@ -336,7 +336,7 @@ class Application {
                 }
             case PropertyTypes::$_EMAIL : {
                     if (filter_var($value, FILTER_VALIDATE_EMAIL)) {
-                        return $value;
+                        return strtolower($value);
                     }
                     break;
                 }
