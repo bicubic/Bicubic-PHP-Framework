@@ -207,6 +207,12 @@ class Application {
         if ($type == PropertyTypes::$_IMAGE256 && !isset($value)) {
             $value = $this->uploadPhoto($name, true, 256, 256);
         }
+		if ($type == PropertyTypes::$_IMAGE512 && !isset($value)) {
+            $value = $this->uploadPhoto($name, true, 512, 512);
+        }
+		if ($type == PropertyTypes::$_IMAGE1024 && !isset($value)) {
+            $value = $this->uploadPhoto($name, true, 1024, 1024);
+        }
         if ($force && !isset($value)) {
             $this->error($this->lang('lang_notvalid') . " : " . (array_key_exists($name, $this->lang) ? $this->lang($name) : $name));
         }
@@ -506,7 +512,9 @@ class Application {
                     }
                     break;
                 }
-            case PropertyTypes::$_IMAGE256 : {
+            case PropertyTypes::$_IMAGE256 :
+		    case PropertyTypes::$_IMAGE512 :
+			case PropertyTypes::$_IMAGE1024 : {
                     if ($value) {
                         $value = trim($value);
                         if ($value) {
@@ -1188,7 +1196,7 @@ class Application {
         }
     }
 
-    public function uploadPhoto($fileParam, $optional = false, $w = 256, $h = 256, $full = true, $secure = true, $bucket = null) {
+    public function uploadPhoto($fileParam, $optional = false, $w = 256, $h = 256, $full = true, $secure = true, $bucket = null, $square = true, $tw = 256, $th = 256, $tsquare = true) {
         if (!isset($_FILES[$fileParam])) {
             if (!$optional) {
                 $this->error($this->lang('lang_filenotfound'));
@@ -1217,7 +1225,7 @@ class Application {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, "https://api.mylodon.cl/index.php?app=json&nav=upload-image");
         curl_setopt($ch, CURLOPT_POST, 1);
-        $post = array('image'=>$cfile, 'appsecret'=>$this->config('mylodon_apikey'), 'w'=>$w, 'h'=>$h);
+        $post = array('image'=>$cfile, 'appsecret'=>$this->config('mylodon_apikey'), 'w'=>$w, 'h'=>$h, 'tw'=>$tw, 'th'=>$th, 'square' =>($square ? "1" : "0"), 'tsquare' =>($tsquare ? "1" : "0"));
         if ($bucket) {
             $post['bucket'] = $bucket;
         }
@@ -1322,8 +1330,9 @@ class Application {
                     }
                     return "";
                 }
-
-            case PropertyTypes::$_IMAGE256 : {
+			case PropertyTypes::$_IMAGE256 :	
+            case PropertyTypes::$_IMAGE512 : 
+			case PropertyTypes::$_IMAGE1024 : {
                     if ($value) {
                         $result = $this->setCustomTemplate("bicubic", "formatimg");
                         $this->setHTMLVariableCustomTemplate($result, "PROPERTY-VALUE", $value);

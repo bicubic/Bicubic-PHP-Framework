@@ -46,6 +46,8 @@ class PropertyTypes {
     public static $_RUT = "rut";
     public static $_FILE = "file";
     public static $_IMAGE256 = "image256";
+	public static $_IMAGE512 = "image512";
+	public static $_IMAGE1024 = "image1024";
     public static $_POSTGRESQLTYPES = array(
         "int"=>'integer',
         "list"=>'integer',
@@ -82,6 +84,8 @@ class PropertyTypes {
         "rut"=>'character varying',
         "file"=>'character varying(1024)',
         "image256"=>'character varying(1024)',
+		"image512"=>'character varying(1024)',
+		"image1024"=>'character varying(1024)',
     );
 
 }
