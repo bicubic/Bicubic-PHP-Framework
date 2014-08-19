@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 bicubictableMore = false;
                             }
                             else {
-                                if (document.body.scrollHeight < window.innerHeight) {
+                                if (document.body.scrollHeight <= window.innerHeight) {
                                     loadBicubicTableData();
                                 }
                             }
