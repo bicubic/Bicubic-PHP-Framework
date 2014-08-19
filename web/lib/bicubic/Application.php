@@ -1982,7 +1982,19 @@ class Application {
     }
 
     public function getLocationFromIP() {
-        if (array_key_exists('REMOTE_ADDR', $_SERVER)) {
+        if (array_key_exists('HTTP_X_FORWARDED_FOR', $_SERVER)) {
+            $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+            if ($ip) {
+                $details = json_decode(file_get_contents("http://ipinfo.io/{$ip}/json"));
+                if ($details && property_exists($details, "loc")) {
+                    $latlong = explode(",", $details->loc);
+                    if (count($latlong) == 2) {
+                        return array("latitude"=>doubleval($latlong[0]), "longitude"=>doubleval($latlong[1]));
+                    }
+                }
+            }
+        }
+        else if (array_key_exists('REMOTE_ADDR', $_SERVER)) {
             $ip = $_SERVER['REMOTE_ADDR'];
             if ($ip) {
                 $details = json_decode(file_get_contents("http://ipinfo.io/{$ip}/json"));
