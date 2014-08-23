@@ -940,7 +940,10 @@ class Application {
             } else if ($property["type"] == PropertyTypes::$_SHORTLIST) {
                 $items = $object->__getList($property["name"], $this);
                 $this->setVariableTemplate("$objectFormName-$paramName", $this->lang($this->item($items, $value)));
-            } else {
+            } else if ($property["type"] == PropertyTypes::$_STRING2048) {
+                $this->setVariableTemplate("$objectFormName-$paramName", $this->makeHTMLTags($this->formatProperty($object, $property)));
+            }
+			else {
                 $this->setVariableTemplate("$objectFormName-$paramName", $this->formatProperty($object, $property));
             }
         }
@@ -962,16 +965,15 @@ class Application {
         $this->tpl->setVariable($name, $value);
     }
 
-    private function makeBreaks($value) {
-        $value = str_replace('\r\n', "\r\n", $value);
-        $value = str_replace('\n', "\n", $value);
+    public function makeHTMLTags($value) {
+        $value = str_replace("\r\n", "<br />", $value);
+        $value = str_replace("\n", "<br />", $value);
         return $value;
     }
 
     public function setHTMLVariableTemplate($name, $value) {
         $value = strval($value);
         $var = $this->utf8tohtml($value, true);
-        $var = $this->makeBreaks($var);
         $this->tpl->setVariable($name, $var);
     }
 
@@ -984,7 +986,6 @@ class Application {
         foreach ($array as &$value) {
             $value = strval($value);
             $value = $this->utf8tohtml($value, true);
-            $value = $this->makeBreaks($value);
         }
         $tpl->setVariable($array);
     }
@@ -992,7 +993,6 @@ class Application {
     public function setHTMLVariableCustomTemplate($tpl, $name, $value) {
         $value = strval($value);
         $var = $this->utf8tohtml($value, true);
-        $var = $this->makeBreaks($var);
         $tpl->setVariable($name, $var);
     }
 
@@ -1007,7 +1007,6 @@ class Application {
         foreach ($array as &$value) {
             $value = strval($value);
             $value = $this->utf8tohtml($value, true);
-            $value = $this->makeBreaks($value);
         }
         $this->tpl->setVariable($array);
     }
