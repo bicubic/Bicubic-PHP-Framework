@@ -21,7 +21,32 @@ class Navigation {
 		$this->tableMaxSize = $this->config('web_table_size');
 		$this->tableSize = 0;
 	}
+	
+	public function getTableLastId() {
+		return $this->tableLastId;
+	}
 
+	public function getTableMaxSize() {
+		return $this->tableMaxSize;
+	}
+
+	public function getTableSize() {
+		return $this->tableSize;
+	}
+
+	public function setTableLastId($tableLastId) {
+		$this->tableLastId = $tableLastId;
+	}
+
+	public function setTableMaxSize($tableMaxSize) {
+		$this->tableMaxSize = $tableMaxSize;
+	}
+
+	public function setTableSize($tableSize) {
+		$this->tableSize = $tableSize;
+	}
+
+	
 	public function lang($string, $langstr = null) {
 		return $this->application->lang($string, $langstr);
 	}
@@ -34,8 +59,8 @@ class Navigation {
 		return $this->application->item($array, $key, $default, $langstr);
 	}
 
-	public function error($message) {
-		return $this->application->error($message);
+	public function error($message, $code = null) {
+		return $this->application->error($message, $code);
 	}
 
 	public function message($message) {

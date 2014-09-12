@@ -734,9 +734,12 @@ class Application {
      * @param string $message <p>the message to show</p>
      * @return void
      */
-    public function error($message) {
+    public function error($message, $code = null) {
         $this->setMainTemplate("bicubic", "error");
         $this->setHTMLVariableTemplate('MESSAGE-TEXT', $this->lang($message));
+		if($code) {
+			$this->setHTMLVariableTemplate('MESSAGE-CODE', "Error Code $code");
+		}
         $this->render();
     }
 
@@ -1636,7 +1639,8 @@ class Application {
                 $str .= "\$lang = array();\n";
                 foreach ($lang as $key=> $value) {
                     if ($value) {
-                        $str .= "\$lang['$key'] = '$value';\n";
+						$value = str_replace('\'', "\'", $value);
+                        $str .= "\$lang['$key'] = '".$value."';\n";
                     }
                 }
                 $str .= "\n";
