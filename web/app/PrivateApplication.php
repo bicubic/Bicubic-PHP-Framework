@@ -8,7 +8,10 @@
  * @license    MIT
  * @version 3.0.0
  */
-class PrivateApplication extends Application {
+
+require_once("app/AccountApplication.php");
+
+class PrivateApplication extends AccountApplication {
 
     function __construct($config, $lang, Data $data = null, $name = "private") {
         if (!$data) {
@@ -19,22 +22,16 @@ class PrivateApplication extends Application {
 
     public function execute() {
         parent::execute();
-        require_once("nav/LoginNavigation.php");
-        $navigation = new LoginNavigation($this);
-        $this->user = $navigation->loginCheck();
-        if (!$this->user) {
-            $this->redirect("login", "login");
-        }
         $this->navigation = $this->getUrlParam($this->config('param_navigation'), PropertyTypes::$_LETTERS, false);
         switch ($this->navigation) {
-            case "hello" : {
+            case "home" : {
                     require_once("nav/HelloNavigation.php");
                     $navigation = new HelloNavigation($this);
                     $navigation->helloPrivate();
                     break;
                 }
             default : {
-                    $this->error($this->lang('lang_navnotfound'));
+                    $this->redirect($this->name, "home");
                     break;
                 }
         }
@@ -42,17 +39,14 @@ class PrivateApplication extends Application {
 
     public function setMainTemplate($navigationFolder, $navigationFile, $title = "") {
         parent::setMainTemplate($navigationFolder, $navigationFile, $title);
-        if ($this->user) {
-            $this->setHTMLVariableTemplate('LINK-ACCOUNT', $this->getAppUrl("login", "account"));
-            $this->setHTMLVariableTemplate('LINK-LOGOUT', $this->getAppUrl("login", "logout"));
-            $this->parseTemplate("USER");
-            if ($this->user->getConfirmemailtoken()) {
-                $this->setHTMLVariableTemplate('LINK-REVALIDATE', $this->getAppUrl("login", "revalidate", array(new Param("token", $this->user->getConfirmemailtoken()))));
-                $this->parseTemplate("REVALIDATE");
-            }
+        $this->setHTMLVariableTemplate('LINK-ACCOUNT', $this->getAppUrl($this->name, "account"));
+        $this->setHTMLVariableTemplate('LINK-LOGOUT', $this->getAppUrl($this->name, "logout"));
+        $this->parseTemplate("USER");
+        if ($this->user->getConfirmemailtoken()) {
+            $this->setHTMLVariableTemplate('LINK-REVALIDATE', $this->getAppUrl($this->name, "revalidate", array(new Param("token", $this->user->getConfirmemailtoken()))));
+            $this->parseTemplate("REVALIDATE");
         }
     }
 
 }
 
-?>

@@ -1,0 +1,38 @@
+<ul id="bicubic-table-menu">
+    <!-- BEGIN FEATURELINK -->
+    <li>
+        <a class="{FEATURELINK-CLASS}" href="{FEATURELINK-LINK}">
+            {FEATURELINK-NAME}
+        </a>
+    </li>
+    <!-- END FEATURELINK -->
+</ul>
+
+<!-- BEGIN SEARCHLINK -->
+<form id="bicubic-search-form" action="{SEARCH-ACTION}" method="post">
+    <div id="bicubic-table-search">
+        <!-- BEGIN SEARCHLIST -->
+        <div>
+            <label>{SEARCHLIST-LANG}</label>
+            <select id="bicubic-search-{SEARCHLIST-NAME}" name="{SEARCHLIST-NAME}" >
+                <option value="">{TEXT-ALL}</option>
+                <!-- BEGIN SEARCHLISTOPTION -->
+                <option value="{SEARCHLISTOPTION-VALUE}"  data-selected="{SEARCHLISTOPTION-SELECTED}">{SEARCHLISTOPTION-NAME}</option>
+                <!-- END SEARCHLISTOPTION -->
+            </select>
+        </div>    
+            <!-- END SEARCHLIST -->
+            <!-- BEGIN SEARCHSTRING -->
+        <div>
+            <label>{SEARCHSTRING-LANG}</label>
+            <input id="bicubic-search-{SEARCHSTRING-NAME}" type="text" maxlength="256" name="{SEARCHSTRING-NAME}" value="{SEARCHSTRING-VALUE}" />
+        </div>    
+        <!-- END SEARCHSTRING -->
+        <button type="submit" id="submit">{TEXT-SEARCH}</button>
+    </div>    
+</form>
+<!-- END SEARCHLINK -->
+
+<table id="bicubic-table" data-lastid="{TABLE-LASTID}" data-url="{TABLE-URL}" data-maxsize="{TABLE-MAXSIZE}">
+    {TABLE-CONTENT}
+</table>

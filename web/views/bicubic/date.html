@@ -1,2 +1,6 @@
-<label>{PROPERTY-LABEL}</label>
-<input type="date" name="{OBJECT-NAME-PROPERTY-NAME}" value="{OBJECT-NAME-PROPERTY-VALUE}" data-required="{OBJECT-NAME-PROPERTY-REQUIRED}" data-langempty="{LANG-EMPTYGENERIC}" />
+<fieldset>
+    <legend>{PROPERTY-LABEL}</legend>
+    <label>{LANG-DAY}</label><input type="number" id="{OBJECT-NAME-PROPERTY-ID-DAY}" step="1" max="31" min="1" name="{OBJECT-NAME-PROPERTY-NAME-DAY}" value="{OBJECT-NAME-PROPERTY-VALUE-DAY}" data-required="{OBJECT-NAME-PROPERTY-REQUIRED}" data-langempty="{LANG-EMPTYGENERIC}" />
+    <label>{LANG-MONTH}</label><input type="number" id="{OBJECT-NAME-PROPERTY-ID-MONTH}" step="1" max="12" min="1" name="{OBJECT-NAME-PROPERTY-NAME-MONTH}" value="{OBJECT-NAME-PROPERTY-VALUE-MONTH}" data-required="{OBJECT-NAME-PROPERTY-REQUIRED}" data-langempty="{LANG-EMPTYGENERIC}" />
+    <label>{LANG-YEAR}</label><input type="number" id="{OBJECT-NAME-PROPERTY-ID-YEAR}" step="1" name="{OBJECT-NAME-PROPERTY-NAME-YEAR}" value="{OBJECT-NAME-PROPERTY-VALUE-YEAR}" data-required="{OBJECT-NAME-PROPERTY-REQUIRED}" data-langempty="{LANG-EMPTYGENERIC}" />
+</fieldset>

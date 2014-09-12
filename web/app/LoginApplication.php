@@ -10,8 +10,6 @@
  */
 class LoginApplication extends Application {
 
-    public $user;
-
     function __construct($config, $lang, Data $data = null, $name = "login") {
         if (!$data) {
             $data = new PostgreSQLData($config);
@@ -32,31 +30,25 @@ class LoginApplication extends Application {
             case "loginSubmit" : {
                     require_once('nav/LoginNavigation.php');
                     $navigation = new LoginNavigation($this);
-                    $navigation->loginSubmit();
+                    $navigation->loginSubmit("private", "home");
                     break;
                 }
-            case "logout" : {
+            case "signup" : {
                     require_once("nav/LoginNavigation.php");
                     $navigation = new LoginNavigation($this);
-                    $navigation->logout();
+                    $navigation->signup();
                     break;
                 }
             case "signUpSubmit" : {
                     require_once('nav/LoginNavigation.php');
                     $navigation = new LoginNavigation($this);
-                    $navigation->signUpSubmit();
+                    $navigation->signUpSubmit("private", "home");
                     break;
                 }
             case "validate" : {
                     require_once('nav/LoginNavigation.php');
                     $navigation = new LoginNavigation($this);
                     $navigation->validate();
-                    break;
-                }
-            case "revalidate" : {
-                    require_once('nav/LoginNavigation.php');
-                    $navigation = new LoginNavigation($this);
-                    $navigation->resendValidation();
                     break;
                 }
             case "forgot" : {
@@ -83,30 +75,6 @@ class LoginApplication extends Application {
                     $navigation->forgotValidateSubmit();
                     break;
                 }
-            case "account" : {
-                    require_once('nav/LoginNavigation.php');
-                    $navigation = new LoginNavigation($this);
-                    $navigation->account();
-                    break;
-                }
-            case "profileSubmit" : {
-                    require_once('nav/LoginNavigation.php');
-                    $navigation = new LoginNavigation($this);
-                    $navigation->profileSubmit();
-                    break;
-                }
-            case "passwordSubmit" : {
-                    require_once('nav/LoginNavigation.php');
-                    $navigation = new LoginNavigation($this);
-                    $navigation->passwordSubmit();
-                    break;
-                }
-            case "emailSubmit" : {
-                    require_once('nav/LoginNavigation.php');
-                    $navigation = new LoginNavigation($this);
-                    $navigation->emailSubmit();
-                    break;
-                }
             case "emailValidate" : {
                     require_once('nav/LoginNavigation.php');
                     $navigation = new LoginNavigation($this);
@@ -119,18 +87,8 @@ class LoginApplication extends Application {
                     $navigation->emailValidateSubmit();
                     break;
                 }
-            default : {
-                    $this->redirect("login", "logout");
-                    break;
-                }
         }
-    }
-
-    public function setMainTemplate($navigationFolder, $navigationFile, $title = "") {
-        parent::setMainTemplate($navigationFolder, $navigationFile, $title);
-        $this->setHTMLVariableTemplate('LINK-HOME', $this->getAppUrl("home", "hello"));
     }
 
 }
 
-?>

@@ -1,6 +1,6 @@
 <?php
 $lang = array();
-$lang['lang_account'] = 'Cuenta';
+$lang['lang_account'] = 'lang_account';
 $lang['lang_argentina'] = 'lang_argentina';
 $lang['lang_australia'] = 'lang_australia';
 $lang['lang_brazil'] = 'lang_brazil';
@@ -100,4 +100,3 @@ $lang['lang_userlang'] = 'lang_userlang';
 $lang['lang_userlangerror'] = 'lang_userlangerror';
 $lang['lang_validate'] = 'lang_validate';
 $lang['lang_yes'] = 'lang_yes';
-?>

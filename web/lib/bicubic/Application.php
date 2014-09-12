@@ -22,6 +22,8 @@ class Application {
     public $tpl;
     //navigation
     public $navigation;
+    //title of stage
+    public $title;
 
     /**
      * generates a new application with HTLM parser
@@ -58,33 +60,93 @@ class Application {
      * @return String the corresponding URL
      */
     public function getAppUrl($app, $navigation, $params = null) {
-        $link = $this->config('web_secure_url') . "?" . $this->config('param_app') . "=" . $app;
-        $link .= "&" . $this->config('param_navigation') . "=" . $navigation;
-        $hasLang = false;
-        if ($params) {
-            foreach ($params as $param) {
-                $link .= "&" . $param->name . "=" . $param->value;
+        if ($this->config('urlforms')) {
+            return $this->getAppFlatUrl($this->config('urlbase'), $app, $navigation, $params);
+        } else {
+            $link = $this->config('web_secure_url') . "?" . $this->config('param_app') . "=" . $app;
+            $link .= "&" . $this->config('param_navigation') . "=" . $navigation;
+            $hasLang = false;
+            if ($params) {
+                foreach ($params as $param) {
+                    $link .= "&" . $param->name . "=" . $param->value;
+                    if ($param->name == $this->config('param_lang')) {
+                        $hasLang = true;
+                    }
+                }
             }
-            if ($param->name == $this->config('param_lang')) {
-                $hasLang = true;
+            if (!$hasLang) {
+                $link .= "&" . $this->config('param_lang') . "=" . $this->config('lang');
             }
+            return $link;
         }
-        if (!$hasLang) {
-            $link .= "&" . $this->config('param_lang') . "=" . $this->config('lang');
-        }
-        return $link;
     }
 
-    /**
-     * Builds a secure app URL in flat mode. Apache needs to be configured properly
-     * @param string $app <p>The application to send</p>
-     * @param string $navigation <p>The application to send</p>
-     * @param string $id <p>the id ob the object to look</p>
-     * @return String the corresponding URL
-     */
-    public function getAppFlatUrl($app, $navigation, $id) {
-        $link = $this->config('web_folder') . "$app/$navigation/$id";
-        return $link;
+    public function getAppFlatUrl($urlbase, $app, $nav, $params) {
+        $urlbase = rtrim($urlbase, '/');
+        $id = "";
+        $lang = false;
+        $linkParams = array();
+        if ($params) {
+            foreach ($params as $param) {
+                if ($param->name == $this->config('param_id')) {
+                    $id = $param->value;
+                } else {
+                    if ($param->name == $this->config('param_lang')) {
+                        $lang = true;
+                    }
+                    $linkParams [] = "$param->name=$param->value";
+                }
+            }
+        }
+        if (!$lang && $this->getUrlParam($this->config('param_lang'), PropertyTypes::$_STRING2, false)) {
+            $linkParams [] = $this->config('param_lang') . "=" . $this->config('lang');
+        }
+        if ($app && $nav) {
+            if ($id) {
+                if (count($linkParams)) {
+                    return $urlbase . "/$app/$nav/$id?" . implode("&", $linkParams);
+                }
+                return $urlbase . "/$app/$nav/$id";
+            }
+            if (count($linkParams)) {
+                return $urlbase . "/$app/$nav/?" . implode("&", $linkParams);
+            }
+            return $urlbase . "/$app/$nav/";
+        } else if ($nav) {
+            if ($id) {
+                if (count($linkParams)) {
+                    return $urlbase . "/$nav/$id?" . implode("&", $linkParams);
+                }
+                return $urlbase . "/$nav/$id";
+            }
+            if (count($linkParams)) {
+                return $urlbase . "/$nav?" . implode("&", $linkParams);
+            }
+            return $urlbase . "/$nav";
+        }
+        if (count($linkParams)) {
+            return $urlbase . "/?" . implode("&", $linkParams);
+        }
+        return $urlbase;
+    }
+
+    public function getHomeUrl() {
+        $linkParams = array();
+        if ($this->config('lang') != LangFactory::getDefaultLang()) {
+            $linkParams [] = $this->config('param_lang') . "=" . $this->config('lang');
+        }
+        if ($this->config('urlforms')) {
+            $urlbase = rtrim($this->config('urlbase'), '/');
+            if ($linkParams) {
+                return $urlbase . "/?" . implode("&", $linkParams);
+            }
+            return $urlbase;
+        } else {
+            if ($linkParams) {
+                return $this->config('web_secure_url') . "?" . implode("&", $linkParams);
+            }
+            return $this->config('web_secure_url');
+        }
     }
 
     /**
@@ -117,25 +179,44 @@ class Application {
      * @return the value of the param, null if does not exist or does not fir the type
      */
     public function getFormParam($name, $type, $force = true) {
+        $value = null;
         if (isset($_POST[$name])) {
             $value = $_POST[$name];
             $value = $this->filter($value, $type);
-            if ($force && !isset($value)) {
-                $this->error($this->lang('lang_notvalid') . " : " . (array_key_exists($name, $this->lang) ? $this->lang($name) : $name));
-            }
-            return $value;
-        } else if (isset($_FILES[$name])) {
-            $value = $_FILES[$name]['name'];
-            $value = $this->filter($value, $type);
-            if ($force && !isset($value)) {
-                $this->error($this->lang('lang_notvalid') . " : " . (array_key_exists($name, $this->lang) ? $this->lang($name) : $name));
-            }
-            return $value;
         }
-        if ($force) {
+        if ($type == PropertyTypes::$_DATE && !isset($value)) {
+            $year = $this->getFormParam("$name-year", PropertyTypes::$_INT, false);
+            $month = $this->getFormParam("$name-month", PropertyTypes::$_INT, false);
+            $day = $this->getFormParam("$name-day", PropertyTypes::$_INT, false);
+            if (isset($year) && $month && $day) {
+                $value = "$year-$month-$day";
+                $value = $this->filter($value, PropertyTypes::$_DATE);
+            }
+        }
+        if ($type == PropertyTypes::$_TIME && !isset($value)) {
+            $hour = $this->getFormParam("$name-hour", PropertyTypes::$_INT, false);
+            $minutes = $this->getFormParam("$name-minutes", PropertyTypes::$_INT, false);
+            if (isset($hour) && isset($minutes)) {
+                $value = "$hour:$minutes";
+                $value = $this->filter($value, PropertyTypes::$_TIME);
+            }
+        }
+        if ($type == PropertyTypes::$_FILE && !isset($value)) {
+            $value = $this->upload($name, true);
+        }
+        if ($type == PropertyTypes::$_IMAGE256 && !isset($value)) {
+            $value = $this->uploadPhoto($name, true, 256, 256);
+        }
+		if ($type == PropertyTypes::$_IMAGE512 && !isset($value)) {
+            $value = $this->uploadPhoto($name, true, 512, 512);
+        }
+		if ($type == PropertyTypes::$_IMAGE1024 && !isset($value)) {
+            $value = $this->uploadPhoto($name, true, 1024, 1024);
+        }
+        if ($force && !isset($value)) {
             $this->error($this->lang('lang_notvalid') . " : " . (array_key_exists($name, $this->lang) ? $this->lang($name) : $name));
         }
-        return null;
+        return $value;
     }
 
     /**
@@ -225,7 +306,7 @@ class Application {
             case PropertyTypes::$_LIST :
             case PropertyTypes::$_SHORTLIST :
             case PropertyTypes::$_LONG : {
-                    if ($value !== "" && $value >= 0) {
+                    if ($value !== "" && $value >= -1) {
                         $vals = array("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "-", "+", ".", ",");
                         $trimed = str_replace($vals, "", $value);
                         if (is_numeric($value) && $trimed === "") {
@@ -253,9 +334,15 @@ class Application {
                     }
                     break;
                 }
+            case PropertyTypes::$_URL : {
+                    if (filter_var($value, FILTER_VALIDATE_URL)) {
+                        return $value;
+                    }
+                    break;
+                }
             case PropertyTypes::$_EMAIL : {
                     if (filter_var($value, FILTER_VALIDATE_EMAIL)) {
-                        return $value;
+                        return strtolower($value);
                     }
                     break;
                 }
@@ -295,7 +382,8 @@ class Application {
                     }
                     break;
                 }
-            case PropertyTypes::$_STRING2 : {
+            case PropertyTypes::$_STRING2 :
+            case PropertyTypes::$_STRINGLIST : {
                     if ($value) {
                         $value = trim($value);
                         $value = (substr($value, 0, 2));
@@ -415,6 +503,26 @@ class Application {
                     }
                     break;
                 }
+            case PropertyTypes::$_FILE : {
+                    if ($value) {
+                        $value = trim($value);
+                        if ($value) {
+                            return $value;
+                        }
+                    }
+                    break;
+                }
+            case PropertyTypes::$_IMAGE256 :
+		    case PropertyTypes::$_IMAGE512 :
+			case PropertyTypes::$_IMAGE1024 : {
+                    if ($value) {
+                        $value = trim($value);
+                        if ($value) {
+                            return $value;
+                        }
+                    }
+                    break;
+                }
             case PropertyTypes::$_FLAT : {
                     return ($value);
                 }
@@ -457,13 +565,23 @@ class Application {
                     }
                     break;
                 }
-            case PropertyTypes::$_BOOLEAN : {
+            case PropertyTypes::$_TIME : {
                     if ($value !== "") {
-                        $vals = array("f", "t", "0", "1");
-                        $trimed = str_replace($vals, "", $value);
-                        if (empty($trimed)) {
-                            return substr($value, 0, 1);
+                        $numbers = explode(":", $value);
+                        if (count($numbers) == 2) {
+                            $time = strtotime("$numbers[0]:$numbers[1]:00");
+                            if ($time) {
+                                return $time;
+                            }
                         }
+                    }
+                    break;
+                }
+            case PropertyTypes::$_BOOLEAN : {
+                    if (strval($value) === "1") {
+                        return ObjectBoolean::$_YES;
+                    } else if (strval($value) === "0") {
+                        return ObjectBoolean::$_NO;
                     }
                     break;
                 }
@@ -616,9 +734,12 @@ class Application {
      * @param string $message <p>the message to show</p>
      * @return void
      */
-    public function error($message) {
-        $this->setMainTemplate("message", "error");
+    public function error($message, $code = null) {
+        $this->setMainTemplate("bicubic", "error");
         $this->setHTMLVariableTemplate('MESSAGE-TEXT', $this->lang($message));
+		if($code) {
+			$this->setHTMLVariableTemplate('MESSAGE-CODE', "Error Code $code");
+		}
         $this->render();
     }
 
@@ -628,7 +749,7 @@ class Application {
      * @return void
      */
     public function message($message) {
-        $this->setMainTemplate("message", "message");
+        $this->setMainTemplate("bicubic", "message");
         $this->setHTMLVariableTemplate('MESSAGE-TEXT', $this->lang($message));
         $this->render();
     }
@@ -639,20 +760,35 @@ class Application {
             if (!$title) {
                 $title = $this->config('web_name');
             }
+            $this->title = $title;
             $this->setHTMLVariableTemplate("TEMPLATE-LANG", $this->config('lang'));
             $this->setHTMLVariableTemplate("TEMPLATE-TITLE", $title);
             $this->setHTMLVariableTemplate("TEMPLATE-COPY", $this->config('web_copyright'));
-            $langs = LangFactory::getAvailableLangList();
-            foreach ($langs as $langKey) {
-                $lang = $this->item(Lang::$_LANGKEY, $langKey);
-                if ($lang) {
-                    $langname = $this->item(Lang::$_ENUM, $lang);
-                    $this->setHtmlArrayTemplate(array(
-                        'LANG-LINK' => $this->getAppUrl($this->name, $this->navigation, array(new Param($this->config('param_lang'), $this->item(Lang::$_LANGVALUE, $lang)))),
-                        'LANG-TEXT' => $this->lang($langname),
-                    ));
-                    $this->parseTemplate('LANGS');
+            $params = array();
+            $app = "";
+            $nav = "";
+            foreach ($_GET as $key=> $value) {
+                if ($key == $this->config('param_lang')) {
+                    continue;
                 }
+                if ($key == $this->config('param_app')) {
+                    $app = $value;
+                    continue;
+                }
+                if ($key == $this->config('param_navigation')) {
+                    $nav = $value;
+                    continue;
+                }
+                $params [] = new Param($key, $value);
+            }
+            foreach (Lang::$_ENUM as $langKey=> $langname) {
+                $langparams = $params;
+                $langparams [] = new Param($this->config('param_lang'), $langKey);
+                $this->setHtmlArrayTemplate(array(
+                    'LANG-LINK'=>$this->getAppUrl($app, $nav, $langparams),
+                    'LANG-TEXT'=>$this->lang($langname),
+                ));
+                $this->parseTemplate('LANGS');
             }
         }
     }
@@ -673,7 +809,7 @@ class Application {
             if (strpos($placeholder, "$prefix-") !== false) {
                 $var = substr($placeholder, 5);
                 $name = strtolower($var);
-                $this->setVariableTemplate("$prefix-$var", $this->lang("lang_$name"));
+                $this->setHtmlVariableTemplate("$prefix-$var", $this->lang("lang_$name"));
             }
         }
         $placeholders = $this->tpl->getPlaceholderList($blockName);
@@ -681,7 +817,7 @@ class Application {
             if (is_string($placeholder) && strpos($placeholder, "$prefix-") !== false) {
                 $var = substr($placeholder, 5);
                 $name = strtolower($var);
-                $this->setVariableTemplate("$prefix-$var", $this->lang("lang_$name"));
+                $this->setHtmlVariableTemplate("$prefix-$var", $this->lang("lang_$name"));
             }
         }
     }
@@ -705,7 +841,7 @@ class Application {
             if (is_string($placeholder) && strpos($placeholder, "$prefix-") !== false) {
                 $var = substr($placeholder, 5);
                 $name = strtolower($var);
-                $this->setVariableTemplate("$prefix-$var", $this->lang("lang_$name"));
+                $this->setHtmlVariableTemplate("$prefix-$var", $this->lang("lang_$name"));
             }
         }
     }
@@ -746,36 +882,72 @@ class Application {
             $paramName = strtoupper($property["name"]);
             $getter = "get" . strtoupper(substr($property["name"], 0, 1)) . substr($property["name"], 1);
             $value = $object->$getter();
-            if ($property["type"] == PropertyTypes::$_LIST) {
+            if ($property["type"] == PropertyTypes::$_LIST || $property["type"] == PropertyTypes::$_STRINGLIST) {
                 $this->setVariableTemplate("$formName-NAME-$objectFormName-$paramName", "$objectName" . "_" . $property["name"]);
                 $items = $object->__getList($property["name"], $this);
-                foreach ($items as $item => $text) {
+                foreach ($items as $item=> $text) {
                     $this->setHTMLArrayTemplate(array(
-                        "$formName-LISTVALUE-$objectFormName-$paramName" => $this->utf8tohtml(strval($item), true),
-                        "$formName-LISTTEXT-$objectFormName-$paramName" => $this->lang($text),
-                        "$formName-LISTSELECTED-$objectFormName-$paramName" => ($item == $value) ? "selected" : ""
+                        "$formName-LISTVALUE-$objectFormName-$paramName"=>$this->utf8tohtml(strval($item), true),
+                        "$formName-LISTTEXT-$objectFormName-$paramName"=>$this->lang($text),
+                        "$formName-LISTSELECTED-$objectFormName-$paramName"=>($item == $value) ? "selected" : ""
                     ));
                     $this->parseTemplate($paramName);
                 }
             } else if ($property["type"] == PropertyTypes::$_SHORTLIST) {
                 $this->setVariableTemplate("$formName-NAME-$objectFormName-$paramName", "$objectName" . "_" . $property["name"]);
                 $items = $object->__getList($property["name"], $this);
-                foreach ($items as $item => $text) {
+                foreach ($items as $item=> $text) {
                     $this->setHTMLArrayTemplate(array(
-                        "$formName-LISTVALUE-$objectFormName-$paramName" => $this->utf8tohtml(strval($item), true),
-                        "$formName-LISTTEXT-$objectFormName-$paramName" => $this->lang($text),
-                        "$formName-LISTSELECTED-$objectFormName-$paramName" => ($item == $value) ? "checked" : ""
+                        "$formName-LISTVALUE-$objectFormName-$paramName"=>$this->utf8tohtml(strval($item), true),
+                        "$formName-LISTTEXT-$objectFormName-$paramName"=>$this->lang($text),
+                        "$formName-LISTSELECTED-$objectFormName-$paramName"=>($item == $value) ? "checked" : ""
                     ));
                     $this->parseTemplate($paramName);
+                }
+            } else if ($property["type"] == PropertyTypes::$_BOOLEAN) {
+                $this->setVariableTemplate("$formName-NAME-$objectFormName-$paramName", "$objectName" . "_" . $property["name"]);
+                $this->setVariableTemplate("$formName-VALUE-$objectFormName-$paramName", ObjectBoolean::$_YES);
+                if ($value) {
+                    $this->setVariableTemplate("$formName-SELECTED-$objectFormName-$paramName", "checked");
+                } else {
+                    $this->setVariableTemplate("$formName-SELECTED-$objectFormName-$paramName", "");
                 }
             } else {
                 $this->setVariableTemplate("$formName-NAME-$objectFormName-$paramName", "$objectName" . "_" . $property["name"]);
                 if ($property["type"] == PropertyTypes::$_DATE) {
                     $value = $this->formatWiredDate($value);
+                } else if ($property["type"] == PropertyTypes::$_TIME) {
+                    $value = $this->formatWiredTime($value);
                 } else {
                     $value = $this->utf8tohtml(strval($value), true);
                 }
                 $this->setVariableTemplate("$formName-VALUE-$objectFormName-$paramName", $value);
+            }
+        }
+    }
+
+    public function setViewObject(DataObject $object) {
+        $properties = $object->__getProperties();
+        if ($object->__isChild()) {
+            $properties = array_merge($properties, $object->__getParentProperties());
+        }
+        $objectName = get_class($object);
+        $objectFormName = strtoupper($objectName);
+        foreach ($properties as $property) {
+            $paramName = strtoupper($property["name"]);
+            $getter = "get" . strtoupper(substr($property["name"], 0, 1)) . substr($property["name"], 1);
+            $value = $object->$getter();
+            if ($property["type"] == PropertyTypes::$_LIST || $property["type"] == PropertyTypes::$_STRINGLIST) {
+                $items = $object->__getList($property["name"], $this);
+                $this->setVariableTemplate("$objectFormName-$paramName", $this->lang($this->item($items, $value)));
+            } else if ($property["type"] == PropertyTypes::$_SHORTLIST) {
+                $items = $object->__getList($property["name"], $this);
+                $this->setVariableTemplate("$objectFormName-$paramName", $this->lang($this->item($items, $value)));
+            } else if ($property["type"] == PropertyTypes::$_STRING2048) {
+                $this->setVariableTemplate("$objectFormName-$paramName", $this->makeHTMLTags($this->formatProperty($object, $property)));
+            }
+			else {
+                $this->setVariableTemplate("$objectFormName-$paramName", $this->formatProperty($object, $property));
             }
         }
     }
@@ -796,11 +968,15 @@ class Application {
         $this->tpl->setVariable($name, $value);
     }
 
+    public function makeHTMLTags($value) {
+        $value = str_replace("\r\n", "<br />", $value);
+        $value = str_replace("\n", "<br />", $value);
+        return $value;
+    }
+
     public function setHTMLVariableTemplate($name, $value) {
         $value = strval($value);
         $var = $this->utf8tohtml($value, true);
-        $var = str_replace("\r\n", "<br />", $var);
-        $var = str_replace("\n", "<br />", $var);
         $this->tpl->setVariable($name, $var);
     }
 
@@ -813,8 +989,6 @@ class Application {
         foreach ($array as &$value) {
             $value = strval($value);
             $value = $this->utf8tohtml($value, true);
-            $value = str_replace("\r\n", "<br />", $value);
-            $value = str_replace("\n", "<br />", $value);
         }
         $tpl->setVariable($array);
     }
@@ -822,8 +996,6 @@ class Application {
     public function setHTMLVariableCustomTemplate($tpl, $name, $value) {
         $value = strval($value);
         $var = $this->utf8tohtml($value, true);
-        $var = str_replace("\r\n", "<br />", $var);
-        $var = str_replace("\n", "<br />", $var);
         $tpl->setVariable($name, $var);
     }
 
@@ -838,8 +1010,6 @@ class Application {
         foreach ($array as &$value) {
             $value = strval($value);
             $value = $this->utf8tohtml($value, true);
-            $value = str_replace("\r\n", "<br />", $value);
-            $value = str_replace("\n", "<br />", $value);
         }
         $this->tpl->setVariable($array);
     }
@@ -893,14 +1063,14 @@ class Application {
             return $object;
         }
         if (is_array($object)) {
-            foreach ($object as $key => $value) {
+            foreach ($object as $key=> $value) {
                 $object[$key] = $this->unescapeJsonObject($value);
             }
             return $object;
         }
         if (is_object($object)) {
             $vars = get_object_vars($object);
-            foreach ($vars as $key => $value) {
+            foreach ($vars as $key=> $value) {
                 $object->$key = $this->unescapeJsonObject($value);
             }
             return $object;
@@ -908,40 +1078,26 @@ class Application {
         return $object;
     }
 
-    public function renderToCss() {
-        $this->tpl->touchBlock($this->name);
-        header('Content-type: text/css');
-        $this->tpl->show();
-        $this->endApp();
-    }
-
-    public function renderToJavascript() {
-        $this->tpl->touchBlock($this->name);
-        header('Content-type: text/javascript');
-        $this->tpl->show();
-        $this->endApp();
-    }
-
-    public function renderToPdf() {
+    public function renderToPdf($creator, $author, $margin = 10, $scale = 1, $font = "helvetica", $fontsize = "12", $orientation = "P", $unit = "mm", $format = "LETTER") {
+        $this->setLangItems($this->name);
         $this->tpl->touchBlock($this->name);
         $html = $this->tpl->get();
-        $pdf = new TCPDF($this->config('pdf_page_orientation'), $this->config('pdf_unite'), $this->config('pdf_page_format'), true, 'UTF-8', false);
-        $pdf->SetCreator($this->config('pdf_creator'));
-        $pdf->SetAuthor($this->config('pdf_author'));
-        $pdf->SetHeaderData(/* logo */ '', /* ancho logo */ '', /* título */ $this->lang('lang_title'), '');
-        $pdf->setHeaderFont(Array($this->config('pdf_font_name_main'), '', $this->config('pdf_font_size_main')));
-        $pdf->setFooterFont(Array($this->config('pdf_font_name_data'), '', $this->config('pdf_font_size_data')));
-        $pdf->SetDefaultMonospacedFont($this->config('pdf_font_monospace'));
-        $pdf->SetMargins($this->config('pdf_margin_left'), $this->config('pdf_margin_top'), $this->config('pdf_margin_right'));
-        $pdf->SetHeaderMargin($this->config('pdf_margin_header'));
-        $pdf->SetFooterMargin($this->config('pdf_margin_footer'));
-        $pdf->SetAutoPageBreak(TRUE, $this->config('pdf_margin_bottom'));
-        $pdf->setImageScale($this->config('pdf_image_scale_ratio'));
+        $pdf = new TCPDF($orientation, $unit, $format, true, 'UTF-8', false);
+        $pdf->SetCreator($creator);
+        $pdf->SetAuthor($author);
+        $pdf->setHeaderFont(Array($font, '', $fontsize));
+        $pdf->setFooterFont(Array($font, '', $fontsize));
+        $pdf->SetDefaultMonospacedFont($font);
+        $pdf->SetMargins($margin, $margin, $margin, true);
+        $pdf->SetHeaderMargin($margin);
+        $pdf->SetFooterMargin($margin);
+        $pdf->SetAutoPageBreak(TRUE, $margin);
+        $pdf->setImageScale($scale);
         $pdf->setFontSubsetting(true);
-        $pdf->SetFont($this->config('pdf_font_name_data'), '', $this->config('pdf_font_size_data'), '', true);
+        $pdf->SetFont($font, '', $fontsize, '', true);
         $pdf->AddPage();
         $pdf->writeHTMLCell(0, 0, '', '', $html, 0, 1, 0, true, '', true);
-        $pdf->Output($this->lang('lang_file'), 'I');
+        $pdf->Output($this->title, 'I');
         $this->endApp();
     }
 
@@ -978,216 +1134,129 @@ class Application {
         $this->endApp();
     }
 
-    public function download($fileName = null, $filepath = null) {
-        if (!isset($fileName)) {
-            $fileName = $this->getUrlParam($this->config('param_file_name'), PropertyTypes::$_STRING);
-            if (!isset($fileName)) {
-                $this->error($this->lang('lang_filenotfound'));
-            }
-            $filepath = $this->config('server_down_folder') . $fileName;
-        }
-        if (!file_exists($filepath)) {
-            $this->error($this->lang('lang_filenotfound'));
-        }
-        header("Content-Type: application/octet-stream");
-        header("Content-Disposition: attachment; filename=$fileName");
-        header("Content-Type: application/force-download");
-        header("Content-Type: application/vnd.ms-excel");
-        header("Content-Transfer-Encoding: binary");
-        ob_clean();
-        flush();
-        readfile($filepath);
-        $this->endApp();
-    }
-
-    public function upload($fileParam, $destFolder, $override, $destname, $optional = false) {
+    public function upload($fileParam, $optional = false, $full = true, $secure = true, $bucket = null) {
         if (!isset($_FILES[$fileParam])) {
             if (!$optional) {
                 $this->error($this->lang('lang_filenotfound'));
             } else {
-                return;
+                return null;
             }
         }
         if ($_FILES[$fileParam]['error'] == UPLOAD_ERR_INI_SIZE) {
             if (!$optional) {
                 $this->error($this->lang('lang_filesize'));
             } else {
-                return;
+                return null;
             }
         }
         if (!is_uploaded_file($_FILES[$fileParam]['tmp_name'])) {
             if (!$optional) {
                 $this->error($this->lang('lang_filenotuploaded'));
             } else {
-                return;
+                return null;
             }
         }
-        if (!$override && file_exists($destFolder . $destname)) {
-            $this->error($this->lang('lang_fileexist'));
+        $cfile = curl_file_create($_FILES[$fileParam]['tmp_name'], null, 'file');
+        if (!$cfile) {
+            $this->error($this->lang('lang_filecreate'));
         }
-        if (!move_uploaded_file($_FILES[$fileParam]['tmp_name'], $destFolder . $destname)) {
-            $this->error($this->lang('lang_filenotmoved'));
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, "https://api.mylodon.cl/index.php?app=json&nav=upload-file");
+        curl_setopt($ch, CURLOPT_POST, 1);
+        $post = array('file'=>$cfile, 'appsecret'=>$this->config('mylodon_apikey'));
+        if ($bucket) {
+            $post['bucket'] = $bucket;
         }
-        return $destFolder . $destname;
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $result = curl_exec($ch);
+        if ($result) {
+            $r = json_decode($result);
+            if ($r->status == "error") {
+                if (!$optional) {
+                    $this->error($this->lang($r->error));
+                } else {
+                    return null;
+                }
+            } else if ($r->status == "success") {
+                if ($full) {
+                    if ($secure) {
+                        return $r->secureurl;
+                    } else {
+                        return $r->fullurl;
+                    }
+                } else {
+                    return $r->url;
+                }
+            }
+        }
+        curl_close($ch);
+        if (!$optional) {
+            $this->error($this->lang('lang_mylodonerror'));
+        } else {
+            return null;
+        }
     }
 
-    public function uploadGS($fileParam, $destFolder, $destname, $mandatory = false, $public = true, $image = false, $width = 256, $height = 256) {
+    public function uploadPhoto($fileParam, $optional = false, $w = 256, $h = 256, $full = true, $secure = true, $bucket = null, $square = true, $tw = 256, $th = 256, $tsquare = true) {
         if (!isset($_FILES[$fileParam])) {
-            if ($mandatory) {
+            if (!$optional) {
                 $this->error($this->lang('lang_filenotfound'));
             } else {
                 return null;
             }
         }
         if ($_FILES[$fileParam]['error'] == UPLOAD_ERR_INI_SIZE) {
-            if ($mandatory) {
+            if (!$optional) {
                 $this->error($this->lang('lang_filesize'));
             } else {
                 return null;
             }
         }
         if (!is_uploaded_file($_FILES[$fileParam]['tmp_name'])) {
-            if ($mandatory) {
-                $this->error($this->lang('lang_filenotuploaded') . " " . $_FILES[$fileParam]['error']);
+            if (!$optional) {
+                $this->error($this->lang('lang_filenotuploaded'));
             } else {
                 return null;
             }
         }
-        //validate extensions
-        if ($image) {
-            $localPath = $_FILES[$fileParam]['tmp_name'];
-            if (exif_imagetype($localPath) != IMAGETYPE_PNG) {
-                if (exif_imagetype($localPath) != IMAGETYPE_JPEG) {
-                    if ($mandatory) {
-                        $this->error($this->lang('lang_filenotjpg'));
+        $cfile = curl_file_create($_FILES[$fileParam]['tmp_name'], null, 'image');
+        if (!$cfile) {
+            $this->error($this->lang('lang_filecreate'));
+        }
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, "https://api.mylodon.cl/index.php?app=json&nav=upload-image");
+        curl_setopt($ch, CURLOPT_POST, 1);
+        $post = array('image'=>$cfile, 'appsecret'=>$this->config('mylodon_apikey'), 'w'=>$w, 'h'=>$h, 'tw'=>$tw, 'th'=>$th, 'square' =>($square ? "1" : "0"), 'tsquare' =>($tsquare ? "1" : "0"));
+        if ($bucket) {
+            $post['bucket'] = $bucket;
+        }
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $result = curl_exec($ch);
+        if ($result) {
+            $r = json_decode($result);
+            if ($r->status == "error") {
+                if (!$optional) {
+                    $this->error($this->lang($r->error));
+                } else {
+                    return null;
+                }
+            } else if ($r->status == "success") {
+                if ($full) {
+                    if ($secure) {
+                        return $r->secureurl;
                     } else {
-                        return null;
+                        return $r->fullurl;
                     }
-                }
-            }
-
-            if (isset($width) && isset($height) && $width == $height) {
-                $imageData = getimagesize($localPath);
-                $origin_w = $imageData[0];
-                $origin_h = $imageData[1];
-                if ($origin_w != $width || $origin_h != $height) {
-                    $image_p = imagecreatetruecolor($width, $height);
-                    if (!imagealphablending($image_p, false)) {
-                        $this->error($this->lang('lang_imageblend'));
-                    }
-                    if (!imagesavealpha($image_p, true)) {
-                        $this->error($this->lang('lang_imagealpha'));
-                    }
-                    $originalimage = FALSE;
-                    if (exif_imagetype($localPath) == IMAGETYPE_PNG) {
-                        $originalimage = imagecreatefrompng($localPath);
-                    } else if (exif_imagetype($localPath) == IMAGETYPE_JPEG) {
-                        $originalimage = imagecreatefromjpeg($localPath);
-                    }
-                    if ($originalimage === FALSE) {
-                        $this->error($this->lang('lang_imagecreate'));
-                    }
-                    $bg = imagecolorallocate($image_p, 255, 255, 255);
-                    if ($bg === FALSE) {
-                        $this->error($this->lang('lang_imagecolor'));
-                    }
-                    if (!imagefill($image_p, 0, 0, $bg)) {
-                        $this->error($this->lang('lang_imagefill'));
-                    }
-
-                    $x = 0;
-                    $y = 0;
-                    $w = $width;
-                    $h = $height;
-
-                    if ($origin_w <= $width && $origin_h <= $height) {
-                        $x = ($width - $origin_w) / 2;
-                        $y = ($height - $origin_h) / 2;
-                        $w = $origin_w;
-                        $h = $origin_h;
-                    } else if ($origin_w > $width && $origin_h <= $height) {
-                        $p = ($width) / $origin_w;
-                        $x = 0;
-                        $y = ($height - ($p * $origin_h)) / 2;
-                        $w = $width;
-                        $h = $p * $origin_h;
-                    } else if ($origin_w <= $width && $origin_h > $height) {
-                        $p = ($height) / $origin_h;
-                        $x = ($width - ($p * $origin_w)) / 2;
-                        $y = 0;
-                        $w = $p * $origin_w;
-                        $h = $height;
-                    } else if ($origin_w > $width && $origin_h > $height) {
-                        if ($origin_w == $origin_h) {
-                            $x = 0;
-                            $y = 0;
-                            $w = $width;
-                            $h = $height;
-                        } else if ($origin_w > $origin_h) {
-                            $p = ($width) / $origin_w;
-                            $x = 0;
-                            $y = ($height - ($p * $origin_h)) / 2;
-                            $w = $width;
-                            $h = $p * $origin_h;
-                        } else if ($origin_w < $origin_h) {
-                            $p = ($height) / $origin_h;
-                            $x = ($width - ($p * $origin_w)) / 2;
-                            $y = 0;
-                            $w = $p * $origin_w;
-                            $h = $height;
-                        }
-                    }
-
-                    if (!imagecopyresampled($image_p, $originalimage, $x, $y, 0, 0, $w, $h, $origin_w, $origin_h)) {
-                        $this->error($this->lang('lang_resample'));
-                    }
-                    if (!imagepng($image_p, $localPath, 9)) {
-                        $this->error($this->lang('lang_save'));
-                    }
+                } else {
+                    return $r->url;
                 }
             }
         }
-        //save object to GS account
-        $localPath = $_FILES[$fileParam]['tmp_name'];
-        $permission = "";
-        if ($public) {
-            $permission = "-a public-read";
-        }
-        $gspath = $this->config('gs_util') . " cp $permission $localPath " . $this->config('gs_bucket') . $destFolder . $destname;
-        $ouput = 0;
-        $result = 0;
-        exec($gspath, $ouput, $result);
-        if ($result === 0) {
-            return $destFolder . $destname;
-        } else {
-            return null;
-        }
-    }
-
-    public function uploadLocalGS($localPath, $destFolder, $destname, $public = false) {
-        //save object to GS account
-        $permission = "";
-        if ($public) {
-            $permission = "-a public-read";
-        }
-        $gspath = $this->config('gs_util') . " cp $permission $localPath " . $this->config('gs_bucketprivate') . $destFolder . $destname;
-        $ouput = 0;
-        $result = 0;
-        exec($gspath, $ouput, $result);
-        if ($result === 0) {
-            return $destFolder . $destname;
-        } else {
-            return null;
-        }
-    }
-
-    public function downloadLocalGS($gspathPath, $destFolder, $destname) {
-        $gspath = $this->config('gs_util') . " cp gs://" . $gspathPath . " " . $destFolder . $destname;
-        $ouput = 0;
-        $result = 0;
-        exec($gspath, $ouput, $result);
-        if ($result === 0) {
-            return $destFolder . $destname;
+        curl_close($ch);
+        if (!$optional) {
+            $this->error($this->lang('lang_mylodonerror'));
         } else {
             return null;
         }
@@ -1213,8 +1282,92 @@ class Application {
         return $num;
     }
 
+    public function formatProperty(DataObject $object, $property) {
+        $getter = "get" . strtoupper(substr($property["name"], 0, 1)) . substr($property["name"], 1);
+        $value = $object->$getter();
+        switch ($property["type"]) {
+            case PropertyTypes::$_LONG : {
+                    return $this->formatInteger($value);
+                }
+            case PropertyTypes::$_DOUBLE : {
+                    return $this->formatDouble($value);
+                }
+            case PropertyTypes::$_LIST :
+            case PropertyTypes::$_STRINGLIST :
+            case PropertyTypes::$_SHORTLIST : {
+                    return $this->lang($this->item($object->__getList($property["name"], $this), $value));
+                }
+            case PropertyTypes::$_INT :
+            case PropertyTypes::$_URL :
+            case PropertyTypes::$_EMAIL :
+            case PropertyTypes::$_RUT :
+            case PropertyTypes::$_STRING :
+            case PropertyTypes::$_STRING1 :
+            case PropertyTypes::$_STRING2 :
+            case PropertyTypes::$_STRING4 :
+            case PropertyTypes::$_STRING8 :
+            case PropertyTypes::$_STRING16 :
+            case PropertyTypes::$_STRING24 :
+            case PropertyTypes::$_STRING32 :
+            case PropertyTypes::$_STRING64 :
+            case PropertyTypes::$_STRING128 :
+            case PropertyTypes::$_STRING256 :
+            case PropertyTypes::$_STRING512 :
+            case PropertyTypes::$_STRING1024 :
+            case PropertyTypes::$_STRING2048 :
+            case PropertyTypes::$_LETTERS :
+            case PropertyTypes::$_ALPHANUMERIC : {
+                    return $value;
+                }
+            case PropertyTypes::$_PASSWORD: {
+                    return "";
+                }
+            case PropertyTypes::$_FILE : {
+                    if ($value) {
+                        $result = $this->setCustomTemplate("bicubic", "formatfile");
+                        $this->setHTMLVariableCustomTemplate($result, "PROPERTY-VALUE", $value);
+                        $this->setHTMLVariableCustomTemplate($result, "PROPERTY-LANG", $this->lang($property["lang"]));
+                        $content = $this->renderCustomTemplate($result);
+                        return $content;
+                    }
+                    return "";
+                }
+			case PropertyTypes::$_IMAGE256 :	
+            case PropertyTypes::$_IMAGE512 : 
+			case PropertyTypes::$_IMAGE1024 : {
+                    if ($value) {
+                        $result = $this->setCustomTemplate("bicubic", "formatimg");
+                        $this->setHTMLVariableCustomTemplate($result, "PROPERTY-VALUE", $value);
+                        $this->setHTMLVariableCustomTemplate($result, "PROPERTY-LANG", $this->lang($property["lang"]));
+                        $content = $this->renderCustomTemplate($result);
+                        return $content;
+                    }
+                    return "";
+                }
+            case PropertyTypes::$_FLAT :
+            case PropertyTypes::$_JSON :
+            case PropertyTypes::$_STRINGARRAY :
+            case PropertyTypes::$_DOUBLEARRAY :
+            case PropertyTypes::$_INTARRAY : {
+                    return strval($value);
+                }
+            case PropertyTypes::$_TIME : {
+                    return $this->formatTime($value);
+                }
+            case PropertyTypes::$_DATE : {
+                    return $this->formatDate($value);
+                }
+            case PropertyTypes::$_BOOLEAN : {
+                    return $this->formatBoolean($value);
+                }
+            default : {
+                    return null;
+                }
+        }
+    }
+
     public function formatBoolean($boolean) {
-        return $boolean ? $this->lang('text_yes') : $this->lang('text_no');
+        return $boolean ? $this->lang('lang_yes') : $this->lang('lang_no');
     }
 
     public function formatMount($mount) {
@@ -1228,6 +1381,22 @@ class Application {
     public function formatNumber($number) {
         if (isset($number)) {
             return number_format($number, 0, ",", ".");
+        } else {
+            return '';
+        }
+    }
+
+    public function formatInteger($number) {
+        if (isset($number)) {
+            return number_format($number, 0, ",", ".");
+        } else {
+            return '';
+        }
+    }
+
+    public function formatDouble($number) {
+        if (isset($number)) {
+            return number_format($number, 2, ",", ".");
         } else {
             return '';
         }
@@ -1249,9 +1418,25 @@ class Application {
         }
     }
 
+    public function formatTime($date) {
+        if (isset($date) && $date != "") {
+            return date('H:i', $date);
+        } else {
+            return '';
+        }
+    }
+
     public function formatWiredDate($date) {
         if (isset($date) && $date != "") {
             return date('Y-m-d', $date);
+        } else {
+            return '';
+        }
+    }
+
+    public function formatWiredTime($date) {
+        if (isset($date) && $date != "") {
+            return date('H:i', $date);
         } else {
             return '';
         }
@@ -1283,8 +1468,9 @@ class Application {
     }
 
     public function lang($string, $langstr = null) {
-        if ($langstr && !array_key_exists($langstr, Lang::$_LANGKEY)) {
-            $langstr = $this->item(Lang::$_LANGVALUE, Lang::$_DEFAULT);
+        $string = strval($string);
+        if ($langstr && !array_key_exists($langstr, Lang::$_ENUM)) {
+            $langstr = Lang::$_DEFAULT;
         }
         if ($langstr && $langstr != $this->config('lang')) {
             $lang = null;
@@ -1312,17 +1498,6 @@ class Application {
             return $this->config[$string];
         } else {
             return $string;
-        }
-    }
-
-    public function photoUrl($baseUrl) {
-        if (!isset($baseUrl)) {
-            return null;
-        }
-        if (strstr($baseUrl, "http") === false) {
-            return $this->config('gs_storage') . $baseUrl;
-        } else {
-            return $baseUrl;
         }
     }
 
@@ -1372,8 +1547,8 @@ class Application {
     }
 
     public function alterLang($langstr) {
-        if ($langstr && !array_key_exists($langstr, Lang::$_LANGKEY)) {
-            $langstr = $this->item(Lang::$_LANGVALUE, Lang::$_DEFAULT);
+        if ($langstr && !array_key_exists($langstr, Lang::$_ENUM)) {
+            $langstr = Lang::$_DEFAULT;
         }
         if ($langstr && $langstr != $this->config('lang')) {
             if (@require("lang/lang.$langstr.php")) {
@@ -1433,28 +1608,27 @@ class Application {
         $langs = array_merge($langs, $this->script_scanHTMLLangs('./templates'));
         $langs = array_merge($langs, $this->script_scanHTMLLangs('./views'));
         $langs = array_merge($langs, $this->script_scanPHPLangs('./lib/bicubic'));
+        $langs = array_merge($langs, $this->script_scanBeansLangs());
 
         $navigation = new Navigation($this);
         $langs = $navigation->sortByValue($langs);
-
-//        echo $str;
-        foreach (Lang::$_LANGVALUE as $valueVal) {
+        foreach (Lang::$_ENUM as $valueVal=> $langName) {
             if (!file_exists("./lang/lang.$valueVal.php")) {
                 $str = "<?php\n";
                 $str .= "\$lang = array();\n";
-                foreach ($langs as $key => $value) {
+                foreach ($langs as $key=> $value) {
                     $str .= "\$lang['$value'] = '$value';\n";
                 }
-                $str .= "?>\n";
+                $str .= "\n";
                 file_put_contents("./lang/lang.$valueVal.php", $str);
             } else {
                 include("lang/lang.$valueVal.php");
-                foreach ($langs as $key => $value) {
+                foreach ($langs as $key=> $value) {
                     if (!array_key_exists($key, $lang)) {
                         $lang[$key] = $value;
                     }
                 }
-                foreach ($lang as $key => $value) {
+                foreach ($lang as $key=> $value) {
                     if (!array_key_exists($key, $langs)) {
                         unset($lang[$key]);
                         echo "unset $key \n";
@@ -1463,12 +1637,13 @@ class Application {
                 $lang = $navigation->sortByKey($lang);
                 $str = "<?php\n";
                 $str .= "\$lang = array();\n";
-                foreach ($lang as $key => $value) {
+                foreach ($lang as $key=> $value) {
                     if ($value) {
-                        $str .= "\$lang['$key'] = '$value';\n";
+						$value = str_replace('\'', "\'", $value);
+                        $str .= "\$lang['$key'] = '".$value."';\n";
                     }
                 }
-                $str .= "?>\n";
+                $str .= "\n";
                 file_put_contents("./lang/lang.$valueVal.php", $str);
             }
         }
@@ -1546,48 +1721,356 @@ class Application {
         return $langs;
     }
 
-    protected function script_generateDB() {
-        $sql = "\n\n\n\n\n";
-        $indexes = "";
-        $constraints = "";
+    protected function script_scanBeansLangs() {
+        echo "BEANS\n";
+        $langs = array();
         foreach (get_declared_classes() as $classname) {
-//            echo $classname . "\n";
+            if (is_subclass_of($classname, "DataObject")) {
+                $object = new $classname();
+                $name = strtolower($classname);
+                $lang = "lang_$name";
+                $langs[$lang] = $lang;
+                echo "-      $lang\n";
+                $properties = $object->__getProperties();
+                foreach ($properties as $property) {
+                    $lang = $property["lang"];
+                    $langs[$lang] = $lang;
+                    echo "-      $lang\n";
+                }
+            }
+        }
+        return $langs;
+    }
+
+    protected function script_generateDB($out = true) {
+        $tablequery = "";
+        $indexquery = "";
+        $constraintquery = "";
+        $dropquery = "";
+        $tables = array();
+        $data = new PostgreSQLData($this->config);
+        $query = "SELECT table_name FROM information_schema.tables WHERE table_schema='public'";
+        $result = $data->performRead($query);
+        while ($row = $data->readNext($result)) {
+            $class = $row['table_name'];
+            $tables [] = $class;
+        }
+        //get existing bean names
+        $beans = array();
+        foreach (get_declared_classes() as $classname) {
             if (is_subclass_of($classname, "DataObject")) {
                 $tablename = strtolower($classname);
-                $object = new $classname();
-                $sql .= "CREATE TABLE $tablename ( \n";
+                $beans[] = $tablename;
+            }
+        }
+        //go
+        foreach ($beans as $bean) {
+            //check if table exist to create new
+            $existbean = false;
+            foreach ($tables as $table) {
+                if ($table == $bean) {
+                    $existbean = true;
+                    break;
+                }
+            }
+            if (!$existbean) {
+                $tablequery .= $this->script_createTable($bean);
+                $tablequery .= $this->script_createColumns($bean);
+                $indexquery .= $this->script_createIndexes($bean);
+                $constraintquery .= $this->script_createCosntraints($bean);
+            } else {
+                $columns = array();
+                //get existing columns
+                $query = "SELECT column_name, ordinal_position FROM information_schema.columns WHERE table_name = '$bean'";
+                $result = $data->performRead($query);
+                while ($row = $data->readNext($result)) {
+                    $columns [] = $row;
+                }
+                //get object properties
+                $object = new $bean();
                 $properties = $object->__getProperties();
                 foreach ($properties as $property) {
                     if (!$property["serializable"]) {
                         continue;
                     }
-                    $name = $property["name"];
-                    if ($name == "id" && !$object->__isChild()) {
-                        $sql .= "id serial NOT NULL";
-                        $constraints.= "ALTER TABLE ONLY $tablename ADD CONSTRAINT $tablename" . "_pk PRIMARY KEY (id); \n";
+                    $existcol = false;
+                    $colposition = 0;
+                    foreach ($columns as $column) {
+
+                        if ($column['column_name'] == $property["name"]) {
+                            $existcol = true;
+                            $colposition = $column['ordinal_position'];
+                            break;
+                        }
+                    }
+                    if (!$existcol) {
+
+                        $tablequery .= $this->script_createColumn($object, $property);
+                        $indexquery .= $this->script_createColumnIndex($object, $property);
+                        $constraintquery .= $this->script_createColumnConstraint($object, $property);
                     } else {
-                        $type = PropertyTypes::$_POSTGRESQLTYPES[$property["type"]];
-                        $notnull = $property["required"] ? "NOT NULL" : "";
-                        $default = $property["default"] ? "DEFAULT " . $property["default"] : "";
-                        $sql .= ",\n";
-                        $sql .= "$name $type $notnull $default";
-                    }
-                    if ($property["index"]) {
-                        $indexes.= "CREATE INDEX $tablename" . "_" . "$name" . "_index ON $tablename USING btree ($name); \n";
-                    }
-                    if ($property["reference"] !== null) {
-                        $constraints.= "ALTER TABLE ONLY $tablename ADD CONSTRAINT $tablename" . "_" . $property["reference"] . "_fkey FOREIGN KEY (" . $property["reference"] . ") REFERENCES " . $property["reference"] . "(id) MATCH FULL ON DELETE CASCADE; \n";
+                        $name = $property["name"];
+                        $query = "select description from pg_catalog.pg_description where objoid = (select c.oid from pg_catalog.pg_class c where c.relname = '$bean') and objsubid = $colposition;";
+                        $result = $data->performRead($query);
+                        $description = "";
+                        $row = $data->readNext($result);
+                        if ($row) {
+                            $description = $row["description"];
+                        }
+                        if ($description != $this->script_createColumnComment($object, $property)) {
+                            $tablequery .= "ALTER TABLE $bean DROP COLUMN $name;";
+                            $tablequery .= $this->script_createColumn($object, $property);
+                            $indexquery .= $this->script_createColumnIndex($object, $property);
+                            $constraintquery .= $this->script_createColumnConstraint($object, $property);
+                        }
                     }
                 }
-                $sql .= "\n";
-                $sql .= "); \n";
+                //look for columns to delete
+                foreach ($columns as $column) {
+                    $existcolumn = false;
+                    foreach ($properties as $property) {
+                        if ($column['column_name'] == $property["name"]) {
+                            $existcolumn = true;
+                            break;
+                        }
+                    }
+                    if (!$existcolumn) {
+                        $columnname = $column['column_name'];
+                        $dropquery .= "ALTER TABLE $bean DROP COLUMN $columnname;";
+                    }
+                }
             }
         }
-        $sql .= $indexes;
-        $sql .= $constraints;
-        echo $sql;
+        foreach ($tables as $table) {
+            $existtable = false;
+            foreach ($beans as $bean) {
+                if ($table == $bean) {
+                    $existtable = true;
+                    break;
+                }
+            }
+            if (!$existtable) {
+                $columnname = $column['column_name'];
+                $dropquery .= "DROP TABLE $bean;";
+            }
+        }
+
+        $sql = trim($dropquery . $tablequery . $indexquery . $constraintquery);
+        if ($out) {
+            echo "$sql\n";
+        } else {
+            if ($sql) {
+                $result = $data->performWrite($sql);
+                if ($result) {
+                    echo "ok\n";
+                } else {
+                    echo "fail\n";
+                }
+            } else {
+                echo "no update\n";
+            }
+        }
+    }
+
+    private function script_createTable($beanname) {
+        $sql = "CREATE TABLE $beanname ();";
+        return $sql;
+    }
+
+    private function script_createColumns($beanname) {
+        $object = new $beanname();
+        $sql = "";
+        $properties = $object->__getProperties();
+        foreach ($properties as $property) {
+            if (!$property["serializable"]) {
+                continue;
+            }
+            $sql .= $this->script_createColumn($object, $property);
+        }
+        return $sql;
+    }
+
+    private function script_createIndexes($beanname) {
+        $object = new $beanname();
+        $sql = "";
+        $properties = $object->__getProperties();
+        foreach ($properties as $property) {
+            if (!$property["serializable"]) {
+                continue;
+            }
+            $sql .= $this->script_createColumnIndex($object, $property);
+        }
+        return $sql;
+    }
+
+    private function script_createCosntraints($beanname) {
+        $object = new $beanname();
+        $sql = "";
+        $properties = $object->__getProperties();
+        foreach ($properties as $property) {
+            if (!$property["serializable"]) {
+                continue;
+            }
+            $sql .= $this->script_createColumnConstraint($object, $property);
+        }
+
+        return $sql;
+    }
+
+    private function script_createColumn(DataObject $object, $property) {
+        $class = strtolower(get_class($object));
+        $sql = "";
+        $name = $property["name"];
+        $type = PropertyTypes::$_POSTGRESQLTYPES[$property["type"]];
+        $notnull = $property["required"] ? "NOT NULL" : "";
+        $default = $property["default"] ? "DEFAULT '" . $property["default"] . "' " : "";
+        if ($name == "id" && !$object->__isChild()) {
+            $sql .= "ALTER TABLE $class ADD COLUMN id bigserial NOT NULL;";
+        } else if ($name == "id" && $object->__isChild()) {
+            $sql .= "ALTER TABLE $class ADD COLUMN id bigint NOT NULL;";
+        } else {
+            $sql .= "ALTER TABLE $class ADD COLUMN $name $type $notnull $default;";
+        }
+
+        $sql .= "COMMENT ON COLUMN $class.$name is '" . $this->script_createColumnComment($object, $property) . "';";
+
+        return $sql;
+    }
+
+    private function script_createColumnComment(DataObject $object, $property) {
+        $name = $property["name"];
+        $type = PropertyTypes::$_POSTGRESQLTYPES[$property["type"]];
+        $notnull = $property["required"] ? "NOT NULL" : "";
+        $default = $property["default"] ? "DEFAULT " . $property["default"] : "";
+        $index = $property["index"] ? "index" : "";
+        $unique = $property["unique"] ? "unique" : "";
+        $references = $property["reference"] ? $property["reference"] : "";
+        return trim("$name $type $notnull $default $index $unique $references");
+    }
+
+    private function script_createColumnIndex(DataObject $object, $property) {
+        $class = strtolower(get_class($object));
+        $sql = "";
+        $name = $property["name"];
+        if ($property["index"]) {
+            if (array_key_exists("unique", $property) && $property["unique"]) {
+                $sql.= "CREATE UNIQUE INDEX $class" . "_" . "$name" . "_index ON $class USING btree ($name);";
+            } else {
+                $sql.= "CREATE INDEX $class" . "_" . "$name" . "_index ON $class USING btree ($name);";
+            }
+        }
+        return $sql;
+    }
+
+    private function script_createColumnConstraint(DataObject $object, $property) {
+        $class = strtolower(get_class($object));
+        $sql = "";
+        $name = $property["name"];
+        if ($name == "id" && !$object->__isChild()) {
+            $sql.= "ALTER TABLE ONLY $class ADD CONSTRAINT $class" . "_pk PRIMARY KEY (id);";
+        } else if ($name == "id" && $object->__isChild()) {
+            $sql.= "ALTER TABLE ONLY $class ADD CONSTRAINT $class" . "_pk PRIMARY KEY (id);";
+        }
+        if ($property["reference"] !== null) {
+            $sql.= "ALTER TABLE ONLY $class ADD CONSTRAINT $class" . "_" . $property["name"] . "_fkey FOREIGN KEY (" . $property["name"] . ") REFERENCES " . $property["reference"] . "(id) MATCH FULL;";
+        }
+        return $sql;
+    }
+
+    public function sendEmail($to, $subject, $html, $text = "") {
+        $mandrillEmail = new MandrillEmail($to, $this->config('web_contact_email'), $this->config('web_contact_name'), $subject);
+        if (!$mandrillEmail->send($this->config('mandrill_key'), $html, $text)) {
+            $this->error($this->lang('lang_erroremail') . " - " . $mandrillEmail->error);
+        }
+    }
+
+    public function getLocationFromIP() {
+        if (array_key_exists('HTTP_X_FORWARDED_FOR', $_SERVER)) {
+            $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+            if ($ip) {
+                $details = json_decode(file_get_contents("http://ipinfo.io/{$ip}/json"));
+                if ($details && property_exists($details, "loc")) {
+                    $latlong = explode(",", $details->loc);
+                    if (count($latlong) == 2) {
+                        return array("latitude"=>doubleval($latlong[0]), "longitude"=>doubleval($latlong[1]));
+                    }
+                }
+            }
+        }
+        else if (array_key_exists('REMOTE_ADDR', $_SERVER)) {
+            $ip = $_SERVER['REMOTE_ADDR'];
+            if ($ip) {
+                $details = json_decode(file_get_contents("http://ipinfo.io/{$ip}/json"));
+                if ($details && property_exists($details, "loc")) {
+                    $latlong = explode(",", $details->loc);
+                    if (count($latlong) == 2) {
+                        return array("latitude"=>doubleval($latlong[0]), "longitude"=>doubleval($latlong[1]));
+                    }
+                }
+            }
+        }
+        return array("latitude"=>doubleval(0), "longitude"=>doubleval(0));
+    }
+
+    public function maintainers(array $navigations) {
+        foreach ($navigations as $className) {
+            switch ($this->navigation) {
+                case "bicubic-$className" : {
+                        require_once("nav/$className.php");
+                        $navigation = new $className($this);
+                        $navigation->records();
+                        break;
+                    }
+                case "bicubic-$className-search" : {
+                        require_once("nav/$className.php");
+                        $navigation = new $className($this);
+                        $navigation->search();
+                        break;
+                    }
+                case "bicubic-$className-reorder" : {
+                        require_once("nav/$className.php");
+                        $navigation = new $className($this);
+                        $navigation->reorder();
+                        break;
+                    }
+                case "bicubic-$className-json" : {
+                        require_once("nav/$className.php");
+                        $navigation = new $className($this);
+                        $navigation->json();
+                        break;
+                    }
+                case "bicubic-$className-add" : {
+                        require_once("nav/$className.php");
+                        $navigation = new $className($this);
+                        $navigation->add();
+                        break;
+                    }
+                case "bicubic-$className-addSubmit" : {
+                        require_once("nav/$className.php");
+                        $navigation = new $className($this);
+                        $navigation->addSubmit();
+                        break;
+                    }
+                case "bicubic-$className-edit" : {
+                        require_once("nav/$className.php");
+                        $navigation = new $className($this);
+                        $navigation->edit();
+                        break;
+                    }
+                case "bicubic-$className-editSubmit" : {
+                        require_once("nav/$className.php");
+                        $navigation = new $className($this);
+                        $navigation->editSubmit();
+                        break;
+                    }
+                case "bicubic-$className-delete" : {
+                        require_once("nav/$className.php");
+                        $navigation = new $className($this);
+                        $navigation->delete();
+                        break;
+                    }
+            }
+        }
     }
 
 }
-
-?>

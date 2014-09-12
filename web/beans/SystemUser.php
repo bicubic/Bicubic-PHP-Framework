@@ -30,17 +30,17 @@ class SystemUser extends DataObject {
 
     public function __getProperties() {
         return array(
-            "id" => ["name" => "id", "type" => PropertyTypes::$_LONG, "required" => false, "default" => null, "serializable" => true, "index" => true, "reference" => null, "updatenull" => true, "hidden" => true, "private" => false],
-            "name" => ["name" => "name", "type" => PropertyTypes::$_STRING256, "required" => false, "default" => null, "serializable" => true, "index" => false, "reference" => null, "updatenull" => true, "hidden" => false, "private" => false],
-            "email" => ["name" => "email", "type" => PropertyTypes::$_EMAIL, "required" => true, "default" => null, "serializable" => true, "index" => true, "reference" => null, "updatenull" => true, "hidden" => false, "private" => false],
-            "password" => ["name" => "password", "type" => PropertyTypes::$_PASSWORD, "required" => false, "default" => null, "serializable" => true, "index" => true, "reference" => null, "updatenull" => true, "hidden" => false, "private" => false],
-            "sessiontoken" => ["name" => "sessiontoken", "type" => PropertyTypes::$_STRING1024, "required" => false, "default" => "", "serializable" => true, "index" => false, "reference" => null, "updatenull" => true, "hidden" => false, "private" => true],
-            "confirmemailtoken" => ["name" => "confirmemailtoken", "type" => PropertyTypes::$_STRING1024, "required" => false, "default" => null, "serializable" => true, "index" => true, "reference" => null, "updatenull" => true, "hidden" => false, "private" => true],
-            "forgottoken" => ["name" => "forgottoken", "type" => PropertyTypes::$_STRING1024, "required" => false, "default" => null, "serializable" => true, "index" => true, "reference" => null, "updatenull" => true, "hidden" => false, "private" => true],
-            "changeemailtoken" => ["name" => "changeemailtoken", "type" => PropertyTypes::$_STRING1024, "required" => false, "default" => null, "serializable" => true, "index" => true, "reference" => null, "updatenull" => true, "hidden" => false, "private" => true],
-            "newemail" => ["name" => "newemail", "type" => PropertyTypes::$_STRING256, "required" => false, "default" => null, "serializable" => true, "index" => true, "reference" => null, "updatenull" => true, "hidden" => false, "private" => false],
-            "usercountry" => ["name" => "usercountry", "type" => PropertyTypes::$_LIST, "required" => false, "default" => null, "serializable" => true, "index" => true, "reference" => null, "updatenull" => true, "hidden" => false, "private" => false],
-            "userlang" => ["name" => "userlang", "type" => PropertyTypes::$_LIST, "required" => false, "default" => null, "serializable" => true, "index" => true, "reference" => null, "updatenull" => true, "hidden" => false, "private" => false],
+            "id" =>                 ["name" => "id",                "lang" => 'lang_id',                "type" => PropertyTypes::$_LONG,        "required" => false,    "default" => null,  "serializable" => true, "index" => true,    "reference" => null, "updatenull" => true, "hidden" => true,    "private" => false, "unique" => true,    "table" => true],
+            "name" =>               ["name" => "name",              "lang" => 'lang_name',              "type" => PropertyTypes::$_STRING256,   "required" => false,    "default" => null,  "serializable" => true, "index" => false,   "reference" => null, "updatenull" => true, "hidden" => false,   "private" => false, "unique" => false,   "table" => true],
+            "email" =>              ["name" => "email",             "lang" => 'lang_email',             "type" => PropertyTypes::$_EMAIL,       "required" => true,     "default" => null,  "serializable" => true, "index" => true,    "reference" => null, "updatenull" => true, "hidden" => false,   "private" => false, "unique" => true,    "table" => true],
+            "password" =>           ["name" => "password",          "lang" => 'lang_password',          "type" => PropertyTypes::$_PASSWORD,    "required" => false,    "default" => null,  "serializable" => true, "index" => true,    "reference" => null, "updatenull" => true, "hidden" => false,   "private" => false, "unique" => false,   "table" => false],
+            "sessiontoken" =>       ["name" => "sessiontoken",      "lang" => 'lang_sessiontoken',      "type" => PropertyTypes::$_STRING1024,  "required" => false,    "default" => "",    "serializable" => true, "index" => false,   "reference" => null, "updatenull" => true, "hidden" => false,   "private" => true,  "unique" => false,   "table" => false],
+            "confirmemailtoken" =>  ["name" => "confirmemailtoken", "lang" => 'lang_confirmemailtoken', "type" => PropertyTypes::$_STRING1024,  "required" => false,    "default" => null,  "serializable" => true, "index" => true,    "reference" => null, "updatenull" => true, "hidden" => false,   "private" => true,  "unique" => false,   "table" => false],
+            "forgottoken" =>        ["name" => "forgottoken",       "lang" => 'lang_forgottoken',       "type" => PropertyTypes::$_STRING1024,  "required" => false,    "default" => null,  "serializable" => true, "index" => true,    "reference" => null, "updatenull" => true, "hidden" => false,   "private" => true,  "unique" => false,   "table" => false],
+            "changeemailtoken" =>   ["name" => "changeemailtoken",  "lang" => 'lang_changeemailtoken',  "type" => PropertyTypes::$_STRING1024,  "required" => false,    "default" => null,  "serializable" => true, "index" => true,    "reference" => null, "updatenull" => true, "hidden" => false,   "private" => true,  "unique" => false,   "table" => false],
+            "newemail" =>           ["name" => "newemail",          "lang" => 'lang_newemail',          "type" => PropertyTypes::$_STRING256,   "required" => false,    "default" => null,  "serializable" => true, "index" => true,    "reference" => null, "updatenull" => true, "hidden" => false,   "private" => false, "unique" => false,   "table" => false],
+            "usercountry" =>        ["name" => "usercountry",       "lang" => 'lang_usercountry',       "type" => PropertyTypes::$_STRINGLIST,        "required" => false,    "default" => null,  "serializable" => true, "index" => true,    "reference" => null, "updatenull" => true, "hidden" => false,   "private" => false, "unique" => false,   "table" => false],
+            "userlang" =>           ["name" => "userlang",          "lang" => 'lang_userlang',          "type" => PropertyTypes::$_STRINGLIST,        "required" => false,    "default" => null,  "serializable" => true, "index" => true,    "reference" => null, "updatenull" => true, "hidden" => false,   "private" => false, "unique" => false,   "table" => false],
         );
     }
 
@@ -49,8 +49,8 @@ class SystemUser extends DataObject {
         switch ($paramname) {
             case "usercountry" : {
                     $navigation = new Navigation($application);
-                    Country::$_ENUM = $navigation->sortByLang(Country::$_ENUM);
-                    return Country::$_ENUM;
+                    $countries = $navigation->sortByLang($navigation->item(Country::$_ENUM, $navigation->config('lang')));
+                    return $countries;
                 }
             case "userlang" : {
                     $navigation = new Navigation($application);
@@ -151,4 +151,3 @@ class SystemUser extends DataObject {
 
 }
 
-?>

@@ -15,6 +15,7 @@ class PostgreSQLData extends SQLData {
         $user = $config["database_user"];
         $password = $config["database_password"];
         $database = $config["database_database"];
+        $this->debug = $config["debugdatabase"];
         $this->connection = pg_connect("host=$host dbname=$database user=$user password=$password");
         pg_set_client_encoding($this->connection, 'utf8');
     }
@@ -94,7 +95,7 @@ class PostgreSQLData extends SQLData {
         if ($this->debug) {
             var_dump($value);
         }
-        return pg_escape_string($this->connection, $value);
+        return pg_escape_string($this->connection, strval($value));
     }
 
     public function freeMemory($result) {
@@ -116,4 +117,3 @@ class PostgreSQLData extends SQLData {
 
 }
 
-?>

@@ -15,23 +15,22 @@ require_once("beans/SystemUser.php");
 require_once("beans/SystemUserLog.php");
 
 class LangFactory {
+
     public static function getAvailableLangList() {
         return array("es", "en", "pt");
     }
+
+    public static function getDefaultLang() {
+        return "es";
+    }
+
 }
 
 //manage applications here, do not rename this class or functions
-class ApplicationFactory  {
+class ApplicationFactory {
 
     public static function makeScriptApplication($app, $config, $lang) {
         $application = null;
-        switch ($app) {
-            case "script": {
-                    require_once("app/ScriptApplication.php");
-                    $application = new ScriptApplication($config, $lang);
-                    break;
-                }
-        }
         return $application;
     }
 
@@ -42,16 +41,6 @@ class ApplicationFactory  {
     public static function makeWebApplication($app, $config, $lang) {
         $application = null;
         switch ($app) {
-            case "home": {
-                    require_once("app/HomeApplication.php");
-                    $application = new HomeApplication($config, $lang);
-                    break;
-                }
-            case "login": {
-                    require_once("app/LoginApplication.php");
-                    $application = new LoginApplication($config, $lang);
-                    break;
-                }
             case "private": {
                     require_once("app/PrivateApplication.php");
                     $application = new PrivateApplication($config, $lang);
@@ -62,14 +51,15 @@ class ApplicationFactory  {
                     $application = new JsonApplication($config, $lang);
                     break;
                 }
+            default : {
+                    require_once("app/HomeApplication.php");
+                    $application = new HomeApplication($config, $lang);
+                }
         }
         return $application;
     }
 
     public static function defaultWebApplication($config, $lang) {
-        $application = new Application($config, $lang, null, null);
-        $application->redirect("home", "hello");
     }
 
 }
-?>

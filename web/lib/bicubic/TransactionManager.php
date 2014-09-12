@@ -18,17 +18,17 @@ class TransactionManager {
         $this->data = $data;
     }
 
-    public function getAll(DataObject $dataObject, $orderIndex = 'id', $orderDirection = 'DESC') {
-        $data = $this->data->select($dataObject, $orderIndex, $orderDirection);
+    public function getAll(DataObject $dataObject, OrderParam $orderParam = null) {
+        $data = $this->data->select($dataObject, $orderParam);
         return $data;
     }
 
-    public function getAllPaged(DataObject $dataObject, $orderIndex = 'id', $orderDirection = 'DESC', $itemsPerPage = 10, $lastIndex = 0, $keyword = null, $keywordfield = null) {
-        $data = $this->data->select($dataObject, $orderIndex, $orderDirection, $itemsPerPage, $lastIndex, $keyword, $keywordfield);
+    public function getAllPaged(DataObject $dataObject, OrderParam $orderParam = null, $itemsPerPage = null, $lastIndex = null) {
+        $data = $this->data->select($dataObject, $orderParam, $itemsPerPage, $lastIndex);
         return $data;
     }
 
-    public function getRecord(DataObject $dataObject) {
+    public function getRecord(DataObject $dataObject, $checkempty = true) {
         $properties = $dataObject->__getProperties();
         $empty = true;
         foreach ($properties as $property) {
@@ -40,7 +40,7 @@ class TransactionManager {
                 break;
             }
         }
-        if ($empty) {
+        if ($checkempty && $empty) {
             return null;
         }
         $dataObject = $this->data->selectOne($dataObject);
@@ -139,4 +139,3 @@ class TransactionManager {
 
 }
 
-?>

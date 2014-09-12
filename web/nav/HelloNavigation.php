@@ -18,7 +18,7 @@ class HelloNavigation extends AccountNavigation {
     }
 
     public function hello() {
-        $this->checkSignedInUser();
+        $this->checkSignedInUser("private", "home");
         $this->application->setMainTemplate("hello", "hello");
         $this->application->setVariableTemplate("SIGNUP-FORM", $this->makeSignUpForm());
         $this->application->render();
@@ -38,4 +38,3 @@ class HelloNavigation extends AccountNavigation {
 
 }
 
-?>
