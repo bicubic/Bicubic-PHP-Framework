@@ -23,44 +23,52 @@ abstract class SQLData extends Data {
 		if (!($object->__isChild() || $object->getId() == null)) {
 			return false;
 		}
-		$class = strtolower(get_class($object));
-		$table = ($class);
-		$params = array();
-		$query = "INSERT INTO " . $table . " (";
-		$i = 0;
-		$j = 0;
-		$properties = $object->__getProperties();
-		foreach ($properties as $property) {
-			if (!$property["serializable"]) {
-				continue;
+		$query = "";
+		if ($object->__isEmpty()) {
+			$class = strtolower(get_class($object));
+			$table = ($class);
+			$query = "INSERT INTO " . $table . " DEFAULT VALUES ";
+		} else {
+			$class = strtolower(get_class($object));
+			$table = ($class);
+			$params = array();
+			$query = "INSERT INTO " . $table . " (";
+			$i = 0;
+			$j = 0;
+			$properties = $object->__getProperties();
+			foreach ($properties as $property) {
+				if (!$property["serializable"]) {
+					continue;
+				}
+				$key = $property["name"];
+				$cammel = strtoupper(substr($key, 0, 1)) . substr($key, 1);
+				$getter = "get$cammel";
+				$value = $object->$getter();
+				if (isset($value) && ($object->__isChild() || $key != $this->idname)) {
+					if ($i == 0) {
+						$query .= "$key";
+						$i++;
+					} else {
+						$query .= ",$key";
+					}
+					$params[$j] = $value;
+					$j++;
+				}
 			}
-			$key = $property["name"];
-			$cammel = strtoupper(substr($key, 0, 1)) . substr($key, 1);
-			$getter = "get$cammel";
-			$value = $object->$getter();
-			if (isset($value) && ($object->__isChild() || $key != $this->idname)) {
+			$query .= ") VALUES (";
+			$i = 0;
+			foreach ($params as $key=> $value) {
+				$value = $this->escapeChars($value);
 				if ($i == 0) {
-					$query .= "$key";
+					$query .= "'$value'";
 					$i++;
 				} else {
-					$query .= ",$key";
+					$query .= ",'$value'";
 				}
-				$params[$j] = $value;
-				$j++;
 			}
+			$query .= ")";
 		}
-		$query .= ") VALUES (";
-		$i = 0;
-		foreach ($params as $key=> $value) {
-			$value = $this->escapeChars($value);
-			if ($i == 0) {
-				$query .= "'$value'";
-				$i++;
-			} else {
-				$query .= ",'$value'";
-			}
-		}
-		$query .= ")";
+
 		if (!$this->performWrite($query)) {
 			return false;
 		}

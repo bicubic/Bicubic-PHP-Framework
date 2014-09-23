@@ -1057,7 +1057,7 @@ class Application {
         $this->endApp();
     }
 
-    private function unescapeJsonObject($object) {
+    public function unescapeJsonObject($object) {
         if (is_string($object)) {
             $object = $this->unescapeJsonVariable($object);
             return $object;
