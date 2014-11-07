@@ -232,6 +232,9 @@ class Application {
             $properties = array_merge($properties, $object->__getParentProperties());
         }
         foreach ($properties as $property) {
+	    if($property["private"]) {
+		continue;
+	    }
             $fieldname = $property["name"];
             $cammelName = strtoupper(substr($fieldname, 0, 1)) . substr($fieldname, 1);
             $setter = "set$cammelName";
@@ -879,6 +882,9 @@ class Application {
         $objectName = get_class($object);
         $objectFormName = strtoupper($objectName);
         foreach ($properties as $property) {
+	     if($property["private"]) {
+		continue;
+	    }
             $paramName = strtoupper($property["name"]);
             $getter = "get" . strtoupper(substr($property["name"], 0, 1)) . substr($property["name"], 1);
             $value = $object->$getter();
@@ -934,6 +940,9 @@ class Application {
         $objectName = get_class($object);
         $objectFormName = strtoupper($objectName);
         foreach ($properties as $property) {
+	     if($property["private"]) {
+		continue;
+	    }
             $paramName = strtoupper($property["name"]);
             $getter = "get" . strtoupper(substr($property["name"], 0, 1)) . substr($property["name"], 1);
             $value = $object->$getter();

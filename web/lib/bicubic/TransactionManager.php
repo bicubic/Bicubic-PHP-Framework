@@ -32,6 +32,9 @@ class TransactionManager {
         $properties = $dataObject->__getProperties();
         $empty = true;
         foreach ($properties as $property) {
+	     if(!$property["serializable"]) {
+		continue;
+	    }
             $cammel = strtoupper(substr($property["name"], 0, 1)) . substr($property["name"], 1);
             $getter = "get$cammel";
             $value = $dataObject->$getter();
@@ -54,6 +57,9 @@ class TransactionManager {
             }
             $properties = $parent->__getProperties();
             foreach ($properties as $property) {
+		 if(!$property["serializable"]) {
+		continue;
+	    }
                 $cammel = strtoupper(substr($property["name"], 0, 1)) . substr($property["name"], 1);
                 $getter = "get$cammel";
                 $setter = "set$cammel";

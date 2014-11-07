@@ -14,12 +14,14 @@ define('SESSION_OBJECT', "MaintainerNavigation_object");
 class MaintainerNavigation extends Navigation {
 
     private $object;
+    private $originalObject;
     private $title;
     private $singleTitle;
     public $name;
 
     function __construct(Application $application, DataObject $object, $name, $title, $singleTitle) {
         parent::__construct($application);
+	$this->originalObject = $object;
         $this->object = $this->application->getSessionParam(SESSION_OBJECT);
         if (!$this->object || get_class($this->object) != get_class($object)) {
             $this->object = $object;
@@ -57,14 +59,14 @@ class MaintainerNavigation extends Navigation {
 
     public function add() {
         $this->application->setMainTemplate("bicubic", "empty", $this->singleTitle);
-        $className = get_class($this->object);
-        $this->application->setVariableTemplate("NAVIGATION-CONTENT", $this->objectForm(new $className(), "bicubic-$this->name-addSubmit"));
+        $originalObject = $this->originalObject;
+        $this->application->setVariableTemplate("NAVIGATION-CONTENT", $this->objectForm($originalObject, "bicubic-$this->name-addSubmit"));
         $this->application->render();
     }
 
     public function addSubmit() {
-        $className = get_class($this->object);
-        $object = $this->application->getFormObject(new $className());
+	$originalObject = $this->originalObject;
+        $object = $this->application->getFormObject($originalObject);
         $data = new TransactionManager($this->application->data);
         $data->data->begin();
         if (!$data->insertRecord($object)) {
@@ -77,10 +79,10 @@ class MaintainerNavigation extends Navigation {
 
     public function edit() {
         $id = $this->application->getUrlParam("id", PropertyTypes::$_INT);
-        $className = get_class($this->object);
-        $object = (new $className($id));
+	$originalObject = $this->originalObject;
+	$originalObject->setId($id);
         $data = new TransactionManager($this->application->data);
-        $object = $data->getRecord($object);
+        $object = $data->getRecord($originalObject);
         if (!$object) {
             $this->error('lang_idnotvalid');
         }
@@ -90,8 +92,8 @@ class MaintainerNavigation extends Navigation {
     }
 
     public function editSubmit() {
-        $className = get_class($this->object);
-        $object = $this->application->getFormObject(new $className());
+	$originalObject = $this->originalObject;
+        $object = $this->application->getFormObject($originalObject);
         $data = new TransactionManager($this->application->data);
         $data->data->begin();
         if (!$data->updateRecord($object)) {
@@ -104,11 +106,11 @@ class MaintainerNavigation extends Navigation {
 
     public function delete() {
         $id = $this->application->getUrlParam("id", PropertyTypes::$_INT);
-        $className = get_class($this->object);
-        $object = (new $className($id));
+        $originalObject = $this->originalObject;
+	$originalObject->setId($id);
         $data = new TransactionManager($this->application->data);
         $data->data->begin();
-        $object = $data->getRecord($object);
+        $object = $data->getRecord($originalObject);
         if (!$object) {
             $data->data->rollback();
             $this->error('lang_idnotvalid');
