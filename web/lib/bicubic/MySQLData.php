@@ -10,13 +10,13 @@
  */
 class MySQLData extends SQLData {
 
-    private $connection;
 
     public function __construct($config) {
         $host = $config["database_host"];
         $user = $config["database_user"];
         $password = $config["database_password"];
         $database = $config["database_database"];
+	$this->debug = $config["debugdatabase"];
         $this->connection = mysqli_connect($host, $user, $password, $database);
         mysqli_set_charset($this->connection, 'utf8');
     }
@@ -40,6 +40,10 @@ class MySQLData extends SQLData {
     }
 
     public function performWrite($query, $params = array()) {
+	if ($this->debug) {
+            echo $query;
+            var_dump($params);
+        }
         if (!mysqli_query($this->connection, $query)) {
             return false;
         }
@@ -47,6 +51,9 @@ class MySQLData extends SQLData {
     }
 
     public function performRead($query) {
+	if ($this->debug) {
+            echo $query;
+	}
         $result = mysqli_query($this->connection, $query) or die(mysqli_error($this->connection));
         return $result;
     }

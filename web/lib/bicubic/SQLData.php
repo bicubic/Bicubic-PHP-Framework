@@ -157,13 +157,14 @@ abstract class SQLData extends Data {
 		}
 
 		$query .= "ORDER BY $orderParam->property  " . ObjectOrder::$_VALUE[$orderParam->order] . " ";
-		$query .= "OFFSET $lastIndex ";
+		
 
 		if ($limit) {
 			if ($limit < 0) {
 				$limit = 0;
 			}
 			$query .= "LIMIT $limit ";
+			$query .= "OFFSET $lastIndex ";
 		}
 		$result = $this->performRead($query);
 		while ($row = $this->readNext($result)) {
