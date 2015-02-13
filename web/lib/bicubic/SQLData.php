@@ -36,13 +36,12 @@ abstract class SQLData extends Data {
 			$i = 0;
 			$j = 0;
 			$properties = $object->__getProperties();
-			foreach ($properties as $property) {
+			foreach ($properties as $pkey => $property) {
 				if (!$property["serializable"]) {
 					continue;
 				}
 				$key = $property["name"];
-				$cammel = strtoupper(substr($key, 0, 1)) . substr($key, 1);
-				$getter = "get$cammel";
+				$getter = "get$pkey";
 				$value = $object->$getter();
 				if (isset($value) && ($object->__isChild() || $key != $this->idname)) {
 					if ($i == 0) {
@@ -88,13 +87,12 @@ abstract class SQLData extends Data {
 		$query = "SELECT * FROM  " . ($class) . " ";
 		$i = 0;
 		$properties = $object->__getProperties();
-		foreach ($properties as $property) {
+		foreach ($properties as $pkey => $property) {
 			if (!$property["serializable"]) {
 				continue;
 			}
 			$key = $property["name"];
-			$cammel = strtoupper(substr($key, 0, 1)) . substr($key, 1);
-			$getter = "get$cammel";
+			$getter = "get$pkey";
 			$value = $object->$getter();
 			if (isset($value)) {
 				$value = $this->escapeChars($value);
@@ -181,13 +179,12 @@ abstract class SQLData extends Data {
 		$query = "SELECT * FROM  " . ($class) . " ";
 		$i = 0;
 		$properties = $object->__getProperties();
-		foreach ($properties as $property) {
+		foreach ($properties as $pkey => $property) {
 			if (!$property["serializable"]) {
 				continue;
 			}
 			$key = $property["name"];
-			$cammel = strtoupper(substr($key, 0, 1)) . substr($key, 1);
-			$getter = "get$cammel";
+			$getter = "get$pkey";
 			$value = $object->$getter();
 			if (isset($value)) {
 				$value = $this->escapeChars($value);
@@ -221,13 +218,12 @@ abstract class SQLData extends Data {
 		$query = "UPDATE " . $table . " ";
 		$i = 0;
 		$properties = $object->__getProperties();
-		foreach ($properties as $property) {
+		foreach ($properties as $pkey => $property) {
 			if (!$property["serializable"]) {
 				continue;
 			}
 			$key = $property["name"];
-			$cammel = strtoupper(substr($key, 0, 1)) . substr($key, 1);
-			$getter = "get$cammel";
+			$getter = "get$pkey";
 			$value = $object->$getter();
 			if ($key != $this->idname) {
 				if (isset($value)) {

@@ -14,11 +14,10 @@ abstract class DataObject {
 
 	public function __isComplete() {
 		$properties = $this->__getProperties();
-		foreach ($properties as $property) {
+		foreach ($properties as $key => $property) {
 			if ($property["required"]) {
-				$pname = $property["name"];
-				$getter = "get$pname";
-				$setter = "set$pname";
+				$getter = "get$key";
+				$setter = "set$key";
 				$value = $this->$getter();
 				if ($value === null) {
 					if ($property["default"] !== null) {
@@ -60,10 +59,9 @@ abstract class DataObject {
 			$parentClassName = get_parent_class($this);
 			$parentObject = new $parentClassName();
 			$properties = $parentObject->__getProperties();
-			foreach ($properties as $property) {
-				$pname = $property["name"];
-				$setter = "set$pname";
-				$getter = "get$pname";
+			foreach ($properties as $key => $property) {
+				$setter = "set$key";
+				$getter = "get$key";
 				$parentObject->$setter($this->$getter());
 			}
 			return $parentObject;
@@ -74,9 +72,8 @@ abstract class DataObject {
 	public function __isEmpty() {
 		$empty = true;
 		$properties = $this->__getProperties();
-		foreach ($properties as $property) {
-			$pname = $property["name"];
-			$getter = "get$pname";
+		foreach ($properties as $key => $property) {
+			$getter = "get$key";
 			$value = $this->$getter();
 			if (isset($value)) {
 				$empty = false;
@@ -98,13 +95,11 @@ abstract class DataObject {
 	}
 
 	private function setObjectProperties($properties, $classname, $row) {
-		foreach ($properties as $property) {
-			$key = $property["name"];
-			$cammel = strtoupper(substr($key, 0, 1)) . substr($key, 1);
-			$setter = "set$cammel";
-			$dbprop1 = $key;
-			$dbprop2 = $classname . $key;
-			$dbprop3 = $key . "id";
+		foreach ($properties as $key => $property) {
+			$setter = "set$key";
+			$dbprop1 = $property["name"];
+			$dbprop2 = $classname . $property["name"];
+			$dbprop3 = $property["name"] . "id";
 			if (array_key_exists($dbprop1, $row)) {
 				$this->$setter($row[$dbprop1]);
 			} else if (array_key_exists($dbprop2, $row)) {
@@ -118,13 +113,11 @@ abstract class DataObject {
 	public function fillFromJson($row) {
 		$class = strtolower(get_class($this));
 		$properties = $this->__getProperties();
-		foreach ($properties as $property) {
-			$key = $property["name"];
-			$cammel = strtoupper(substr($key, 0, 1)) . substr($key, 1);
-			$setter = "set$cammel";
-			$dbprop1 = $key;
-			$dbprop2 = $class . $key;
-			$dbprop3 = $key . "id";
+		foreach ($properties as $key => $property) {
+			$setter = "set$key";
+			$dbprop1 = $property["name"];
+			$dbprop2 = $class . $property["name"];
+			$dbprop3 = $property["name"] . "id";
 			if (property_exists($row, $dbprop1)) {
 				$this->$setter($row->$dbprop1);
 			} else if (property_exists($row, $dbprop2)) {

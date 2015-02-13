@@ -161,9 +161,10 @@ class Navigation {
 	return ucwords(strtolower(trim($string)));
     }
 
-    public function objectFormElement(DataObject $object, $property) {
+    public function objectFormElement(DataObject $object, $key) {
+	$property = $this->item($object->__getProperties(), $key);
 	$objectName = get_class($object);
-	$getter = "get" . strtoupper(substr($property["name"], 0, 1)) . substr($property["name"], 1);
+	$getter = "get$key";
 	$value = $object->$getter();
 	if ($this->item($property, "private", false)) {
 	    return "";
@@ -346,7 +347,7 @@ class Navigation {
 	    $this->application->setHTMLArrayCustomTemplate($result, [
 		'SEARCH-ACTION' => $this->application->getAppUrl($search->app, $search->nav, $params),
 	    ]);
-	    foreach ($properties as $property) {
+	    foreach ($properties as $pkey => $property) {
 		if (!$property["table"]) {
 		    continue;
 		}
@@ -368,7 +369,7 @@ class Navigation {
 		    case PropertyTypes::$_STRING512 :
 		    case PropertyTypes::$_STRING1024 :
 		    case PropertyTypes::$_STRING2048 : {
-			    $getter = "get" . strtoupper(substr($property["name"], 0, 1)) . substr($property["name"], 1);
+			    $getter = "get$pkey";
 			    $val = $object->$getter();
 			    $this->application->setHTMLArrayCustomTemplate($result, [
 				'SEARCHSTRING-NAME' => $property["name"],
@@ -384,7 +385,7 @@ class Navigation {
 				'SEARCHLIST-LANG' => $this->lang($property["lang"]),
 			    ]);
 			    $enum = ObjectBoolean::$_ENUM;
-			    $getter = "get" . strtoupper(substr($property["name"], 0, 1)) . substr($property["name"], 1);
+			    $getter = "get$pkey";
 			    $val = $object->$getter();
 			    foreach ($enum as $key => $value) {
 				$this->application->setHTMLArrayCustomTemplate($result, [
@@ -405,7 +406,7 @@ class Navigation {
 				'SEARCHLIST-LANG' => $this->lang($property["lang"]),
 			    ]);
 			    $enum = $object->__getList($property["name"], $this->application);
-			    $getter = "get" . strtoupper(substr($property["name"], 0, 1)) . substr($property["name"], 1);
+			    $getter = "get$pkey";
 			    $val = $object->$getter();
 			    foreach ($enum as $key => $value) {
 				$this->application->setHTMLArrayCustomTemplate($result, [
@@ -458,14 +459,14 @@ class Navigation {
 	if ($object->__isChild()) {
 	    $properties = array_merge($properties, $object->__getParentProperties());
 	}
-	foreach ($properties as $property) {
+	foreach ($properties as $key => $property) {
 	     if($property["private"]) {
 		continue;
 	    }
 	    if (!$property["table"]) {
 		continue;
 	    }
-	    $setter = "set" . strtoupper(substr($property["name"], 0, 1)) . substr($property["name"], 1);
+	    $setter = "set$key";
 	    $object->$setter($this->application->getFormParam($property["name"], $property["type"], false));
 	}
 	return $object;
@@ -519,14 +520,14 @@ class Navigation {
 	    $properties = array_merge($properties, $object->__getParentProperties());
 	}
 	$headercontent = "";
-	foreach ($properties as $property) {
+	foreach ($properties as $key => $property) {
 	     if($property["private"]) {
 		continue;
 	    }
 	    if (!$property["table"]) {
 		continue;
 	    }
-	    $headercontent .= $this->objectTableHeaderValue($object, $property, $reorder, $order);
+	    $headercontent .= $this->objectTableHeaderValue($object, $key, $reorder, $order);
 	}
 	if ($actionParams) {
 	    $headercontent .= $this->objectTableHeaderActions();
@@ -539,7 +540,8 @@ class Navigation {
 	return $content;
     }
 
-    public function objectTableHeaderValue(DataObject $object, $property, LinkParam $reorder = null, OrderParam $order = null) {
+    public function objectTableHeaderValue(DataObject $object, $key, LinkParam $reorder = null, OrderParam $order = null) {
+	$property = $this->item($object->__getProperties(), $key);
 	if ($reorder && $order) {
 	    $result = $this->application->setCustomTemplate("bicubic", "tabletha");
 	    $this->application->setHTMLVariableCustomTemplate($result, "PROPERTY-HEADER", $this->lang($property["lang"]));
@@ -573,14 +575,14 @@ class Navigation {
 	    $properties = array_merge($properties, $object->__getParentProperties());
 	}
 	$rowcontent = "";
-	foreach ($properties as $property) {
+	foreach ($properties as $key => $property) {
 	     if($property["private"]) {
 		continue;
 	    }
 	    if (!$property["table"]) {
 		continue;
 	    }
-	    $rowcontent .= $this->objectTableRowValue($object, $property);
+	    $rowcontent .= $this->objectTableRowValue($object, $key);
 	}
 	if ($actionParams) {
 	    $rowcontent .= $this->objectTableRowActions($object, $actionParams);
@@ -593,11 +595,12 @@ class Navigation {
 	return $content;
     }
 
-    public function objectTableRowValue(DataObject $object, $property) {
+    public function objectTableRowValue(DataObject $object, $key) {
+	$property = $this->item($object->__getProperties(), $key);
 	$result = $this->application->setCustomTemplate("bicubic", "tabletd");
-	$this->application->setVariableCustomTemplate($result, "PROPERTY-VALUE", $this->application->formatProperty($object, $property));
+	$this->application->setVariableCustomTemplate($result, "PROPERTY-VALUE", $this->application->formatProperty($object, $key));
 	if ($property["type"] == PropertyTypes::$_BOOLEAN) {
-	    $getter = "get" . strtoupper(substr($property["name"], 0, 1)) . substr($property["name"], 1);
+	    $getter = "get$key";
 	    $value = $object->$getter();
 	    $data = "";
 	    if (intval($value) == 1) {
@@ -662,11 +665,11 @@ class Navigation {
 	    foreach ($objects as $object) {
 		$lastid++;
 		$column = "A";
-		foreach ($properties as $property) {
+		foreach ($properties as $key => $property) {
 		    if (!$property["table"]) {
 			continue;
 		    }
-		    $excel->getActiveSheet()->setCellValue($column . $rowNumber, $this->application->formatProperty($object, $property));
+		    $excel->getActiveSheet()->setCellValue($column . $rowNumber, $this->application->formatProperty($object, $key));
 		    $column++;
 		}
 		$rowNumber++;
@@ -701,28 +704,30 @@ class Navigation {
 	    $properties = array_merge($properties, $object->__getParentProperties());
 	}
 	$content = "";
-	foreach ($properties as $property) {
+	foreach ($properties as $key => $property) {
 	     if($property["private"]) {
 		continue;
 	    }
 	    if (!$property["table"]) {
 		continue;
 	    }
-	    $content .= $this->objectViewTitle($object, $property) . $this->objectViewData($object, $property);
+	    $content .= $this->objectViewTitle($object, $property) . $this->objectViewData($object, $key);
 	}
 	return $content;
     }
 
-    public function objectViewTitle(DataObject $object, $property) {
+    public function objectViewTitle(DataObject $object, $key) {
+	$property = $this->item($object->__getProperties(), $key);
 	$result = $this->application->setCustomTemplate("bicubic", "viewtitle");
 	$this->application->setHTMLVariableCustomTemplate($result, "VIEW-TITLE", $this->lang($property["lang"]));
 	$content = $this->application->renderCustomTemplate($result);
 	return $content;
     }
 
-    public function objectViewData(DataObject $object, $property) {
+    public function objectViewData(DataObject $object, $key) {
+//	$property = $this->item($object->__getProperties(), $key);
 	$result = $this->application->setCustomTemplate("bicubic", "viewdata");
-	$this->application->setVariableCustomTemplate($result, "VIEW-DATA", $this->application->formatProperty($object, $property));
+	$this->application->setVariableCustomTemplate($result, "VIEW-DATA", $this->application->formatProperty($object, $key));
 	$content = $this->application->renderCustomTemplate($result);
 	return $content;
     }

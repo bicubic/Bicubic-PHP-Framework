@@ -231,13 +231,12 @@ class Application {
         if ($object->__isChild()) {
             $properties = array_merge($properties, $object->__getParentProperties());
         }
-        foreach ($properties as $property) {
+        foreach ($properties as $key => $property) {
 	    if($property["private"]) {
 		continue;
 	    }
             $fieldname = $property["name"];
-            $cammelName = strtoupper(substr($fieldname, 0, 1)) . substr($fieldname, 1);
-            $setter = "set$cammelName";
+            $setter = "set$key";
             $object->$setter($this->getFormParam("$objectName" . "_" . "$fieldname", $property["type"], false));
         }
         if ($force && !$object->__isComplete()) {
@@ -881,12 +880,12 @@ class Application {
         }
         $objectName = get_class($object);
         $objectFormName = strtoupper($objectName);
-        foreach ($properties as $property) {
+        foreach ($properties as $key => $property) {
 	     if($property["private"]) {
 		continue;
 	    }
             $paramName = strtoupper($property["name"]);
-            $getter = "get" . strtoupper(substr($property["name"], 0, 1)) . substr($property["name"], 1);
+            $getter = "get$key";
             $value = $object->$getter();
             if ($property["type"] == PropertyTypes::$_LIST || $property["type"] == PropertyTypes::$_STRINGLIST) {
                 $this->setVariableTemplate("$formName-NAME-$objectFormName-$paramName", "$objectName" . "_" . $property["name"]);
@@ -939,12 +938,12 @@ class Application {
         }
         $objectName = get_class($object);
         $objectFormName = strtoupper($objectName);
-        foreach ($properties as $property) {
+        foreach ($properties as $key => $property) {
 	     if($property["private"]) {
 		continue;
 	    }
             $paramName = strtoupper($property["name"]);
-            $getter = "get" . strtoupper(substr($property["name"], 0, 1)) . substr($property["name"], 1);
+            $getter = "get$key";
             $value = $object->$getter();
             if ($property["type"] == PropertyTypes::$_LIST || $property["type"] == PropertyTypes::$_STRINGLIST) {
                 $items = $object->__getList($property["name"], $this);
@@ -953,10 +952,10 @@ class Application {
                 $items = $object->__getList($property["name"], $this);
                 $this->setVariableTemplate("$objectFormName-$paramName", $this->lang($this->item($items, $value)));
             } else if ($property["type"] == PropertyTypes::$_STRING2048) {
-                $this->setVariableTemplate("$objectFormName-$paramName", $this->makeHTMLTags($this->formatProperty($object, $property)));
+                $this->setVariableTemplate("$objectFormName-$paramName", $this->makeHTMLTags($this->formatProperty($object, $key)));
             }
 			else {
-                $this->setVariableTemplate("$objectFormName-$paramName", $this->formatProperty($object, $property));
+                $this->setVariableTemplate("$objectFormName-$paramName", $this->formatProperty($object, $key));
             }
         }
     }
@@ -1291,8 +1290,9 @@ class Application {
         return $num;
     }
 
-    public function formatProperty(DataObject $object, $property) {
-        $getter = "get" . strtoupper(substr($property["name"], 0, 1)) . substr($property["name"], 1);
+    public function formatProperty(DataObject $object, $key) {
+	$property = $this->item($object->__getProperties(), $key);
+        $getter = "get$key";
         $value = $object->$getter();
         switch ($property["type"]) {
             case PropertyTypes::$_LONG : {

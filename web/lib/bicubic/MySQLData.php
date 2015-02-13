@@ -17,7 +17,7 @@ class MySQLData extends SQLData {
         $password = $config["database_password"];
         $database = $config["database_database"];
 	$this->debug = $config["debugdatabase"];
-        $this->connection = mysqli_connect($host, $user, $password, $database);
+        $this->connection = mysqli_connect($host, $user, $password, $database) or die("Error " . mysqli_connect_error());
         mysqli_set_charset($this->connection, 'utf8');
     }
 
