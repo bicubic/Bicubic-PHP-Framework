@@ -2078,6 +2078,24 @@ class Application {
                         $navigation->delete();
                         break;
                     }
+		case "bicubic-$className-export" : {
+                        require_once("nav/$className.php");
+                        $navigation = new $className($this);
+                        $navigation->export();
+                        break;
+                    }
+		case "bicubic-$className-import" : {
+                        require_once("nav/$className.php");
+                        $navigation = new $className($this);
+                        $navigation->import();
+                        break;
+                    }
+		case "bicubic-$className-importSubmit" : {
+                        require_once("nav/$className.php");
+                        $navigation = new $className($this);
+                        $navigation->importSubmit();
+                        break;
+                    }
             }
         }
     }

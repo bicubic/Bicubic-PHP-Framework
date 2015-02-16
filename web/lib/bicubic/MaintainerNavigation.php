@@ -37,7 +37,7 @@ class MaintainerNavigation extends Navigation {
 
     public function records() {
         $this->application->setMainTemplate("bicubic", "empty", $this->title);
-        $this->application->setVariableTemplate("NAVIGATION-CONTENT", $this->objectTable($this->object, $this->order, [new LinkParam($this->application->name, "bicubic-$this->name-edit", [], 'lang_edit'), new LinkParam($this->application->name, "bicubic-$this->name-delete", [], 'lang_delete')], [new LinkParam($this->application->name, "bicubic-$this->name-add", [], 'lang_add')], new LinkParam($this->application->name, "bicubic-$this->name-json"), new LinkParam($this->application->name, "bicubic-$this->name-search"), new LinkParam($this->application->name, "bicubic-$this->name-reorder")));
+        $this->application->setVariableTemplate("NAVIGATION-CONTENT", $this->objectTable($this->object, $this->order, [new LinkParam($this->application->name, "bicubic-$this->name-edit", [], 'lang_edit'), new LinkParam($this->application->name, "bicubic-$this->name-delete", [], 'lang_delete')], [new LinkParam($this->application->name, "bicubic-$this->name-export", [], 'lang_export'), new LinkParam($this->application->name, "bicubic-$this->name-import", [], 'lang_import'), new LinkParam($this->application->name, "bicubic-$this->name-add", [], 'lang_add')], new LinkParam($this->application->name, "bicubic-$this->name-json"), new LinkParam($this->application->name, "bicubic-$this->name-search"), new LinkParam($this->application->name, "bicubic-$this->name-reorder")));
         $this->application->render();
     }
 
@@ -75,6 +75,29 @@ class MaintainerNavigation extends Navigation {
         }
         $data->data->commit();
         $this->application->redirect($this->application->name, "bicubic-$this->name");
+    }
+    
+    public function export() {
+	$this->objectExport($this->object);
+    }
+    
+    public function import() {
+        $this->application->setMainTemplate("bicubic", "import", $this->singleTitle);
+	$originalObject = $this->originalObject;
+        $this->application->setVariableTemplate("FORM-ID",  $this->application->navigation . get_class($originalObject));
+	$this->application->setVariableTemplate("FORM-ACTION", $this->application->getAppUrl($this->application->name, "bicubic-$this->name-importSubmit"));
+        $this->application->render();
+    }
+    
+    public function importSubmit() {
+	$data = new TransactionManager($this->application->data);
+	$originalObject = $this->originalObject;
+	if(!$this->objectImportSubmit($originalObject, $data)) {
+	    $data->data->rollback();
+            $this->error('lang_servererror', $this->importError);
+	}
+	$data->data->commit();
+	$this->application->redirect($this->application->name, "bicubic-$this->name");
     }
 
     public function edit() {

@@ -310,7 +310,7 @@ class Navigation {
 	    if ($property["private"]) {
 		continue;
 	    }
-	    $formContent .= $this->objectFormElement($object, $property);
+	    $formContent .= $this->objectFormElement($object, $property['name']);
 	}
 	return $formContent;
     }
@@ -460,7 +460,7 @@ class Navigation {
 	    $properties = array_merge($properties, $object->__getParentProperties());
 	}
 	foreach ($properties as $key => $property) {
-	     if($property["private"]) {
+	    if ($property["private"]) {
 		continue;
 	    }
 	    if (!$property["table"]) {
@@ -521,7 +521,7 @@ class Navigation {
 	}
 	$headercontent = "";
 	foreach ($properties as $key => $property) {
-	     if($property["private"]) {
+	    if ($property["private"]) {
 		continue;
 	    }
 	    if (!$property["table"]) {
@@ -576,7 +576,7 @@ class Navigation {
 	}
 	$rowcontent = "";
 	foreach ($properties as $key => $property) {
-	     if($property["private"]) {
+	    if ($property["private"]) {
 		continue;
 	    }
 	    if (!$property["table"]) {
@@ -639,6 +639,7 @@ class Navigation {
 	$cacheSettings = array(' memoryCacheSize ' => '512MB');
 	PHPExcel_Settings::setCacheStorageMethod($cacheMethod, $cacheSettings);
 	PHPExcel_Settings::setZipClass(PHPExcel_Settings::PCLZIP);
+	$excel->createSheet(1);
 	$excel->setActiveSheetIndex(0);
 	$properties = $object->__getProperties();
 	if ($object->__isChild()) {
@@ -647,13 +648,14 @@ class Navigation {
 	$column = "A";
 	$rowNumber = 1;
 	foreach ($properties as $property) {
-	     if($property["private"]) {
+	    if ($property["private"]) {
 		continue;
 	    }
 	    if (!$property["table"]) {
 		continue;
 	    }
-	    $excel->getActiveSheet()->setCellValue($column . $rowNumber, $this->lang($property["lang"]));
+	    $excel->getSheet(0)->setCellValue($column . $rowNumber, $this->lang($property["lang"]));
+	    $excel->getSheet(1)->setCellValue($column . $rowNumber, $this->lang($property["lang"]));
 	    $column++;
 	}
 	$data = new TransactionManager($this->application->data);
@@ -666,10 +668,16 @@ class Navigation {
 		$lastid++;
 		$column = "A";
 		foreach ($properties as $key => $property) {
+		    if ($property["private"]) {
+			continue;
+		    }
 		    if (!$property["table"]) {
 			continue;
 		    }
-		    $excel->getActiveSheet()->setCellValue($column . $rowNumber, $this->application->formatProperty($object, $key));
+		    $getter = "get$key";
+		    $value = $object->$getter();
+		    $excel->getSheet(0)->setCellValue($column . $rowNumber, $value);
+		    $excel->getSheet(1)->setCellValue($column . $rowNumber, $this->application->formatProperty($object, $key));
 		    $column++;
 		}
 		$rowNumber++;
@@ -683,12 +691,84 @@ class Navigation {
 	$objWriter->save('php://output');
     }
 
-    public function objectImport(DataObject $object, $callBack) {
-	
-    }
+    public $importError;
 
-    public function objectImportSubmit(DataObject $object, $callBack) {
-	
+    public function objectImportSubmit(DataObject $object, TransactionManager $data) {
+	require_once "lib/ext/PHPExcel/PHPExcel.php";
+	$fileParam = "bicubic-import-file";
+	if (!isset($_FILES[$fileParam])) {
+	    $this->importError = ('lang_filenotfound');
+	    return false;
+	}
+	if ($_FILES[$fileParam]['error'] == UPLOAD_ERR_INI_SIZE) {
+	    $this->importError = ('lang_filesize');
+	    return false;
+	}
+	if (!is_uploaded_file($_FILES[$fileParam]['tmp_name'])) {
+	    $this->importError = ('lang_filenotuploaded');
+	    return false;
+	}
+	$objPHPExcel = null;
+	$inputFileType = PHPExcel_IOFactory::identify($_FILES[$fileParam]['tmp_name']);
+	if ($inputFileType == 'Excel5' || $inputFileType == 'Excel2007' || $inputFileType == 'Excel2003XML' || $inputFileType == 'OOCalc') {
+	    try {
+		$objReader = PHPExcel_IOFactory::createReader($inputFileType);
+		$objReader->setReadDataOnly(true);
+		$objPHPExcel = $objReader->load($_FILES[$fileParam]['tmp_name']);
+	    } catch (Exception $e) {
+		$this->importError = ($e->getMessage());
+		return false;
+	    }
+	} else {
+	    $this->importError = ("lang_file_error");
+	    return false;
+	}
+	$objPHPExcel->setActiveSheetIndex(0);
+	$sheetData = $objPHPExcel->getActiveSheet()->toArray(null, true, true, true);
+	$properties = $object->__getProperties();
+	if ($object->__isChild()) {
+	    $properties = array_merge($properties, $object->__getParentProperties());
+	}
+	for ($i = 2; $i <= count($sheetData); $i++) {
+	    $newObject = $object;
+	    $column = "A";
+	    $delete = true;
+	    foreach ($properties as $key => $property) {
+		if (!$property["table"]) {
+		    continue;
+		}
+		if ($property["private"]) {
+		    continue;
+		}
+		$setter = "set" . $property['name'];
+		$getter = "get" . $property['name'];
+		$newObject->$setter($this->application->filter($sheetData[$i][$column], $property['type']));
+		if ($property['name'] != "id" && $newObject->$getter()) {
+		    $delete = false;
+		}
+		$column++;
+	    }
+	    if ($newObject->getId()) {
+		if ($delete) {
+		    if (!$data->deleteRecord($newObject)) {
+			$data->data->rollback();
+			$this->importError = ("lang_errorimport");
+			return false;
+		    }
+		} else if (!$data->updateRecord($newObject)) {
+		    $data->data->rollback();
+		    $this->importError = ("lang_errorimport");
+		    return false;
+		}
+	    } else {
+		if (!$data->insertRecord($newObject)) {
+		    $data->data->rollback();
+		    $this->importError = ("lang_errorimport");
+		    return false;
+		}
+	    }
+	}
+	return true;
     }
 
     public function objectView(DataObject $object) {
@@ -705,7 +785,7 @@ class Navigation {
 	}
 	$content = "";
 	foreach ($properties as $key => $property) {
-	     if($property["private"]) {
+	    if ($property["private"]) {
 		continue;
 	    }
 	    if (!$property["table"]) {

@@ -11,6 +11,7 @@
 abstract class SQLData extends Data {
 
 	public $localError;
+	public $globalError;
 	protected $idname = "id";
 	protected $connection;
 	public $debug = false;
