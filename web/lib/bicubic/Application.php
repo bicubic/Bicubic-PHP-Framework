@@ -237,7 +237,7 @@ class Application {
 	    }
             $fieldname = $property["name"];
             $setter = "set$key";
-            $object->$setter($this->getFormParam("$objectName" . "_" . "$fieldname", $property["type"], false));
+            $object->$setter($this->getFormParam(strtolower($objectName) . "-" . strtolower($fieldname), $property["type"], false));
         }
         if ($force && !$object->__isComplete()) {
             $this->error($this->lang('lang_notcomplete'));
@@ -888,7 +888,7 @@ class Application {
             $getter = "get$key";
             $value = $object->$getter();
             if ($property["type"] == PropertyTypes::$_LIST || $property["type"] == PropertyTypes::$_STRINGLIST) {
-                $this->setVariableTemplate("$formName-NAME-$objectFormName-$paramName", "$objectName" . "_" . $property["name"]);
+                $this->setVariableTemplate("$formName-NAME-$objectFormName-$paramName", strtolower($objectName) . "-" . strtolower($property["name"]));
                 $items = $object->__getList($property["name"], $this);
                 foreach ($items as $item=> $text) {
                     $this->setHTMLArrayTemplate(array(
@@ -899,7 +899,7 @@ class Application {
                     $this->parseTemplate($paramName);
                 }
             } else if ($property["type"] == PropertyTypes::$_SHORTLIST) {
-                $this->setVariableTemplate("$formName-NAME-$objectFormName-$paramName", "$objectName" . "_" . $property["name"]);
+                $this->setVariableTemplate("$formName-NAME-$objectFormName-$paramName", strtolower($objectName) . "-" . strtolower($property["name"]));
                 $items = $object->__getList($property["name"], $this);
                 foreach ($items as $item=> $text) {
                     $this->setHTMLArrayTemplate(array(
@@ -910,7 +910,7 @@ class Application {
                     $this->parseTemplate($paramName);
                 }
             } else if ($property["type"] == PropertyTypes::$_BOOLEAN) {
-                $this->setVariableTemplate("$formName-NAME-$objectFormName-$paramName", "$objectName" . "_" . $property["name"]);
+                $this->setVariableTemplate("$formName-NAME-$objectFormName-$paramName", strtolower($objectName) . "-" . strtolower($property["name"]));
                 $this->setVariableTemplate("$formName-VALUE-$objectFormName-$paramName", ObjectBoolean::$_YES);
                 if ($value) {
                     $this->setVariableTemplate("$formName-SELECTED-$objectFormName-$paramName", "checked");
@@ -918,7 +918,7 @@ class Application {
                     $this->setVariableTemplate("$formName-SELECTED-$objectFormName-$paramName", "");
                 }
             } else {
-                $this->setVariableTemplate("$formName-NAME-$objectFormName-$paramName", "$objectName" . "_" . $property["name"]);
+                $this->setVariableTemplate("$formName-NAME-$objectFormName-$paramName", strtolower($objectName) . "-" . strtolower($property["name"]));
                 if ($property["type"] == PropertyTypes::$_DATE) {
                     $value = $this->formatWiredDate($value);
                 } else if ($property["type"] == PropertyTypes::$_TIME) {
