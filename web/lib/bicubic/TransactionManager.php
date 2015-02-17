@@ -140,5 +140,54 @@ class TransactionManager {
 	$result = $this->data->performRead($sql);
 	return $result;
     }
+    
+    //$query = "INSERT INTO $tableName (getPropertiesInsert) "
+    protected function getPropertiesInsert(DataObject $object) {
+	$objectProperties = $object->__getProperties();
+	foreach ($objectProperties as $property) {
+	    $propertyName = $property['name'];
+	    $queryArray[] = "$propertyName";
+	}
+	$array = implode(", ", $queryArray);
+	return $array;
+    }
+
+    protected function getPropertiesSet(DataObject $object, array $properties) {
+	$objectProperties = $object->__getProperties();
+	foreach ($properties as $property) {
+	    $propertyName = $objectProperties[$property]["name"];
+	    $getter = "get$propertyName";
+	    $value = $this->data->escapeChars($object->$getter());
+	    if ($object->$getter() === null) {
+		$queryArray[] = "$propertyName= null ";
+	    } else {
+		$queryArray[] = "$propertyName='$value' ";
+	    }
+	}
+	$select = implode(", ", $queryArray);
+	return $select;
+    }
+
+    //SELECT getPropertiesSelect
+    protected function getPropertiesSelect(DataObject $object, $properties) {
+	$className = strtolower(get_class($object));
+	$objectProperties = $object->__getProperties();
+	foreach ($properties as $property) {
+	    $propertyName = $objectProperties[$property]["name"];
+	    $queryArray[] = "$className.$propertyName as " . $className . $propertyName;
+	}
+	$select = implode(", ", $queryArray);
+	return $select;
+    }
+    
+    function updateTable(DataObject $object, array $properties) {
+	$setProperties = $this->getPropertiesSet($object, $properties);
+	$tableName = strtolower(get_class($object));
+	$objectId = $object->getId();
+	$query = "UPDATE $tableName "
+	    . "SET $setProperties "
+	    . "WHERE id='$objectId'";
+	return $this->data->performWrite($query);
+    }
 
 }

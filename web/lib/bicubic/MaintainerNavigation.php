@@ -21,18 +21,18 @@ class MaintainerNavigation extends Navigation {
 
     function __construct(Application $application, DataObject $object, $name, $title, $singleTitle) {
         parent::__construct($application);
+	$this->name = $name;
 	$this->originalObject = $object;
-        $this->object = $this->application->getSessionParam(SESSION_OBJECT);
+        $this->object = $this->application->getSessionParam(SESSION_OBJECT.$this->name);
         if (!$this->object || get_class($this->object) != get_class($object)) {
             $this->object = $object;
-            $this->order = $this->application->getSessionParam(SESSION_ORDER);
+            $this->order = $this->application->getSessionParam(SESSION_ORDER.$this->name);
         }
         if (!$this->order) {
             $this->order = new OrderParam("id", ObjectOrder::$_DESC);
         }
         $this->title = $title;
         $this->singleTitle = $singleTitle;
-        $this->name = $name;
     }
 
     public function records() {
@@ -47,13 +47,13 @@ class MaintainerNavigation extends Navigation {
 
     public function search() {
         $obj = $this->objectTableFilter($this->object);
-        $this->application->setSessionParam(SESSION_OBJECT, $obj);
+        $this->application->setSessionParam(SESSION_OBJECT.$this->name, $obj);
         $this->application->redirect($this->application->name, "bicubic-$this->name");
     }
 
     public function reorder() {
         $order = $this->objectTableOrder();
-        $this->application->setSessionParam(SESSION_ORDER, $order);
+        $this->application->setSessionParam(SESSION_ORDER.$this->name, $order);
         $this->application->redirect($this->application->name, "bicubic-$this->name");
     }
 
