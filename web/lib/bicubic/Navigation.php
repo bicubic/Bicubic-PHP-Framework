@@ -651,9 +651,6 @@ class Navigation {
 	    if ($property["private"]) {
 		continue;
 	    }
-	    if (!$property["table"]) {
-		continue;
-	    }
 	    $excel->getSheet(0)->setCellValue($column . $rowNumber, $this->lang($property["lang"]));
 	    $excel->getSheet(1)->setCellValue($column . $rowNumber, $this->lang($property["lang"]));
 	    $column++;
@@ -669,9 +666,6 @@ class Navigation {
 		$column = "A";
 		foreach ($properties as $key => $property) {
 		    if ($property["private"]) {
-			continue;
-		    }
-		    if (!$property["table"]) {
 			continue;
 		    }
 		    $getter = "get$key";
@@ -734,9 +728,6 @@ class Navigation {
 	    $column = "A";
 	    $delete = true;
 	    foreach ($properties as $key => $property) {
-		if (!$property["table"]) {
-		    continue;
-		}
 		if ($property["private"]) {
 		    continue;
 		}
