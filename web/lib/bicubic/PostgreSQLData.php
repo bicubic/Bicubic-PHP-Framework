@@ -78,7 +78,8 @@ class PostgreSQLData extends SQLData {
     }
 
     public function getError() {
-        $error = pg_last_error($this->connection);
+        $this->globalError = pg_last_error($this->connection);
+	$error = $this->globalError;
         if ($this->localError) {
             $error .= " " . $this->localError;
         }

@@ -35,6 +35,7 @@ require_once("lib/bicubic/Param.php");
 require_once("lib/bicubic/LinkParam.php");
 require_once("lib/bicubic/OrderParam.php");
 require_once("lib/bicubic/SQLData.php");
+require_once("lib/bicubic/MySQLData.php");
 require_once("lib/bicubic/PostgreSQLData.php");
 require_once("lib/bicubic/MandrillEmail.php");
 require_once("lib/bicubic/SMTPEmail.php");
