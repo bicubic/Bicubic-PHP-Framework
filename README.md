@@ -1,4 +1,4 @@
-Bicubic-PHP-Framework
+Bicubic Framework PHP
 =====================
 
 A simple and efficient MVC framework written in PHP for PostgreSQL, or similar DB.
@@ -33,4 +33,3 @@ Beans params
 - updatenull: if true, a null value on the field should override any existing value, if false, the stored value should not be changed.
 - hidden: if true, this field should not be shown in forms.
 - private: if true, this field should not be present in forms nor manipulated by clients.
-

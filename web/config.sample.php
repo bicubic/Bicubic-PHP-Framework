@@ -1,53 +1,44 @@
 <?php
 
-/**
- * Bicubic PHP Framework
+/*
+ * Copyright (C)  Juan Francisco Rodríguez
  *
- * @author     Juan Rodríguez-Covili <juan@bicubic.cl>
- * @copyright  2011-2014 Bicubic Technology - http://www.bicubic.cl
- * @license    MIT
- * @version 3.0.0
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 $config = array();
-//Config
 $config['maintenance'] = false;
 $config['sslavailable'] = false;
 $config['debugdatabase'] = false;
 $config['urlforms'] = false;
-$config['urlbase'] = "https://www.bicubic.cl/";
-/* URL BASE Apache
-    RewriteEngine On
-    RewriteCond %{REQUEST_URI} !/assets
-    RewriteRule /([a-zA-Z0-9\-]+)/([a-zA-Z0-9\-]+)/([a-zA-Z0-9\-\.]+)?(.*) /index.php?app=$1&nav=$2&id=$3 [QSA]
-    RewriteCond %{REQUEST_URI} !/assets
-    RewriteRule /([a-zA-Z0-9\-]+)/([a-zA-Z0-9\-]+)/([a-zA-Z0-9\-\.]+) /index.php?app=$1&nav=$2&id=$3
-    RewriteCond %{REQUEST_URI} !/assets
-    RewriteRule /([a-zA-Z0-9\-]+)/([a-zA-Z0-9\-\.]+)?(.*) /index.php?nav=$1&id=$2 [QSA]
-    RewriteCond %{REQUEST_URI} !/assets
-    RewriteRule /([a-zA-Z0-9\-]+)/([a-zA-Z0-9\-\.]+) /index.php?nav=$1&id=$2
-    RewriteCond %{REQUEST_URI} !/assets
-    RewriteRule /([a-zA-Z0-9\-]+)?(.*) /index.php?nav=$1 [QSA]
-    RewriteRule /([a-zA-Z0-9\-]+)/([a-zA-Z0-9\-]+)/assets/(.*) /assets/$3
-    RewriteRule /([a-zA-Z0-9\-]+)/assets/(.*) /assets/$2
-
-  */
-
-//Web  
-$config['web_name'] = "Bicubic PHP Framework";
-$config['web_copyright'] = "©2014 Bicubic Technology - All rights reserved";
-$config['web_contact_email'] = "hello@bicubic.cl";
-$config['web_contact_name'] = "Bicubic Technology";
+$config['urlbase'] = "";
+//Web
+$config['web_name'] = "";
+$config['web_copyright'] = "";
+$config['web_contact_email'] = "";
+$config['web_contact_name'] = "";
 $config['web_time_out'] = 360000;
 $config['web_table_size'] = 100;
 //Code
 $config['code_time_out'] = 300;
 $config['code_time_zone'] = 'America/Santiago';
-$config['code_error_report'] =  E_ALL & ~(E_STRICT | E_DEPRECATED);
+$config['code_error_report'] = E_ALL & ~(E_STRICT | E_DEPRECATED);
 //Data Base values
-$config['database_host'] = "localhost";
-$config['database_database'] = "bicubic";
-$config['database_user'] = "root";
-$config['database_password'] = "root";
+$config['database_host'] = "";
+$config['database_database'] = "";
+$config['database_user'] = "";
+$config['database_password'] = "";
 //Email with SMTP
 $config['email_host'] = "ssl://smtp.gmail.com";
 $config['email_port'] = 465;
@@ -79,3 +70,19 @@ $config['mylodon_apikey'] = "";
 //Certificates for ios push notification
 $config['certificate_private'] = "";
 $config['certificate_auth'] = "";
+
+/* URL BASE Apache
+  RewriteEngine On
+  RewriteCond %{REQUEST_URI} !/assets
+  RewriteRule /([a-zA-Z0-9\-]+)/([a-zA-Z0-9\-]+)/([a-zA-Z0-9\-\.]+)?(.*) /index.php?app=$1&nav=$2&id=$3 [QSA]
+  RewriteCond %{REQUEST_URI} !/assets
+  RewriteRule /([a-zA-Z0-9\-]+)/([a-zA-Z0-9\-]+)/([a-zA-Z0-9\-\.]+) /index.php?app=$1&nav=$2&id=$3
+  RewriteCond %{REQUEST_URI} !/assets
+  RewriteRule /([a-zA-Z0-9\-]+)/([a-zA-Z0-9\-\.]+)?(.*) /index.php?nav=$1&id=$2 [QSA]
+  RewriteCond %{REQUEST_URI} !/assets
+  RewriteRule /([a-zA-Z0-9\-]+)/([a-zA-Z0-9\-\.]+) /index.php?nav=$1&id=$2
+  RewriteCond %{REQUEST_URI} !/assets
+  RewriteRule /([a-zA-Z0-9\-]+)?(.*) /index.php?nav=$1 [QSA]
+  RewriteRule /([a-zA-Z0-9\-]+)/([a-zA-Z0-9\-]+)/assets/(.*) /assets/$3
+  RewriteRule /([a-zA-Z0-9\-]+)/assets/(.*) /assets/$2
+ */

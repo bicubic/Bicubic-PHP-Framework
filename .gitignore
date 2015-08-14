@@ -5,3 +5,4 @@ config.php
 .settings
 .DS_Store
 
+/web/nbproject/private/
