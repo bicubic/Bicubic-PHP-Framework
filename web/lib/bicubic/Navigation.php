@@ -661,17 +661,17 @@ class Navigation {
 	$objects = $data->getAllPaged($object, new OrderParam("id", ObjectOrder::$_ASC), $items, $lastid);
 	$rowNumber = 2;
 	while ($objects) {
-	    foreach ($objects as $object) {
-		$lastid++;
+	    foreach ($objects as $dbobject) {
+		$lastid = $dbobject->getId();
 		$column = "A";
 		foreach ($properties as $key => $property) {
 		    if ($property["private"]) {
 			continue;
 		    }
 		    $getter = "get$key";
-		    $value = $object->$getter();
+		    $value = $dbobject->$getter();
 		    $excel->getSheet(0)->setCellValue($column . $rowNumber, $value);
-		    $excel->getSheet(1)->setCellValue($column . $rowNumber, $this->application->formatProperty($object, $key));
+		    $excel->getSheet(1)->setCellValue($column . $rowNumber, $this->application->formatProperty($dbobject, $key));
 		    $column++;
 		}
 		$rowNumber++;
