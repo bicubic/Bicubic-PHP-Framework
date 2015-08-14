@@ -14,40 +14,38 @@ $config['maintenance'] = false;
 $config['sslavailable'] = false;
 $config['debugdatabase'] = false;
 $config['urlforms'] = false;
-$config['urlbase'] = "https://www.bicubic.cl/";
+$config['urlbase'] = "";
 /* URL BASE Apache
-    RewriteEngine On
-    RewriteCond %{REQUEST_URI} !/assets
-    RewriteRule /([a-zA-Z0-9\-]+)/([a-zA-Z0-9\-]+)/([a-zA-Z0-9\-\.]+)?(.*) /index.php?app=$1&nav=$2&id=$3 [QSA]
-    RewriteCond %{REQUEST_URI} !/assets
-    RewriteRule /([a-zA-Z0-9\-]+)/([a-zA-Z0-9\-]+)/([a-zA-Z0-9\-\.]+) /index.php?app=$1&nav=$2&id=$3
-    RewriteCond %{REQUEST_URI} !/assets
-    RewriteRule /([a-zA-Z0-9\-]+)/([a-zA-Z0-9\-\.]+)?(.*) /index.php?nav=$1&id=$2 [QSA]
-    RewriteCond %{REQUEST_URI} !/assets
-    RewriteRule /([a-zA-Z0-9\-]+)/([a-zA-Z0-9\-\.]+) /index.php?nav=$1&id=$2
-    RewriteCond %{REQUEST_URI} !/assets
-    RewriteRule /([a-zA-Z0-9\-]+)?(.*) /index.php?nav=$1 [QSA]
-    RewriteRule /([a-zA-Z0-9\-]+)/([a-zA-Z0-9\-]+)/assets/(.*) /assets/$3
-    RewriteRule /([a-zA-Z0-9\-]+)/assets/(.*) /assets/$2
-
-  */
-
-//Web  
-$config['web_name'] = "Bicubic PHP Framework";
-$config['web_copyright'] = "©2014 Bicubic Technology - All rights reserved";
-$config['web_contact_email'] = "hello@bicubic.cl";
-$config['web_contact_name'] = "Bicubic Technology";
+  RewriteEngine On
+  RewriteCond %{REQUEST_URI} !/assets
+  RewriteRule /([a-zA-Z0-9\-]+)/([a-zA-Z0-9\-]+)/([a-zA-Z0-9\-\.]+)?(.*) /index.php?app=$1&nav=$2&id=$3 [QSA]
+  RewriteCond %{REQUEST_URI} !/assets
+  RewriteRule /([a-zA-Z0-9\-]+)/([a-zA-Z0-9\-]+)/([a-zA-Z0-9\-\.]+) /index.php?app=$1&nav=$2&id=$3
+  RewriteCond %{REQUEST_URI} !/assets
+  RewriteRule /([a-zA-Z0-9\-]+)/([a-zA-Z0-9\-\.]+)?(.*) /index.php?nav=$1&id=$2 [QSA]
+  RewriteCond %{REQUEST_URI} !/assets
+  RewriteRule /([a-zA-Z0-9\-]+)/([a-zA-Z0-9\-\.]+) /index.php?nav=$1&id=$2
+  RewriteCond %{REQUEST_URI} !/assets
+  RewriteRule /([a-zA-Z0-9\-]+)?(.*) /index.php?nav=$1 [QSA]
+  RewriteRule /([a-zA-Z0-9\-]+)/([a-zA-Z0-9\-]+)/assets/(.*) /assets/$3
+  RewriteRule /([a-zA-Z0-9\-]+)/assets/(.*) /assets/$2
+ */
+//Web
+$config['web_name'] = "";
+$config['web_copyright'] = "";
+$config['web_contact_email'] = "";
+$config['web_contact_name'] = "";
 $config['web_time_out'] = 360000;
 $config['web_table_size'] = 100;
 //Code
 $config['code_time_out'] = 300;
 $config['code_time_zone'] = 'America/Santiago';
-$config['code_error_report'] =  E_ALL & ~(E_STRICT | E_DEPRECATED);
+$config['code_error_report'] = E_ALL & ~(E_STRICT | E_DEPRECATED);
 //Data Base values
-$config['database_host'] = "localhost";
-$config['database_database'] = "bicubic";
-$config['database_user'] = "root";
-$config['database_password'] = "root";
+$config['database_host'] = "";
+$config['database_database'] = "";
+$config['database_user'] = "";
+$config['database_password'] = "";
 //Email with SMTP
 $config['email_host'] = "ssl://smtp.gmail.com";
 $config['email_port'] = 465;

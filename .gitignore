@@ -4,3 +4,4 @@ config.php
 .project
 .settings
 
+/web/nbproject/private/
