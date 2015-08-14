@@ -804,7 +804,7 @@ class Application {
 	return null;
     }
 
-    private function setLangItems($blockName) {
+    protected function setLangItems($blockName) {
 	$prefix = "LANG";
 	$placeholders = $this->tpl->getPlaceholderList();
 	foreach ($placeholders as $placeholder) {
@@ -824,7 +824,7 @@ class Application {
 	}
     }
 
-    private function setLangCustomItems($tpl) {
+    protected function setLangCustomItems($tpl) {
 	$prefix = "LANG";
 	$placeholders = $tpl->getPlaceholderList();
 	foreach ($placeholders as $placeholder) {
@@ -836,7 +836,7 @@ class Application {
 	}
     }
 
-    private function setArrayLangItems($blockName) {
+    protected function setArrayLangItems($blockName) {
 	$prefix = "TEXT";
 	$placeholders = $this->tpl->getPlaceholderList($blockName);
 	foreach ($placeholders as $placeholder) {
@@ -848,7 +848,7 @@ class Application {
 	}
     }
 
-    private function setArrayLangCustomItems($tpl, $blockName) {
+    protected function setArrayLangCustomItems($tpl, $blockName) {
 	$prefix = "TEXT";
 	$placeholders = $tpl->getPlaceholderList($blockName);
 	foreach ($placeholders as $placeholder) {
@@ -873,7 +873,7 @@ class Application {
 	}
     }
 
-    private function setFormObject(DataObject $object, $formName) {
+    protected function setFormObject(DataObject $object, $formName) {
 	$properties = $object->__getProperties();
 	if ($object->__isChild()) {
 	    $properties = array_merge($properties, $object->__getParentProperties());
@@ -959,7 +959,7 @@ class Application {
 	}
     }
 
-    private function setFormParam(Param $param, $formName) {
+    protected function setFormParam(Param $param, $formName) {
 	$viewParam = strtoupper($param->name);
 	$this->setVariableTemplate("$formName-NAME-" . $viewParam, $param->name);
 	$this->setVariableTemplate("$formName-VALUE-" . $viewParam, $this->utf8tohtml(strval($param->value), true));
@@ -1527,7 +1527,7 @@ class Application {
 	return $default;
     }
 
-    private function valida_rut($r) {
+    protected function valida_rut($r) {
 	$r = strtoupper(ereg_replace('\.|,|-', '', $r));
 	$sub_rut = substr($r, 0, strlen($r) - 1);
 	$sub_dv = substr($r, -1);
@@ -1880,12 +1880,12 @@ class Application {
 	}
     }
 
-    private function script_createTable($beanname) {
+    protected function script_createTable($beanname) {
 	$sql = "CREATE TABLE $beanname ();";
 	return $sql;
     }
 
-    private function script_createColumns($beanname) {
+    protected function script_createColumns($beanname) {
 	$object = new $beanname();
 	$sql = "";
 	$properties = $object->__getProperties();
@@ -1898,7 +1898,7 @@ class Application {
 	return $sql;
     }
 
-    private function script_createIndexes($beanname) {
+    protected function script_createIndexes($beanname) {
 	$object = new $beanname();
 	$sql = "";
 	$properties = $object->__getProperties();
@@ -1911,7 +1911,7 @@ class Application {
 	return $sql;
     }
 
-    private function script_createCosntraints($beanname) {
+    protected function script_createCosntraints($beanname) {
 	$object = new $beanname();
 	$sql = "";
 	$properties = $object->__getProperties();
@@ -1925,7 +1925,7 @@ class Application {
 	return $sql;
     }
 
-    private function script_createColumn(DataObject $object, $property) {
+    protected function script_createColumn(DataObject $object, $property) {
 	$class = strtolower(get_class($object));
 	$sql = "";
 	$name = $property["name"];
@@ -1945,7 +1945,7 @@ class Application {
 	return $sql;
     }
 
-    private function script_createColumnComment(DataObject $object, $property) {
+    protected function script_createColumnComment(DataObject $object, $property) {
 	$name = $property["name"];
 	$type = PropertyTypes::$_POSTGRESQLTYPES[$property["type"]];
 	$notnull = $property["required"] ? "NOT NULL" : "";
@@ -1956,7 +1956,7 @@ class Application {
 	return trim("$name $type $notnull $default $index $unique $references");
     }
 
-    private function script_createColumnIndex(DataObject $object, $property) {
+    protected function script_createColumnIndex(DataObject $object, $property) {
 	$class = strtolower(get_class($object));
 	$sql = "";
 	$name = $property["name"];
@@ -1970,7 +1970,7 @@ class Application {
 	return $sql;
     }
 
-    private function script_createColumnConstraint(DataObject $object, $property) {
+    protected function script_createColumnConstraint(DataObject $object, $property) {
 	$class = strtolower(get_class($object));
 	$sql = "";
 	$name = $property["name"];
