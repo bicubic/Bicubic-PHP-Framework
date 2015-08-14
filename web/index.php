@@ -1,12 +1,21 @@
 <?php
 
-/**
- * Bicubic PHP Framework
+/*
+ * Copyright (C)  Juan Francisco Rodríguez
  *
- * @author     Juan Rodríguez-Covili <juan@bicubic.cl>
- * @copyright  2011-2014 Bicubic Technology - http://www.bicubic.cl
- * @license    MIT
- * @version 3.0.0
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 //base
 require_once("config.php");
@@ -60,8 +69,8 @@ $config['folder_images'] = "images/";
 //filter langs
 $allLangs = Lang::$_ENUM;
 $filterLangs = array();
-foreach (LangFactory::getAvailableLangList() as $key=> $value) {
-	$filterLangs [$value] = $allLangs[$value];
+foreach (LangFactory::getAvailableLangList() as $key => $value) {
+    $filterLangs [$value] = $allLangs[$value];
 }
 Lang::$_ENUM = $filterLangs;
 Lang::$_DEFAULT = LangFactory::getDefaultLang();
@@ -71,28 +80,28 @@ require_once("lang/lang.$langfile.php");
 $application = new Application($config, $lang, null, null);
 //Lang from browser
 if (array_key_exists('HTTP_ACCEPT_LANGUAGE', $_SERVER)) {
-	$langfile = substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2);
+    $langfile = substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2);
 }
 //Lang from URL
 $urllocale = $application->getUrlParam($config['param_lang'], PropertyTypes::$_STRING256, false);
 if (isset($urllocale)) {
-	$langfile = $urllocale;
+    $langfile = $urllocale;
 }
 //Lang from Facebook
 $fblocale = $application->getUrlParam("fb_locale", PropertyTypes::$_STRING, false);
 if (isset($fblocale)) {
-	$langfile = substr($fblocale, 0, 2);
+    $langfile = substr($fblocale, 0, 2);
 }
 //Check Lang
 if (!array_key_exists($langfile, Lang::$_ENUM)) {
-	$langfile = Lang::$_DEFAULT;
+    $langfile = Lang::$_DEFAULT;
 }
 //Lang reload
 if (file_exists("lang/lang.$langfile.php")) {
-	require_once("lang/lang.$langfile.php");
+    require_once("lang/lang.$langfile.php");
 } else {
-	$langfile = Lang::$_DEFAULT;
-	require_once("lang/lang.$langfile.php");
+    $langfile = Lang::$_DEFAULT;
+    require_once("lang/lang.$langfile.php");
 }
 
 $config["lang"] = $langfile;
@@ -104,51 +113,50 @@ $port = array_key_exists('SERVER_PORT', $_SERVER) ? $_SERVER['SERVER_PORT'] : 80
 $parts = explode('/', $url);
 $dir = array_key_exists('SERVER_NAME', $_SERVER) ? $_SERVER['SERVER_NAME'] : "";
 if ($port != 80 && $port != 443) {
-	$dir .= ":$port";
+    $dir .= ":$port";
 }
 for ($i = 0; $i < count($parts) - 1; $i++) {
-	$dir .= $parts[$i] . "/";
+    $dir .= $parts[$i] . "/";
 }
 $dir = rtrim($dir, "/");
 $protocol = ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') || (array_key_exists('SERVER_PORT', $_SERVER) ? $_SERVER['SERVER_PORT'] == 443 : false)) ? "https" : "http";
 $config['web_folder'] = "$protocol://$dir/";
 if ($config['sslavailable']) {
-	$config['web_secure_url'] = "https://$dir/index.php";
+    $config['web_secure_url'] = "https://$dir/index.php";
 } else {
-	$config['web_secure_url'] = "http://$dir/index.php";
+    $config['web_secure_url'] = "http://$dir/index.php";
 }
 //Set Input Data into GET
 if (isset($argv)) {
-	for ($i = 1; $i < count($argv); $i++) {
-		$request = preg_split('/=/', $argv[$i]);
-		$_GET[$request[0]] = $request[1];
-	}
-	//fix base url for test
-	$config['web_folder'] = $config['urlbase'];
-	$config['web_secure_url'] = $config['urlbase'];
-	$app = $application->getUrlParam($config['param_app'], PropertyTypes::$_LETTERS);
-	switch ($app) {
-		case "script": {
-				$application = new ScriptApplication($config, $lang);
-				$application->execute();
-				break;
-			}
-		default : {
-				$application = ApplicationFactory::makeScriptApplication($app, $config, $lang);
-				if ($application) {
-					$application->execute();
-				} else {
-					ApplicationFactory::defaultScriptApplication($config, $lang);
-				}
-			}
-	}
-	
-} else {
-	$app = $application->getUrlParam($config['param_app'], PropertyTypes::$_LETTERS, false);
-	$application = ApplicationFactory::makeWebApplication($app, $config, $lang);
-	if ($application) {
+    for ($i = 1; $i < count($argv); $i++) {
+	$request = preg_split('/=/', $argv[$i]);
+	$_GET[$request[0]] = $request[1];
+    }
+    //fix base url for test
+    $config['web_folder'] = $config['urlbase'];
+    $config['web_secure_url'] = $config['urlbase'];
+    $app = $application->getUrlParam($config['param_app'], PropertyTypes::$_LETTERS);
+    switch ($app) {
+	case "script": {
+		$application = new ScriptApplication($config, $lang);
 		$application->execute();
-	} else {
-		ApplicationFactory::defaultWebApplication($config, $lang);
-	}
+		break;
+	    }
+	default : {
+		$application = ApplicationFactory::makeScriptApplication($app, $config, $lang);
+		if ($application) {
+		    $application->execute();
+		} else {
+		    ApplicationFactory::defaultScriptApplication($config, $lang);
+		}
+	    }
+    }
+} else {
+    $app = $application->getUrlParam($config['param_app'], PropertyTypes::$_LETTERS, false);
+    $application = ApplicationFactory::makeWebApplication($app, $config, $lang);
+    if ($application) {
+	$application->execute();
+    } else {
+	ApplicationFactory::defaultWebApplication($config, $lang);
+    }
 }

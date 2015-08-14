@@ -1,13 +1,23 @@
 <?php
 
-/**
- * Bicubic PHP Framework
+/*
+ * Copyright (C)  Juan Francisco Rodríguez
  *
- * @author     Juan Rodríguez-Covili <juan@bicubic.cl>
- * @copyright  2011-2014 Bicubic Technology - http://www.bicubic.cl
- * @license    MIT
- * @version 3.0.0
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+
 class PropertyTypes {
 
     public static $_INT = "int";
@@ -46,46 +56,46 @@ class PropertyTypes {
     public static $_RUT = "rut";
     public static $_FILE = "file";
     public static $_IMAGE256 = "image256";
-	public static $_IMAGE512 = "image512";
-	public static $_IMAGE1024 = "image1024";
+    public static $_IMAGE512 = "image512";
+    public static $_IMAGE1024 = "image1024";
     public static $_POSTGRESQLTYPES = array(
-        "int"=>'integer',
-        "list"=>'integer',
-        "stringlist"=>'character varying(2)',
-        "shortlist"=>'integer',
-        "long"=>'bigint',
-        "double"=>'double precision',
-        "url"=>'character varying(1024)',
-        "email"=>'character varying(256)',
-        "password"=>'character varying(1024)',
-        "string"=>'character varying',
-        "string2048"=>'character varying(2048)',
-        "string1024"=>'character varying(1024)',
-        "string512"=>'character varying(512)',
-        "string256"=>'character varying(256)',
-        "string128"=>'character varying(128)',
-        "string64"=>'character varying(64)',
-        "string32"=>'character varying(32)',
-        "string16"=>'character varying(16)',
-        "string8"=>'character varying(8)',
-        "string4"=>'character varying(4)',
-        "string2"=>'character varying(2)',
-        "string1"=>'character varying(1)',
-        "flat"=>'character varying',
-        "letters"=>'character varying',
-        "alphanumeric"=>'character varying',
-        "date"=>'bigint',
-        "time"=>'bigint',
-        "boolean"=>'integer',
-        "int-array"=>'character varying',
-        "double-array"=>'character varying',
-        "string-array"=>'character varying',
-        "json"=>'character varying',
-        "rut"=>'character varying',
-        "file"=>'character varying(1024)',
-        "image256"=>'character varying(1024)',
-		"image512"=>'character varying(1024)',
-		"image1024"=>'character varying(1024)',
+	"int" => 'integer',
+	"list" => 'integer',
+	"stringlist" => 'character varying(2)',
+	"shortlist" => 'integer',
+	"long" => 'bigint',
+	"double" => 'double precision',
+	"url" => 'character varying(1024)',
+	"email" => 'character varying(256)',
+	"password" => 'character varying(1024)',
+	"string" => 'character varying',
+	"string2048" => 'character varying(2048)',
+	"string1024" => 'character varying(1024)',
+	"string512" => 'character varying(512)',
+	"string256" => 'character varying(256)',
+	"string128" => 'character varying(128)',
+	"string64" => 'character varying(64)',
+	"string32" => 'character varying(32)',
+	"string16" => 'character varying(16)',
+	"string8" => 'character varying(8)',
+	"string4" => 'character varying(4)',
+	"string2" => 'character varying(2)',
+	"string1" => 'character varying(1)',
+	"flat" => 'character varying',
+	"letters" => 'character varying',
+	"alphanumeric" => 'character varying',
+	"date" => 'bigint',
+	"time" => 'bigint',
+	"boolean" => 'integer',
+	"int-array" => 'character varying',
+	"double-array" => 'character varying',
+	"string-array" => 'character varying',
+	"json" => 'character varying',
+	"rut" => 'character varying',
+	"file" => 'character varying(1024)',
+	"image256" => 'character varying(1024)',
+	"image512" => 'character varying(1024)',
+	"image1024" => 'character varying(1024)',
     );
 
 }
@@ -96,9 +106,9 @@ class Gender {
     public static $_MALE = 2;
     public static $_FEMALE = 3;
     public static $_ENUM = array(
-        1=>'lang_none',
-        2=>'lang_male',
-        3=>'lang_female'
+	1 => 'lang_none',
+	2 => 'lang_male',
+	3 => 'lang_female'
     );
 
 }
@@ -108,8 +118,8 @@ class ObjectBoolean {
     public static $_NO = 0;
     public static $_YES = 1;
     public static $_ENUM = array(
-        0=>'lang_no',
-        1=>'lang_yes',
+	0 => 'lang_no',
+	1 => 'lang_yes',
     );
 
 }
@@ -119,19 +129,16 @@ class ObjectOrder {
     public static $_ASC = 1;
     public static $_DESC = 2;
     public static $_ENUM = array(
-        1=>'lang_asc',
-        2=>'lang_desc',
+	1 => 'lang_asc',
+	2 => 'lang_desc',
     );
     public static $_VALUE = array(
-        1=>'ASC',
-        2=>'DESC',
+	1 => 'ASC',
+	2 => 'DESC',
     );
     public static $_OPOSITE = array(
-        1=>2,
-        2=>1,
+	1 => 2,
+	2 => 1,
     );
 
 }
-
-
-
