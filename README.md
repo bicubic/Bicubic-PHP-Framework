@@ -1,4 +1,4 @@
-Bicubic Framework PHP
+#Bicubic Framework PHP
 =====================
 
 A simple and efficient MVC framework written in PHP for PostgreSQL, or similar DB.
