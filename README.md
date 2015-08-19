@@ -1,6 +1,6 @@
 #Bicubic Framework PHP
 A simple and efficient MVC framework written in PHP for PostgreSQL, or similar DB.
-The files are deady to initialize a new project.
+The files are ready to initialize a new project.
 
 ##Directory Structure
 - app: Application classes.
