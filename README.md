@@ -1,11 +1,8 @@
 #Bicubic Framework PHP
-=====================
-
 A simple and efficient MVC framework written in PHP for PostgreSQL, or similar DB.
 
 
-Directory Structure
--------
+##Directory Structure
 - app: Application classes.
 - assets: javascript, css, and images files.
 - beans: DataObject classes.
@@ -19,8 +16,7 @@ Directory Structure
 - factory.php: editable file with application mappings.
 - index.php: non editable init file.
 
-Beans params
--------
+##Beans params
 - name: name of field.
 - lang: lang key for display name.
 - type: type of field, a value from PropertyTypes.
