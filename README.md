@@ -1,6 +1,6 @@
 #Bicubic Framework PHP
 A simple and efficient MVC framework written in PHP for PostgreSQL, or similar DB.
-
+The files are deady to initialize a new project.
 
 ##Directory Structure
 - app: Application classes.
@@ -30,3 +30,31 @@ A simple and efficient MVC framework written in PHP for PostgreSQL, or similar D
 - private: if true, this field should not be present in forms nor manipulated by clients.
 - unique: if true, the value of the field must be unique.
 - table: if true the field is shown in automatic tables.
+
+##Updating framework files
+Only update the following files:
+- assets/bicubic/
+- lib/bicubic/
+- views/bicubic/
+- index.php
+- Check any aditional params in config.sample.php
+- Check any aditional folders in lib/.
+
+##Scripts
+###Creates or updates database
+```
+php index.php app=script nav=db 
+```
+###Outputs code to create or update database
+```
+php index.php app=script nav=data 
+```
+###Outputs an encoded password
+```
+php index.php app=script nav=password password=MYPASSWORD
+```
+###Generates and updates language files
+For this command to work all language references from PHP code must use single quotation.
+```
+php index.php app=script nav=lang
+```
